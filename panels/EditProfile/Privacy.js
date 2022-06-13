@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ScrollView, View, Switch } from "react-native";
+
+import themeContext from "../../config/themeContext";
 
 import { 
     Header,
@@ -8,23 +10,22 @@ import {
 } from "../../components";
 
 export const EditProfile_Privacy = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack
         }
     } = props;
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
             subtitle="Приватность"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <ScrollView
@@ -34,23 +35,21 @@ export const EditProfile_Privacy = (props) => {
                 <View style={{marginTop: 5, paddingTop: 15}}/>
 
                 <Cell
-                style={style}
                 title="Закрытый профиль"
                 subtitle="При включении этой функции все Ваши данные в профиле будут скрыты для всех людей"
-                after={
-                    <Switch
-                    value={false}
-                    // onValueChange={}
-                    trackColor={{ false: style.switch_track_color_off, true: style.switch_track_color_on }}
-                    thumbColor={style.switch_thumb_color_light}
-                    />
-                }
+                // after={
+                //     // <Switch
+                //     // value={false}
+                //     // // onValueChange={}
+                //     // trackColor={{ false: style.switch_track_color_off, true: style.switch_track_color_on }}
+                //     // thumbColor={style.switch_thumb_color_light}
+                //     // />
+                // }
                 />
 
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Кто может отправлять мне заявки в друзья"
                 subtitle="Все пользователи"
                 />
@@ -58,7 +57,6 @@ export const EditProfile_Privacy = (props) => {
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Кто может видеть в профиле мои комментарии"
                 subtitle="Все пользователи"
                 />
@@ -66,7 +64,6 @@ export const EditProfile_Privacy = (props) => {
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Кто может видеть в профиле мои сборки"
                 subtitle="Все пользователи"
                 />
@@ -74,7 +71,6 @@ export const EditProfile_Privacy = (props) => {
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Кто может видеть в профиле моих друзей"
                 subtitle="Все пользователи"
                 />
@@ -82,7 +78,6 @@ export const EditProfile_Privacy = (props) => {
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Кто может видеть мои социальные сети"
                 subtitle="Все пользователи"
                 />

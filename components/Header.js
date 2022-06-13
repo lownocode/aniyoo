@@ -1,17 +1,20 @@
-import React, {Fragment} from 'react';
+import React, { Fragment, useContext } from 'react';
 import { View, Text, StyleSheet, StatusBar, } from 'react-native';
 import { Icon, PressIcon } from '.';
 
+import themeContext from "../config/themeContext";
+
 export const Header = (props) => {
+    const theme = useContext(themeContext);
+
     const {
-        backgroundColor,
+        backgroundColor = theme.header_background_color,
         backButton,
         title,
         titleStyle,
         subtitleStyle,
         subtitle,
         backButtonOnPress,
-        style,
         afterComponent
     } = props;
 
@@ -25,8 +28,6 @@ export const Header = (props) => {
             paddingBottom: 10,
             justifyContent: "space-between",
             zIndex: 100,
-            borderBottomLeftRadius: 15,
-            borderBottomRightRadius: 15
         },
         leftHeader: {
             flexDirection: 'row',
@@ -39,7 +40,7 @@ export const Header = (props) => {
         title: {
             fontSize: 22,
             fontWeight: "500",
-            color: style.text_color,
+            color: theme.text_color,
             marginLeft: backButton ? 0 : 25,
         },
         subtitle: {
@@ -84,7 +85,6 @@ export const Header = (props) => {
                     <View style={styles.leftHeader}>
                         {backButton && 
                         <PressIcon 
-                        style={style}
                         icon={
                             <Icon
                             type="AntDesign"

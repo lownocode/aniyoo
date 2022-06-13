@@ -1,4 +1,4 @@
-export const REQUEST_DOMAIN = "https://anicast.localhostov.ru:1007";
+export const REQUEST_DOMAIN = "https://aniyoo.localhostov.ru:1007/api";
 export const USER_SCHEMA = {
     "id": 1,
     "nickname": "...",

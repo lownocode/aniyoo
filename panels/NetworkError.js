@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View } from "react-native";
 import { Icon, Placeholder } from "../components";
 
+import themeContext from "../config/themeContext";
+
 export const NetworkError = (props) => {
-    const { style, } = props;
+    const theme = useContext(themeContext);
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Placeholder
-            style={style}
             title="Ой, видимо, произошла ошибка"
             subtitle="Извините, похоже, что Вы не можете подключиться к нашему серверу. Возможно, это связано с отсутствием интернета, или же наш сервер сейчас недоступен."
             icon={

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ScrollView, View, Switch } from "react-native";
 
 import { 
@@ -7,24 +7,25 @@ import {
     Icon
 } from "../../components";
 
+import themeContext from "../../config/themeContext";
+
 export const Settings_Another = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack
         }
     } = props;
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Настройки"
             subtitle="Другое"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <ScrollView

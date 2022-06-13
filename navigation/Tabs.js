@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, TouchableWithoutFeedback } from "react-native";
+import { Text, View, TouchableNativeFeedback } from "react-native";
 
 import {
     Bookmarks,
@@ -10,198 +10,215 @@ import {
     Profile
 } from "../screens";
 import { Icon } from "../components";
+import themeContext from "../config/themeContext";
 
 const Tab = createBottomTabNavigator();
 
-const CustomTab = ({ label, icon, accessibilityState, onPress, style }) => {
+export const Tabs = () => {
+
+const MyTabBar = ({ state, descriptors, navigation }) => {
+    const theme = useContext(themeContext);
+
     return (
-        <View
+        <View 
         style={{
-            flexGrow: 1, 
+            backgroundColor: theme.bottom_tabbar.background, 
+            height: 60, 
+            shadowColor: "transparent",
+            flexDirection: "row", 
+            alignItems: "center",
+            borderWidth: 1,
+            borderTopWidth: 1,
+            borderTopColor: theme.divider_color,
+            borderColor: theme.divider_color,
+            position: "absolute",
+            bottom: 13,
+            right: 13,
+            left: 13,
+            borderRadius: 12,
         }}
         >
-            <TouchableWithoutFeedback 
-            onPress={() => onPress()}
-            delayPressIn={0}
-            >
-                <View  
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 100,
-                    paddingVertical: 7,
-                    backgroundColor: accessibilityState.selected ? style.bottom_tab_bar_active_tab_background : "transparent",
-                }}
-                >
-                    <Icon
-                    name={icon.name}
-                    type={icon.type}
-                    size={accessibilityState.selected ? icon.size - 7 : icon.size}
-                    color={accessibilityState.selected ? style.bottom_tab_active_color : "gray"}
-                    style={{
-                        marginRight: accessibilityState.selected ? 5 : 0,
-                        ...icon.style
-                    }}
-                    />
-                    {
-                        accessibilityState.selected && (
-                            <Text
+            {
+                state.routes.map((route, index) => {
+                    const { options } = descriptors[route.key];
+            
+                    const isFocused = state.index === index;
+            
+                    const onPress = () => {
+                        const event = navigation.emit({
+                            type: 'tabPress',
+                            target: route.key,
+                            canPreventDefault: true,
+                        });
+            
+                        if (!isFocused && !event.defaultPrevented) {
+                            navigation.navigate({ name: route.name, merge: true });
+                        }
+                    };
+
+                    return (
+                        <TouchableNativeFeedback 
+                        key={"tab-" + index}
+                        onPress={() => onPress()}
+                        delayPressIn={0}
+                        background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
+                        >
+                            <View  
                             style={{
-                                color: accessibilityState.selected ? style.bottom_tab_active_color : "gray"
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: 12,
+                                paddingVertical: 7,
+                                backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
+                                flex: 1,
+                                height: 59
                             }}
                             >
-                                {label}
-                            </Text>
-                        )
-                    }
-                </View>
-            </TouchableWithoutFeedback>
+                                <Icon
+                                name={isFocused ? options.iconFocus.name : options.iconUnfocus.name}
+                                type={isFocused ? options.iconFocus.type : options.iconUnfocus.type}
+                                size={isFocused ? options.iconFocus.size - 5 : options.iconUnfocus.size}
+                                color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
+                                />
+
+                                {
+                                    isFocused && (
+                                        <Text
+                                        numberOfLines={1}
+                                        style={{
+                                            marginHorizontal: 5,
+                                            color: theme.bottom_tabbar.active_icon_color,
+                                            fontWeight: "500",
+                                            fontSize: 12
+                                        }}
+                                        >
+                                            {
+                                                options.label
+                                            }
+                                        </Text> 
+                                    )
+                                }
+                                
+                            </View>
+                        </TouchableNativeFeedback>
+                    )
+                })
+            }
         </View>
     )
 };
 
-export const Tabs = ({ style }) => {
     return (
         <Tab.Navigator
         screenOptions={{
-            tabBarStyle: {
-                backgroundColor: style.bottom_tab_background_color, 
-                paddingTop: 10,
-                height: 60, 
-                shadowColor: "transparent",
-                flexDirection: "row", 
-                alignItems: "flex-start",
-                borderTopWidth: style.bottom_tab_border_width,
-                borderColor: style.divider_color
-            },
             tabBarAllowFontScaling: true,
             headerShown: false,
-            tabBarHideOnKeyboard: true
+            tabBarHideOnKeyboard: true,
         }}
+        tabBar={props => <MyTabBar {...props} />}
         >
             <Tab.Screen
             name="home"
             options={{
-                tabBarButton: (props) => (
-                    <CustomTab 
-                    label="Главная" 
-                    {...props}
-                    style={style}
-                    icon={{
-                        name: props.accessibilityState.selected ? "home" : "home-outline",
-                        type: "MaterialCommunityIcons",
-                        size: 27,
-                        style: {
-                            marginTop: props.accessibilityState.selected ? 0 : -2
-                        }
-                    }}
-                    />
-                ),
+                label: "Главная",
+                iconFocus: {
+                    name: "home",
+                    type: "MaterialCommunityIcons",
+                    size: 27,
+                },
+                iconUnfocus: {
+                    name: "home-outline",
+                    type: "MaterialCommunityIcons",
+                    size: 27,
+                }
             }}
             >
                 {
-                    props => <Home {...props} style={style}/>
+                    props => <Home {...props} />
                 }
             </Tab.Screen>
 
             <Tab.Screen
             name="search"
             options={{
-                tabBarButton: (props) => (
-                    <CustomTab 
-                    label="Поиск" 
-                    {...props}
-                    style={style}
-                    icon={{
-                        name: props.accessibilityState.selected ? "search" : "search",
-                        type: "Ionicons",
-                        size: 23.5,
-                        style: {
-                            marginTop: props.accessibilityState.selected ? 0 : -1.5
-                        }
-                    }}
-                    />
-                ),
+                label: "Поиск",
+                iconFocus: {
+                    name: "search",
+                    type: "Ionicons",
+                    size: 24,
+                },
+                iconUnfocus: {
+                    name: "search",
+                    type: "Ionicons",
+                    size: 24,
+                }
             }}
             >
                 {
-                    props => <Search {...props} style={style}/>
+                    props => <Search {...props} />
                 }
             </Tab.Screen>
 
             <Tab.Screen
             name="bookmarks"
             options={{
-                tabBarButton: (props) => (
-                    <CustomTab 
-                    label="Закладки" 
-                    {...props}
-                    style={style}
-                    icon={{
-                        name: props.accessibilityState.selected ? "bookmark-multiple" : "bookmark-multiple-outline",
-                        type: "MaterialCommunityIcons",
-                        size: 22.4,
-                        style: {
-                            marginTop: props.accessibilityState.selected ? 0 : -0.7
-                        }
-                    }}
-                    />
-                ),
+                label: "Списки",
+                iconFocus: {
+                    name: "book-multiple",
+                    type: "MaterialCommunityIcons",
+                    size: 23,
+                },
+                iconUnfocus: {
+                    name: "book-multiple-outline",
+                    type: "MaterialCommunityIcons",
+                    size: 23,
+                }
             }}
             >
                 {
-                    props => <Bookmarks {...props} style={style}/>
+                    props => <Bookmarks {...props} />
                 }
             </Tab.Screen>
 
             <Tab.Screen
             name="notices"
             options={{
-                tabBarButton: (props) => (
-                    <CustomTab 
-                    label="Уведомления" 
-                    {...props}
-                    style={style}
-                    icon={{
-                        name: props.accessibilityState.selected ? "notifications" : "notifications-none",
-                        type: "MaterialIcons",
-                        size: 26,
-                        style: {
-                            marginTop: props.accessibilityState.selected ? 0 : -2
-                        }
-                    }}
-                    />
-                ),
+                label: "Уведомления",
+                iconFocus: {
+                    name: "notifications",
+                    type: "MaterialIcons",
+                    size: 26,
+                },
+                iconUnfocus: {
+                    name: "notifications-none",
+                    type: "MaterialIcons",
+                    size: 26,
+                }
             }}
             >
                 {
-                    props => <Notices {...props} style={style}/>
+                    props => <Notices {...props} />
                 }
             </Tab.Screen>
 
             <Tab.Screen
             name="profile"
             options={{
-                tabBarButton: (props) => (
-                    <CustomTab 
-                    label="Профиль"
-                    {...props}
-                    style={style}
-                    icon={{
-                        name: props.accessibilityState.selected ? "account-circle" : "account-circle-outline",
-                        type: "MaterialCommunityIcons",
-                        size: 25,
-                        style: {
-                            marginTop: props.accessibilityState.selected ? 0 : -1.4
-                        }
-                    }}
-                    />
-                ),
+                label: "Профиль",
+                iconFocus: {
+                    name: "account-circle",
+                    type: "MaterialCommunityIcons",
+                    size: 25,
+                },
+                iconUnfocus: {
+                    name: "account-circle-outline",
+                    type: "MaterialCommunityIcons",
+                    size: 25,
+                }
             }}
             >
                 {
-                    props => <Profile {...props} style={style}/>
+                    props => <Profile {...props} />
                 }
             </Tab.Screen>
         </Tab.Navigator>

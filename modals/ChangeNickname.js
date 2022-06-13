@@ -86,14 +86,12 @@ export const ChangeNickname = (props) => {
     return (
         <View>
             <Snackbar
-            style={style}
             text={snackbar.text}
             before={snackbar.before}
             ref={snackbarRef}
             />
 
             <Cell
-            style={style}
             title="Смена никнейма"
             subtitle="Пользователи без примиума могут менять никнейм 1 раз в неделю, однако с ним пользователи могут менять никнейм каждый час"
             centered

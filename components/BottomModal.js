@@ -1,14 +1,17 @@
-import React, { useCallback, useImperativeHandle, useState } from "react";
+import React, { useCallback, useImperativeHandle, useState, useContext } from "react";
 import { View, StyleSheet, Dimensions, TouchableWithoutFeedback, Modal } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, } from "react-native-reanimated";
+
+import themeContext from "../config/themeContext";
 
 const { height: SCREEN_HEIGHT, width } = Dimensions.get("window");
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT / 2 + 20;
 
 export const BottomModal = React.forwardRef((props, ref) => {
+    const theme = useContext(themeContext);
+
     const { 
         children, 
-        style,
     } = props;
 
     const [ openModal, setOpenModal ] = useState(false);
@@ -17,14 +20,14 @@ export const BottomModal = React.forwardRef((props, ref) => {
         container: {
             width: width - 20,
             marginLeft: 10,
-            backgroundColor: style.bottom_modal_background,
+            backgroundColor: theme.bottom_modal.background,
             position: "absolute",
             bottom: MAX_TRANSLATE_Y,
             zIndex: 1000,
             maxHeight: SCREEN_HEIGHT / 1.1,
-            borderColor: style.bottom_modal_border_color,
+            borderColor: theme.bottom_modal.border,
             borderWidth: 0.5,
-            overflow: "hidden"
+            overflow: "hidden",
         },
         line: {
             width: 50,

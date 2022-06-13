@@ -5,4 +5,4 @@ import App from './App';
 import { REQUEST_DOMAIN } from "./variables";
 
 axios.defaults.baseURL = REQUEST_DOMAIN;
-AppRegistry.registerComponent("anicast", () => App);
+AppRegistry.registerComponent("aniyoo", () => App);

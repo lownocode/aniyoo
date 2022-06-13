@@ -1,24 +1,20 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React, { useContext } from "react";
+import { View } from "react-native";
 
 import {
-    Divider,
     Header
 } from "../components";
 
-export const Search = props => {
-    const { 
-        style,
-    } = props;
+import themeContext from "../config/themeContext";
+
+export const Search = () => {
+    const theme = useContext(themeContext);
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Поиск"
-            titleStyle={style.header_title}
             height={30}
-            backgroundColor={style.header_background_color}
-            style={style}
             />
         </View>
     )

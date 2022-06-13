@@ -1,12 +1,13 @@
-import React from "react";
-import { View, ScrollView, StyleSheet, Image, Dimensions, TouchableNativeFeedback, Text } from "react-native";
+import React, { useContext } from "react";
+import { View, ScrollView, Image, Dimensions, TouchableNativeFeedback, Text } from "react-native";
 import { Cell, Icon } from ".";
 
+import themeContext from "../config/themeContext";
+
 export const AssemblyOfWeekCarousel = (props) => {
-    const { style, items = [] } = props;
-    const localStyles = StyleSheet.create({
-        
-    });
+    const theme = useContext(themeContext);
+
+    const { items = [] } = props;
 
     return (
         <ScrollView
@@ -25,13 +26,13 @@ export const AssemblyOfWeekCarousel = (props) => {
                             borderRadius: 8,
                             overflow: "hidden",
                             width: Dimensions.get("window").width / 1.4,
-                            borderColor: style.divider_color,
+                            borderColor: theme.divider_color,
                             borderWidth: 1
                         }}
                         >
                             <TouchableNativeFeedback
                             onPress={() => console.log("on press assem")}
-                            background={TouchableNativeFeedback.Ripple(style.cell_press_background, false)}
+                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                             >
                                 <View>
                                     <Image
@@ -44,7 +45,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                         height: 130,
                                         borderTopLeftRadius: 8,
                                         borderTopRightRadius: 8,
-                                        backgroundColor: style.divider_color,
+                                        backgroundColor: theme.divider_color,
                                     }}
                                     />
 
@@ -55,7 +56,6 @@ export const AssemblyOfWeekCarousel = (props) => {
                                     }}
                                     >
                                         <Cell
-                                        style={style}
                                         title={item?.title}
                                         containerStyle={{
                                             paddingLeft: 0,
@@ -76,7 +76,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                         justifyContent: "space-evenly",
                                         alignItems: "center",
                                         flexDirection: "row",
-                                        borderColor: style.divider_color,
+                                        borderColor: theme.divider_color,
                                         borderTopWidth: 0.4,
                                     }}
                                     >
@@ -90,7 +90,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                             <Icon
                                             name="like2"
                                             type="AntDesign"
-                                            color={style.text_color}
+                                            color={theme.text_color}
                                             style={{
                                                 marginRight: 5
                                             }}
@@ -99,7 +99,7 @@ export const AssemblyOfWeekCarousel = (props) => {
 
                                             <Text
                                             style={{
-                                                color: style.text_color,
+                                                color: theme.text_color,
                                                 fontSize: 12,
                                                 fontWeight: "600"
                                             }}
@@ -108,7 +108,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                             </Text>
                                         </View>
 
-                                        <View style={{ height: 20, width: 0.6, backgroundColor: style.divider_color }}/>
+                                        <View style={{ height: 20, width: 0.6, backgroundColor: theme.divider_color }}/>
                                     
                                         <View
                                         style={{
@@ -120,7 +120,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                             <Icon
                                             name="bookmark-o"
                                             type="FontAwesome"
-                                            color={style.text_color}
+                                            color={theme.text_color}
                                             style={{
                                                 marginRight: 5
                                             }}
@@ -129,7 +129,7 @@ export const AssemblyOfWeekCarousel = (props) => {
 
                                             <Text
                                             style={{
-                                                color: style.text_color,
+                                                color: theme.text_color,
                                                 fontSize: 12,
                                                 fontWeight: "600"
                                             }}
@@ -138,7 +138,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                             </Text>
                                         </View>
 
-                                        <View style={{ height: 20, width: 0.6, backgroundColor: style.divider_color }}/>
+                                        <View style={{ height: 20, width: 0.6, backgroundColor: theme.divider_color }}/>
 
                                         <View
                                         style={{
@@ -150,7 +150,7 @@ export const AssemblyOfWeekCarousel = (props) => {
                                             <Icon
                                             name="comment-multiple-outline"
                                             type="MaterialCommunityIcons"
-                                            color={style.text_color}
+                                            color={theme.text_color}
                                             style={{
                                                 marginRight: 5
                                             }}
@@ -159,7 +159,7 @@ export const AssemblyOfWeekCarousel = (props) => {
 
                                             <Text
                                             style={{
-                                                color: style.text_color,
+                                                color: theme.text_color,
                                                 fontSize: 12,
                                                 fontWeight: "600"
                                             }}

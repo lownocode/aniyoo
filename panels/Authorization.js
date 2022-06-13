@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Image } from "react-native";
+import React, { useState, useRef, useContext } from "react";
+import { View, Text, ScrollView, Image, Keyboard } from "react-native";
 import axios from "axios";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
     Button,
@@ -8,15 +9,20 @@ import {
     Input,
     Icon,
     PressIcon,
+    Snackbar
 } from "../components";
 import {
-    storage
+    storage,
+    sleep
 } from "../functions";
-import appLogo from "../android/app/src/main/res/mipmap/ic_launch_screen.png";
+
+import themeContext from "../config/themeContext";
+import appLogo from "../android/app/src/main/res/mipmap-xhdpi/ic_launcher.png";
 
 export const Authorization = props => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             navigate,
         },
@@ -27,376 +33,361 @@ export const Authorization = props => {
     const [ email, setEmail ] = useState("");
     const [ password, setPassword ] = useState("");
     const [ nickname, setNickname ] = useState("");
-    const [ error, setError ] = useState({ show: false });
     const [ loading, setLoading ] = useState(false);
-    const [ hidePassword, setHidePassword ] = useState(true);
+    const [ hideSignInPassword, setHideSignInPassword ] = useState(true);
+    const [ hideSignUpPassword, setHideSignUpPassword ] = useState(true);
+    const [ snackbar, setSnackbar ] = useState(null);
+
+    const snackbarRef = useRef();
 
     const signIn = async () => {
         setLoading(true);
-        const { data } = await axios.post("/user.signIn", {
+        
+        axios.post("/user.signIn", {
             email: email,
             password: password
-        });
+        })
+        .then(({ data }) => {
+            storage.setItem("AUTHORIZATION_SIGN", data.sign);
 
-        if(!data?.success) {
             setLoading(false);
-            return setError({ show: true, message: data?.message });
-        }
+            navigation.reset({
+                index: 0,
+                routes: [{name: "tabs"}]
+            });
+            navigate("tabs");
+        })
+        .catch(({ response: { data } }) => {
+            setLoading(false);
+            setSnackbar({
+                text: data?.message || "Неизвестная ошибка",
+                before: <Icon
+                name="error-outline"
+                type="MaterialIcons"
+                color="orangered"
+                size={20}
+                />
+            });
 
-        storage.setItem("authorization_data", {
-            email: email,
-            password: password
+            snackbarRef.current.show();
+            sleep(5).then(() => snackbarRef?.current?.hide());
         });
-        storage.setItem("user_data", data.user_data);
-
-        setLoading(false);
-        setError({ show: false });
-        navigation.reset({
-            index: 0,
-            routes: [{name: "tabs"}]
-        });
-        navigate("tabs");
     };
 
     const registration = async () => {
         setLoading(true);
-        const { data } = await axios.post("/user.registration", {
+
+        axios.post("/user.registration", {
             email: email,
             password: password,
             nickname: nickname
-        });
+        })
+        .then(({ data }) => {
+            storage.setItem("AUTHORIZATION_SIGN", data.sign);
 
-        if(!data.success) {
             setLoading(false);
-            return setError({ show: true, message: data.message });
-        }
+            navigation.reset({
+                index: 0,
+                routes: [{name: "tabs"}]
+            });
+            navigate("tabs");
+        })
+        .catch(({ response: { data } }) => {
+            setLoading(false);
+            setSnackbar({
+                text: data.message,
+                before: <Icon
+                name="error-outline"
+                type="MaterialIcons"
+                color="orangered"
+                size={20}
+                />
+            });
 
-        storage.setItem("authorization_data", {
-            email: email,
-            password: password
+            snackbarRef.current.show();
+            sleep(5).then(() => snackbarRef?.current?.hide());
         });
-        storage.setItem("user_data", data.user_data);
-
-        setLoading(false);
-        setError({ show: false });
-        navigation.reset({
-            index: 0,
-            routes: [{name: "tabs"}]
-        });
-        navigate("tabs");
-    };  
-
-    return (
-        <ScrollView style={style.view}>
-            <View 
+    }; 
+    
+    const renderSignIn = () => (
+        <View>
+            <View
             style={{
-                alignItems: "center",
-                marginTop: 100
-            }}
-            >
-                <Image
-                source={appLogo}
-                style={{
-                    width: 100,
-                    height: 100
-                }}
-                />  
-            </View> 
-
-            <Text
-            style={{
-                fontSize: 20,
-                textAlign: "center",
-                color: style.text_color,
-                fontWeight: "500"
-            }}
-            >
-                {
-                    authType === "signin"
-                    ? "Вход в аккаунт"
-                    : authType === "registration"
-                    ? "Регистрация аккаунта"
-                    : "Авторизация"
-                }
-            </Text>
-
-            {
-                authType === "signin" ? (
-                    <View>
-                        <View
-                        style={{
-                            padding: 10,
-                            marginTop: 10
-                        }}
-                        >
-                            <Input
-                            style={style}
-                            placeholder="Введите почту"
-                            before={
-                                <Icon
-                                type="Entypo"
-                                name="email"
-                                size={17}
-                                color={style.icon_color}
-                                />
-                            }
-                            type="email-address"
-                            onChangeText={text => setEmail(text)}
-                            value={email}
-                            inputStyle={{
-                                backgroundColor: "transparent"
-                            }}
-                            />
-
-                            <Input
-                            style={style}
-                            placeholder="Введите пароль"
-                            type="visible-password"
-                            before={
-                                <Icon
-                                type="Feather"
-                                name="lock"
-                                size={17}
-                                color={style.icon_color}
-                                />
-                            }
-                            after={
-                                <PressIcon
-                                style={style}
-                                onPress={() => setHidePassword(!hidePassword)}
-                                icon={
-                                    hidePassword ? (
-                                        <Icon
-                                        type="Ionicons"
-                                        name="eye-outline"
-                                        size={19}
-                                        color={style.icon_color}
-                                        />
-                                    ) : (
-                                        <Icon
-                                        type="Ionicons"
-                                        name="eye-off-outline"
-                                        size={19}
-                                        color={style.icon_color}
-                                        />
-                                    )
-                                    
-                                }
-                                />
-                            }
-                            onChangeText={text => setPassword(text)}
-                            value={password}
-                            secureTextEntry={hidePassword}
-                            inputStyle={{
-                                backgroundColor: "transparent"
-                            }}
-                            />
-                        </View>
-
-                        <View 
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginHorizontal: 10
-                        }}
-                        >
-                            <Text style={{color: style.accent, maxWidth: "50%", textDecorationLine: "underline"}}>Восстановить пароль</Text>
-                            <View>
-                                <Button
-                                style={style}
-                                title="Войти"
-                                upperTitle={false}
-                                textColor="#fff"
-                                backgroundColor={style.accent}
-                                onPress={() => signIn()}
-                                loading={loading}
-                                buttonStyle={{
-                                    width: 200
-                                }}
-                                containerStyle={{
-                                    marginRight: 0
-                                }}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                ) : authType === "registration" ? (
-                    <View>
-                        <View
-                        style={{
-                            padding: 10,
-                            marginTop: 10
-                        }}
-                        >
-                            <Input
-                            style={style}
-                            placeholder="Придумайте никнейм"
-                            before={
-                                <Icon
-                                type="AntDesign"
-                                name="user"
-                                size={17}
-                                color={style.icon_color}
-                                />
-                            }
-                            onChangeText={text => setNickname(text)}
-                            value={nickname}
-                            inputStyle={{
-                                backgroundColor: "transparent"
-                            }}
-                            />
-
-                            <Input
-                            style={style}
-                            placeholder="Введите свою почту"
-                            before={
-                                <Icon
-                                type="Entypo"
-                                name="email"
-                                size={17}
-                                color={style.icon_color}
-                                />
-                            }
-                            onChangeText={text => setEmail(text)}
-                            value={email}
-                            inputStyle={{
-                                backgroundColor: "transparent"
-                            }}
-                            type="email-address"
-                            />
-
-                            <Input
-                            style={style}
-                            placeholder="Придумайте пароль"
-                            before={
-                                <Icon
-                                type="Feather"
-                                name="lock"
-                                size={17}
-                                color={style.icon_color}
-                                />
-                            }
-                            onChangeText={text => setPassword(text)}
-                            value={password}
-                            inputStyle={{
-                                backgroundColor: "transparent"
-                            }}
-                            type="visible-password"
-                            after={
-                                <PressIcon
-                                style={style}
-                                onPress={() => setHidePassword(!hidePassword)}
-                                icon={
-                                    hidePassword ? (
-                                        <Icon
-                                        type="Ionicons"
-                                        name="eye-outline"
-                                        size={19}
-                                        color={style.icon_color}
-                                        />
-                                    ) : (
-                                        <Icon
-                                        type="Ionicons"
-                                        name="eye-off-outline"
-                                        size={19}
-                                        color={style.icon_color}
-                                        />
-                                    )
-                                    
-                                }
-                                />
-                            }
-                            secureTextEntry={hidePassword}
-                            />
-                        </View>
-
-                        <Button
-                        style={style}
-                        title="Зарегистрироваться"
-                        upperTitle={false}
-                        textColor="#fff"
-                        backgroundColor={style.accent}
-                        onPress={() => registration()}
-                        loading={loading}
-                        />
-                    </View>
-                ) : null
-            }
-
-            <Divider
-            style={style}
-            dividerStyle={{
+                padding: 10,
                 marginTop: 10
             }}
-            centerComponent={
-                <Text 
-                style={{
-                    color: style.text_secondary_color, 
-                    marginHorizontal: 10, 
-                    marginTop: 10
-                }}
-                >
-                    Или
-                </Text>
-            }
-            />
-
-            <View>
-                <Button
-                style={style}
-                title={
-                    authType === "signin"
-                    ? "Зарегистрироваться"
-                    : authType === "registration"
-                    ? "Войти"
-                    : ""
+            >
+                <Input
+                placeholder="Адрес электронной почты"
+                before={
+                    <Icon
+                    type="Entypo"
+                    name="email"
+                    size={17}
+                    color={theme.icon_color}
+                    />
                 }
-                type="outline"
-                upperTitle={false}
-                onPress={() => {
-                    authType === "signin"
-                    ? setAuthType("registration")
-                    : authType === "registration"
-                    ? setAuthType("signin")
-                    : null
+                type="email-address"
+                onChangeText={text => setEmail(text)}
+                value={email}
+                inputStyle={{
+                    backgroundColor: "transparent"
+                }}
+                />
+
+                <Input
+                placeholder="Пароль"
+                type={!hideSignInPassword ? "visible-password" : "default"}
+                before={
+                    <Icon
+                    type="Feather"
+                    name="lock"
+                    size={17}
+                    color={theme.icon_color}
+                    />
+                }
+                after={
+                    <PressIcon
+                    onPress={() => setHideSignInPassword(!hideSignInPassword)}
+                    icon={
+                        hideSignInPassword ? (
+                            <Icon
+                            type="Ionicons"
+                            name="eye-outline"
+                            size={19}
+                            color={theme.icon_color}
+                            />
+                        ) : (
+                            <Icon
+                            type="Ionicons"
+                            name="eye-off-outline"
+                            size={19}
+                            color={theme.icon_color}
+                            />
+                        )
+                        
+                    }
+                    />
+                }
+                onChangeText={text => setPassword(text)}
+                value={password}
+                secureTextEntry={hideSignInPassword}
+                inputStyle={{
+                    backgroundColor: "transparent"
                 }}
                 />
             </View>
 
-            {
-                error.show && (
-                    <View 
+            <View 
+            style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginHorizontal: 10
+            }}
+            >
+                <Text 
+                style={{
+                    color: theme.accent, 
+                    textDecorationLine: "underline",
+                    marginRight: 50
+                }}
+                >
+                    Восстановить пароль
+                </Text>
+                
+                <Button
+                title="Войти"
+                upperTitle={false}
+                textColor="#fff"
+                backgroundColor={theme.accent}
+                onPress={() => {
+                    Keyboard.dismiss();
+                    signIn();
+                }}
+                loading={loading}
+                containerStyle={{
+                    marginRight: 0
+                }}
+                />
+            </View>
+        </View>
+    );
+
+    const renderRegistration = () => (
+        <View>
+            <View
+            style={{
+                padding: 10,
+                marginTop: 10
+            }}
+            >
+                <Input
+                placeholder="Ваш никнейм"
+                before={
+                    <Icon
+                    type="AntDesign"
+                    name="user"
+                    size={17}
+                    color={theme.icon_color}
+                    />
+                }
+                onChangeText={text => setNickname(text)}
+                value={nickname}
+                inputStyle={{
+                    backgroundColor: "transparent"
+                }}
+                />
+
+                <Input
+                placeholder="Адрес электронной почты"
+                before={
+                    <Icon
+                    type="Entypo"
+                    name="email"
+                    size={17}
+                    color={theme.icon_color}
+                    />
+                }
+                onChangeText={text => setEmail(text)}
+                value={email}
+                inputStyle={{
+                    backgroundColor: "transparent"
+                }}
+                type="email-address"
+                />
+
+                <Input
+                placeholder="Пароль"
+                before={
+                    <Icon
+                    type="Feather"
+                    name="lock"
+                    size={17}
+                    color={theme.icon_color}
+                    />
+                }
+                onChangeText={text => setPassword(text)}
+                value={password}
+                inputStyle={{
+                    backgroundColor: "transparent"
+                }}
+                type={!hideSignUpPassword ? "visible-password" : "default"}
+                after={
+                    <PressIcon
+                    onPress={() => setHideSignUpPassword(!hideSignUpPassword)}
+                    icon={
+                        hideSignUpPassword ? (
+                            <Icon
+                            type="Ionicons"
+                            name="eye-outline"
+                            size={19}
+                            color={theme.icon_color}
+                            />
+                        ) : (
+                            <Icon
+                            type="Ionicons"
+                            name="eye-off-outline"
+                            size={19}
+                            color={theme.icon_color}
+                            />
+                        )
+                        
+                    }
+                    />
+                }
+                secureTextEntry={hideSignUpPassword}
+                />
+            </View>
+
+            <Button
+            title="Зарегистрироваться"
+            upperTitle={false}
+            textColor="#fff"
+            backgroundColor="#04b84f"
+            onPress={() => {
+                Keyboard.dismiss();
+                registration();
+            }}
+            loading={loading}
+            />
+        </View>
+    );
+
+    return (
+        <GestureHandlerRootView 
+        style={{
+            backgroundColor: theme.background_content, 
+            flex: 1,
+            flexDirection: "column",
+            flexGrow: 1,
+            justifyContent: "space-between"
+        }}
+        >
+            <Snackbar
+            ref={snackbarRef}
+            text={snackbar?.text}
+            before={snackbar?.before}
+            />
+
+            <View>
+                <View 
+                style={{
+                    alignItems: "center",
+                    marginTop: 100
+                }}
+                >
+                    <Image
+                    source={appLogo}
                     style={{
-                        backgroundColor: "#c90e3a30",
-                        borderRadius: 10,
-                        marginBottom: 10,
-                        marginTop: 10,
-                        paddingTop: 5,
-                        paddingBottom: 5,
-                        paddingLeft: 10,
-                        marginHorizontal: 10
+                        width: 100,
+                        height: 100,
                     }}
-                    >
-                        <Text 
-                        style={{
-                            fontSize: 18,
-                            color: style.text_secondary_color
-                        }}
-                        >
-                            Ошибка
-                        </Text>
-                        <Text 
-                        style={{
-                            fontSize: 12,
-                            color: style.text_secondary_color
-                        }}
-                        >
-                            {error.message || ""}
-                        </Text>
-                    </View>
-                )
-            }
-        </ScrollView>
+                    />  
+                </View> 
+
+                <Text
+                style={{
+                    fontSize: 20,
+                    textAlign: "center",
+                    color: theme.text_color,
+                    fontWeight: "500",
+                }}
+                >
+                    {
+                        authType === "signin" ? "Вход в аккаунт"
+                        : authType === "registration" && "Регистрация аккаунта"
+                    }
+                </Text>
+
+                {
+                    authType === "signin" ? renderSignIn() 
+                    : authType === "registration" && renderRegistration()
+                }
+            </View>
+            
+            <View
+            style={{
+                marginBottom: 15
+            }}
+            >
+                <Button
+                title={
+                    authType === "signin" ? "Зарегистрироваться"
+                    : authType === "registration" && "Войти"
+                }
+                size={45}
+                upperTitle={false}
+                onPress={() => {
+                    authType === "signin" ? setAuthType("registration")
+                    : authType === "registration" && setAuthType("signin")
+                }}
+                backgroundColor={
+                    authType === "signin" ? "#04b84f"
+                    : authType === "registration" && theme.accent
+                }
+                />
+            </View>
+        </GestureHandlerRootView>
     )
 };

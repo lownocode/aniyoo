@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, ScrollView } from "react-native";
 
 import {
@@ -7,9 +7,12 @@ import {
     Icon,
 } from "../components";
 
+import themeContext from "../config/themeContext";
+
 export const EditProfile = props => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack,
             navigate
@@ -17,15 +20,12 @@ export const EditProfile = props => {
     } = props;
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
-            titleStyle={style.header_title}
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <ScrollView 
@@ -34,7 +34,6 @@ export const EditProfile = props => {
                 <View style={{  marginTop: 10 }}/>
 
                 <Cell
-                style={style}
                 title="Профиль"
                 subtitle="Аватарка, никнейм, статус"
                 onPress={() => navigate("edit_profile.profile")}
@@ -43,7 +42,7 @@ export const EditProfile = props => {
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -53,7 +52,7 @@ export const EditProfile = props => {
                         name="user-alt"
                         type="FontAwesome5"
                         size={18}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -62,7 +61,6 @@ export const EditProfile = props => {
                 <View style={{marginTop: 5}} />
 
                 <Cell
-                style={style}
                 title="Безопасность"
                 subtitle="Пароль, почта"
                 onPress={() => navigate("edit_profile.security")}
@@ -71,7 +69,7 @@ export const EditProfile = props => {
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -81,7 +79,7 @@ export const EditProfile = props => {
                         name="security"
                         type="MaterialIcons"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -90,7 +88,6 @@ export const EditProfile = props => {
                 <View style={{marginTop: 5}} />
 
                 <Cell
-                style={style}
                 title="Приватность"
                 subtitle="Закрытый профиль, настройки приватности"
                 onPress={() => navigate("edit_profile.privacy")}
@@ -99,7 +96,7 @@ export const EditProfile = props => {
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -109,7 +106,7 @@ export const EditProfile = props => {
                         name="privacy-tip"
                         type="MaterialIcons"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }

@@ -18,8 +18,11 @@ import {
 import { Tabs } from './navigation/Tabs';
 
 import { storage } from './functions';
-import { style as StylesStack } from './styles';
 import axios from 'axios';
+import { EventRegister } from 'react-native-event-listeners';
+
+import theme from "./config/theme";
+import themeContext from "./config/themeContext";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,9 +31,9 @@ export default App = () => {
   const [ initialScreenName, setInitialScreenName ] = useState();
 
   const getTheme = async () => {
-    const theme = await storage.getItem("darkTheme");
+    const theme = await storage.getItem("DARK_THEME_MODE");
     if(theme === null) {
-      await storage.setItem("darkTheme", true);
+      await storage.setItem("DARK_THEME_MODE", true);
       return setDarkThemeMode(true);
     }
 
@@ -39,112 +42,127 @@ export default App = () => {
   }; 
 
   const authorization = async () => {
-    const authorizationData = await storage.getItem("authorization_data");
-    if(!authorizationData) {
+    const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+    if(!sign) {
       setInitialScreenName("authorization");
       return SplashScreen.hide();
     }
 
-    const { data } = await axios.post("/user.signIn", authorizationData)
+    axios.post("/user.signIn", null, {
+        headers: {
+            "authorization": sign,
+            "Content-Type": "application/json"
+        }
+    })
     .catch((error) => {
       if(error.toJSON().message === "Network Error") {
         SplashScreen.hide();
         return setInitialScreenName("network_error");
       }
-    });
 
-    if(!data.success) {
-      storage.setItem("authorization_data", null);
+      storage.setItem("AUTHORIZATION_SIGN", null);
       setInitialScreenName("authorization");
       return SplashScreen.hide();
-    }
+    });
 
     setInitialScreenName("tabs");
     SplashScreen.hide();
   };
 
   useEffect(() => {
+    const eventListener = EventRegister.addEventListener("changeTheme", data => {
+      storage.setItem("DARK_THEME_MODE", data);
+      setDarkThemeMode(data);
+    });
+
+    return () => {
+      EventRegister.removeEventListener(eventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     getTheme();
     authorization();
   }, []);
 
-  const style = StylesStack(darkThemeMode);
-
   return (
-    <NavigationContainer>
-      <StatusBar
-      backgroundColor="transparent"
-      translucent
-      />
+    <themeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
+      <NavigationContainer>
+        <StatusBar
+        backgroundColor="transparent"
+        translucent
+        />
 
-      {
-        initialScreenName ? (
-          <Stack.Navigator 
-          initialRouteName={initialScreenName} 
-          screenOptions={{ headerShown: false }}
-          >
-            <Stack.Screen name="tabs" options={{ animation: "none" }}>
-              {
-                props => <Tabs {...props} style={style}/>
-              }
-            </Stack.Screen>
+        {
+          initialScreenName ? (
+            <Stack.Navigator 
+            initialRouteName={initialScreenName} 
+            screenOptions={{ headerShown: false }}
+            >
+              <Stack.Screen name="tabs" options={{ animation: "none" }}>
+                {
+                  props => <Tabs {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="settings" options={{ animation: "none" }}>
-              {
-                props => <Settings {...props} style={style} getTheme={getTheme}/>
-              }
-            </Stack.Screen>
+              <Stack.Screen name="settings" options={{ animation: "none" }}>
+                {
+                  props => <Settings {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="authorization">
-              {
-                props => <Authorization {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="authorization">
+                {
+                  props => <Authorization {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="edit_profile" options={{ animation: "none" }}>
-              {
-                props => <EditProfile {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="edit_profile" options={{ animation: "none" }}>
+                {
+                  props => <EditProfile {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="network_error" options={{ animation: "none" }}>
-              {
-                props => <NetworkError {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="network_error" options={{ animation: "none" }}>
+                {
+                  props => <NetworkError {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="edit_profile.profile" options={{ animation: "none" }}>
-              {
-                props => <EditProfile_Profile {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="edit_profile.profile" options={{ animation: "none" }}>
+                {
+                  props => <EditProfile_Profile {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="edit_profile.privacy" options={{ animation: "none" }}>
-              {
-                props => <EditProfile_Privacy {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="edit_profile.privacy" options={{ animation: "none" }}>
+                {
+                  props => <EditProfile_Privacy {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="edit_profile.security" options={{ animation: "none" }}>
-              {
-                props => <EditProfile_Security {...props} style={style} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="edit_profile.security" options={{ animation: "none" }}>
+                {
+                  props => <EditProfile_Security {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="settings.application" options={{ animation: "none" }}>
-              {
-                props => <Settings_Application {...props} style={style} getTheme={getTheme} />
-              }
-            </Stack.Screen>
+              <Stack.Screen name="settings.application" options={{ animation: "none" }}>
+                {
+                  props => <Settings_Application {...props} />
+                }
+              </Stack.Screen>
 
-            <Stack.Screen name="settings.another" options={{ animation: "none" }}>
-              {
-                props => <Settings_Another {...props} style={style} />
-              }
-            </Stack.Screen>
-          </Stack.Navigator>
-        ) : null
-      }
-    </NavigationContainer>
+              <Stack.Screen name="settings.another" options={{ animation: "none" }}>
+                {
+                  props => <Settings_Another {...props} />
+                }
+              </Stack.Screen>
+            </Stack.Navigator>
+          ) : null
+        }
+      </NavigationContainer>
+    </themeContext.Provider>
   );
 };

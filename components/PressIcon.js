@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, TouchableNativeFeedback, View } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const PressIcon = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
         onPress, 
-        style, 
         icon, 
         containerStyle,
         disabled,
@@ -25,7 +28,7 @@ export const PressIcon = (props) => {
     return (
         <TouchableNativeFeedback 
         onPress={onPress}
-        background={TouchableNativeFeedback.Ripple(background || style.press_icon_background, true)}
+        background={TouchableNativeFeedback.Ripple(background || theme.press_icon_background, true)}
         disabled={disabled}
         >
             <View style={localStyles.container}>

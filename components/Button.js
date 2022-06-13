@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet, ActivityIndicator } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const Button = (props) => {
+    const theme = useContext(themeContext);
+
     const {
         title, 
         type = 'primary', 
@@ -11,7 +15,6 @@ export const Button = (props) => {
         buttonStyle = {}, 
         size = "m", 
         backgroundColor,
-        style, 
         loading = false, 
         disabled = false, 
         textColor, 
@@ -39,9 +42,9 @@ export const Button = (props) => {
             height: typeof size === "number" ? size : size === "s" ? 30 : size === "m" ? 39 : size === "l" ? 47 : 0,
             backgroundColor: buttonTypesNoBackground.findIndex(item => item === type) !== -1 
             ? "transparent" : backgroundColor ? backgroundColor
-            : style[`button_` + type + `_background`],
+            : theme.button[type][`background`],
             borderWidth: type === 'outline' ? 1 : 0,
-            borderColor: backgroundColor ? backgroundColor : style.button_outline_background,
+            borderColor: backgroundColor ? backgroundColor : theme.button.outline.background,
             paddingLeft: size === "l" ? 20 : 10,
             paddingRight: size === "l" ? 20 : 10,
             alignItems: 
@@ -56,7 +59,7 @@ export const Button = (props) => {
             fontSize: size === "s" ? 12 : size === "m" ? 15 : size === "l" ? 17 : 15,
             fontWeight: "600",
             letterSpacing: 0.5,
-            color: textColor ? textColor : style[`button_` + type + `_text_color`],
+            color: textColor ? textColor : theme.button[type][`text_color`],
             marginLeft: before && 5,
             ...textStyle
         },
@@ -79,13 +82,13 @@ export const Button = (props) => {
     };
 
     const background = () => {
-        if(noAutoPressBackground) return style[`button_` + type + `_press_background`];
+        if(noAutoPressBackground) return theme.button[type][`_ress_background`];
 
         if(backgroundColor && textColor) return hexToRGBA(textColor, .2);
         if(backgroundColor) return hexToRGBA(backgroundColor, .2);
         if(textColor) return hexToRGBA(textColor, .2);
 
-        return style[`button_` + type + `_press_background`];
+        return theme.button[type][`press_background`];
     };
 
     return (
@@ -102,7 +105,7 @@ export const Button = (props) => {
                     {
                         loading ? 
                         (
-                            <ActivityIndicator style={style.activity_indicator} color={style[`button_` + type + `_text_color`]}/>
+                            <ActivityIndicator color={theme.button[type][`text_color`]}/>
                         ) : (
                             <View style={localStyles.textContainer}>
                                 {   

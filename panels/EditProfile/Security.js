@@ -1,22 +1,24 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { ScrollView, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import themeContext from "../../config/themeContext";
 
 import { 
     Header,
     Cell,
     Icon,
     BottomModal,
-    Snackbar,
     Button
 } from "../../components";
 import { EmailConfirmation } from "../../modals";
 
-import { storage, sleep } from "../../functions";
+import { storage } from "../../functions";
 
 export const EditProfile_Security = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack,
             reset
@@ -26,10 +28,8 @@ export const EditProfile_Security = (props) => {
     const [ userData, setUserData ] = useState({});
     const [ modalContent, setModalContent ] = useState(null);
     const [ authData, setAuthData ] = useState({});
-    const [ snackbar, setSnackbar ] = useState(null);
 
     const modalRef = useRef();
-    const snackbarRef = useRef();
 
     const getUserData = async () => {
         const authorizationData = await storage.getItem("authorization_data");
@@ -53,13 +53,12 @@ export const EditProfile_Security = (props) => {
                 style={{
                     margin: 10,
                     borderRadius: 10,
-                    backgroundColor: style.divider_color + "30",
+                    backgroundColor: theme.divider_color + "30",
                     borderWidth: 0.5,
-                    borderColor: style.divider_color
+                    borderColor: theme.divider_color
                 }}
                 >
                     <Cell
-                    style={style}
                     title="Подтвердите почту!"
                     subtitle="В качестве защиты аккаунта Вы можете подтвердить свой адрес электронной почты. В случае потери пароля Вы легко сможете его восстановить!"
                     containerStyle={{
@@ -70,11 +69,10 @@ export const EditProfile_Security = (props) => {
 
                     <View style={{width: "50%"}}>
                         <Button
-                        style={style}
                         title="Подтвердить"
                         upperTitle={false}
                         onPress={() => {
-                            setModalContent(<EmailConfirmation style={style} onClose={() => {
+                            setModalContent(<EmailConfirmation onClose={() => {
                                 getUserData();
                                 modalRef?.current?.hide();
                                 setModalContent(null);
@@ -89,19 +87,16 @@ export const EditProfile_Security = (props) => {
     };
 
     return (
-        <GestureHandlerRootView style={style.view}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
             subtitle="Безопасность"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <BottomModal
-            style={style}
             ref={modalRef}
             >
                 {modalContent}
@@ -115,14 +110,13 @@ export const EditProfile_Security = (props) => {
                 {warningsRender()}
 
                 <Cell
-                style={style}
                 title="Изменить пароль"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -132,7 +126,7 @@ export const EditProfile_Security = (props) => {
                         name="lock"
                         type="Feather"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -142,14 +136,13 @@ export const EditProfile_Security = (props) => {
                 <View style={{marginTop: 5}}/>
 
                 <Cell
-                style={style}
                 title="Изменить почту"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -159,7 +152,7 @@ export const EditProfile_Security = (props) => {
                         name="email"
                         type="Entypo"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }

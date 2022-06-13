@@ -1,8 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { View, RefreshControl, ScrollView, Text, Image, Linking, TouchableNativeFeedback, Dimensions } from "react-native";
+import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
+import { View, RefreshControl, ScrollView, Text, Image, Linking, TouchableNativeFeedback } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import themeContext from "../config/themeContext";
 
 import {
     Avatar,
@@ -27,8 +29,9 @@ import {
 import { EditSocialNetworks, SetStatus } from "../modals";
 
 export const Profile = props => {
+    const theme = useContext(themeContext);
+    
     const { 
-        style,
         navigation: {
             navigate,
         },
@@ -47,24 +50,35 @@ export const Profile = props => {
     }, []);
 
     const getUserData = async () => {
-        const authorizationData = await storage.getItem("authorization_data");
-        const { data } = await axios.post("/user.signIn", authorizationData);
-        
-        setUserData(data.user_data);
-        setRefreshing(false);
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        axios.post("/user.signIn", null, {
+            headers: {
+                "authorization": sign,
+                "Content-Type": "application/json"
+            }
+        })
+        .then(({ data }) => {
+            setUserData(data)
+        })
+        .catch(({ response: { data } }) => {
+            console.log(data)
+        })
+        .finally(() => {
+            setRefreshing(false);
+        });
     }; 
 
     useEffect(() => {
         onRefresh();
     }, []);
 
-    const statisticsChartValues = [
-        userData.watch.length,
-        userData.watched.length,
-        userData.rewatching.length,
-        userData.in_plans.length,
-        userData.postponed.length,
-        userData.abandoned.length
+    const statisticsChartValues = [0,0,0,0,0,0
+        // userData.watch.length,
+        // userData.watched.length,
+        // userData.rewatching.length,
+        // userData.in_plans.length,
+        // userData.postponed.length,
+        // userData.abandoned.length
     ];
     const statisticsChartColors = ['#25cf19','#1070de','#03fcdf','#770ecc','#f79502', '#f71202'];
 
@@ -78,7 +92,6 @@ export const Profile = props => {
 
     const lastGradeReleasesRender = (item) => (
         <Cell
-        style={style}
         key={"release-"+item.id}
         title={item.title}
         before={
@@ -97,7 +110,6 @@ export const Profile = props => {
         subtitle={
             <View>
                 <Rating
-                style={style}
                 length={5}
                 select={item.stars}
                 iconSelect={<Icon type="AntDesign" name="star" color="gold"/>}
@@ -123,7 +135,7 @@ export const Profile = props => {
             name="arrow-up-right"
             type="Feather"
             size={20}
-            color={style.icon_color}
+            color={theme.icon_color}
             />
         }
         />
@@ -132,7 +144,6 @@ export const Profile = props => {
     const recentlyViewsRender = (item) => (
         <Cell
         key={"release-"+item.id}
-        style={style}
         title={item.title}
         before={
             <Image
@@ -177,7 +188,7 @@ export const Profile = props => {
             name="arrow-up-right"
             type="Feather"
             size={20}
-            color={style.icon_color}
+            color={theme.icon_color}
             />
         }
         />
@@ -211,7 +222,6 @@ export const Profile = props => {
         return (
             <Button
             key={item.network}
-            style={style}
             title={title}
             onPress={() => Linking.openURL(pressLink)}
             before={
@@ -233,20 +243,18 @@ export const Profile = props => {
     const userInfoRender = () => (
         <View
         style={{
-            backgroundColor: style.header_background_color,
+            backgroundColor: theme.header_background_color,
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
             overflow: "hidden",
-            paddingTop: 15,
         }}
         >
             <Cell
-            style={style}
             centered={false}
             title={
                 <Text
                 style={{
-                    color: style.text_color,
+                    color: theme.text_color,
                     fontSize: 20,
                     fontWeight: "600"
                 }}
@@ -260,7 +268,6 @@ export const Profile = props => {
                     onPress={() => {
                         setModalContent(
                             <SetStatus 
-                            style={style} 
                             onClose={() => {
                                 modalRef?.current?.hide();
                                 setModalContent(null);
@@ -272,7 +279,7 @@ export const Profile = props => {
                     }}
                     >
                         <Text 
-                        style={{color: style.text_secondary_color}}
+                        style={{color: theme.text_secondary_color}}
                         numberOfLines={3}
                         >
                             {userData.status.trim().length < 1 ? "Статус не установлен" : userData.status}
@@ -302,7 +309,6 @@ export const Profile = props => {
                 <Avatar
                 url={userData.photo || ""}
                 size={85}
-                style={style}
                 borderRadius={29}
                 />
             }
@@ -345,7 +351,7 @@ export const Profile = props => {
                                     <Icon
                                     name="hashtag"
                                     type="Fontisto"
-                                    color={item.color || style.accent}
+                                    color={item.color || theme.accent}
                                     style={{
                                         marginRight: 5
                                     }}
@@ -355,7 +361,7 @@ export const Profile = props => {
                                     <Text
                                     style={{
                                         fontWeight: "500",
-                                        color: item.color || style.accent
+                                        color: item.color || theme.accent
                                     }}
                                     >
                                         {
@@ -371,7 +377,6 @@ export const Profile = props => {
 
             <Button
             title="Редактировать"
-            style={style}
             upperTitle={false}
             size={37}
             textStyle={{
@@ -381,7 +386,7 @@ export const Profile = props => {
                 <Icon
                 type="MaterialCommunityIcons"
                 name="account-edit-outline"
-                color={style.button_primary_text_color}
+                color={theme.button.primary.text_color}
                 size={19}
                 />
             }
@@ -409,7 +414,7 @@ export const Profile = props => {
                 >
                     <TouchableNativeFeedback
                     onPress={() => console.log("assembly")}
-                    background={TouchableNativeFeedback.Ripple(style.cell_press_background, false)}
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                     >
                         <View
                         style={{
@@ -422,19 +427,19 @@ export const Profile = props => {
                             <Icon
                             name="comment-multiple-outline"
                             type="MaterialCommunityIcons"
-                            color={style.accent}
+                            color={theme.accent}
                             size={30}
                             />
 
                             <Text
                             style={{
-                                color: style.accent,
+                                color: theme.accent,
                                 fontSize: 12,
                                 fontWeight: "500"
                             }}
                             >
-                                <Text style={{fontWeight: "600"}}>{userData.comments.length} </Text>
-                                {declOfNum(userData.comments.length, ["комментарий","комментария","комментариев"])}
+                                <Text style={{fontWeight: "600"}}>{userData.comments} </Text>
+                                {declOfNum(userData.comments, ["комментарий","комментария","комментариев"])}
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
@@ -448,7 +453,7 @@ export const Profile = props => {
                 >
                     <TouchableNativeFeedback
                     onPress={() => console.log("comments")}
-                    background={TouchableNativeFeedback.Ripple(style.cell_press_background, false)}
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                     >
                         <View
                         style={{
@@ -461,30 +466,30 @@ export const Profile = props => {
                             <Icon
                             name="layers"
                             type="Ionicons"
-                            color={style.accent}
+                            color={theme.accent}
                             size={30}
                             />
 
                             <Text
                             style={{
-                                color: style.accent,
+                                color: theme.accent,
                                 fontSize: 12,
                                 fontWeight: "500"
                             }}
                             >
-                                <Text style={{fontWeight: "600"}}>{userData.assembly.length} </Text>
-                                {declOfNum(userData.assembly.length, ["сборка","сборки","сборок"])}
+                                <Text style={{fontWeight: "600"}}>{userData.collections} </Text>
+                                {declOfNum(userData.collections, ["коллекций","коллекции","коллекций"])}
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
                 </View>
             </View>
 
-            <Divider style={style} dividerStyle={{marginTop: 1}}/>
+            <Divider dividerStyle={{marginTop: 1}}/>
 
             {friendsRender()}
 
-            <Divider style={style} dividerStyle={{marginTop: 1}}/>
+            <Divider dividerStyle={{marginTop: 1}}/>
 
             {socialNetworksRender()}
         </View>
@@ -505,14 +510,13 @@ export const Profile = props => {
                 }
 
                 <Button
-                style={style}
                 title="Добавить"
                 before={
                     <Icon
                     type="Ionicons"
                     name="add"
                     size={25}
-                    color={style.button_primary_text_color}
+                    color={theme.button.primary.text_color}
                     />
                 }
                 upperTitle={false}
@@ -522,7 +526,6 @@ export const Profile = props => {
                 onPress={() => {
                     setModalContent(
                         <EditSocialNetworks 
-                        style={style} 
                         onClose={() => {
                             modalRef?.current?.hide();
                             setModalContent(null);
@@ -542,7 +545,7 @@ export const Profile = props => {
             <View
             style={{
                 borderWidth: 1,
-                borderColor: style.divider_color,
+                borderColor: theme.divider_color,
                 margin: 10,
                 borderRadius: 6,
                 paddingRight: 9,
@@ -550,7 +553,7 @@ export const Profile = props => {
                 flexWrap: "wrap",
                 alignItems: "center",
                 justifyContent: "space-between",
-                backgroundColor: style.divider_color + "30",
+                backgroundColor: theme.divider_color + "30",
                 overflow: "hidden"
             }}
             >
@@ -583,11 +586,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                Смотрю <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[0]}</Text>
+                                Смотрю <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[0]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -615,11 +618,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                Просмотрено <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[1]}</Text>
+                                Просмотрено <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[1]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -647,11 +650,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                Пересматриваю <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[2]}</Text>
+                                Пересматриваю <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[2]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -679,11 +682,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                В планах <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[3]}</Text>
+                                В планах <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[3]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -711,11 +714,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                Отложено <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[4]}</Text>
+                                Отложено <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[4]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -739,11 +742,11 @@ export const Profile = props => {
 
                             <Text
                             style={{
-                                color: style.text_secondary_color,
+                                color: theme.text_secondary_color,
                                 fontSize: 12
                             }}
                             >
-                                Брошено: <Text style={{fontWeight: "700", color: style.text_color}}>{statisticsChartValues[5]}</Text>
+                                Брошено: <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[5]}</Text>
                             </Text>
                         </View>
                     </View> 
@@ -754,7 +757,7 @@ export const Profile = props => {
                         <Icon
                         type="FontAwesome"
                         name="pie-chart"
-                        color={style.divider_color}
+                        color={theme.divider_color}
                         size={100}
                         />
                     ) : (
@@ -767,7 +770,7 @@ export const Profile = props => {
                 }
             </View>
 
-            <Divider style={style} indents />
+            <Divider indents />
         </View>
     );
 
@@ -778,23 +781,22 @@ export const Profile = props => {
         }}
         >
             <Cell
-            style={style}
             centered
             before={
                 <Icon
                 name="users"
                 type="FontAwesome5"
-                color={style.text_color}
+                color={theme.text_color}
                 />
             }
             title={
                 <Text
                 style={{
                     fontWeight: "500",
-                    color: style.text_color
+                    color: theme.text_color
                 }}
                 >
-                    Друзья <Text style={{color: style.text_secondary_color}}>{userData?.friend_requests?.length}</Text>
+                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friend_requests?.length}</Text>
                 </Text>
             }
             after={
@@ -802,7 +804,7 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.friend_requests?.length >= 1 ? style.accent : style.dark_secondary,
+                    backgroundColor: userData?.friend_requests?.length >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -814,7 +816,7 @@ export const Profile = props => {
                         fontSize: 12
                     }}
                     >
-                        {userData?.friend_requests?.length} {declOfNum(userData?.friend_requests?.length, ["заявка","заявки","заявок"])}
+                        {userData?.friend_requests?.length || 0} {declOfNum(userData?.friend_requests?.length, ["заявка","заявки","заявок"])}
                     </Text>
 
                     <Icon
@@ -828,7 +830,7 @@ export const Profile = props => {
             />
 
             {
-                userData.friends.length >= 1 ? (
+                userData.friends >= 1 ? (
                     <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -849,7 +851,7 @@ export const Profile = props => {
                                     }}
                                     >
                                         <TouchableNativeFeedback
-                                        background={TouchableNativeFeedback.Ripple(style.cell_press_background, false)}
+                                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                                         >
                                             <View
                                             style={{
@@ -863,13 +865,12 @@ export const Profile = props => {
                                                 <Avatar
                                                 size={55}
                                                 url={item.photo}
-                                                style={style}
                                                 />
 
                                                 <Text
                                                 numberOfLines={2}
                                                 style={{
-                                                    color: style.text_color,
+                                                    color: theme.text_color,
                                                     fontSize: 12,
                                                     textAlign: "center"
                                                 }}
@@ -885,7 +886,6 @@ export const Profile = props => {
                     </ScrollView>
                 ) : (
                     <Placeholder
-                    style={style}
                     title="Пусто"
                     subtitle="Похоже, Вы ещё не завели друзей :("
                     />
@@ -897,7 +897,6 @@ export const Profile = props => {
     const ratedRender = () => (
         <View>
             <Cell
-            style={style}
             title="Оценённые"
             before={
                 <Icon
@@ -915,7 +914,7 @@ export const Profile = props => {
                 >
                     <Text
                     style={{
-                        color: style.text_secondary_color,
+                        color: theme.text_secondary_color,
                         fontSize: 13
                     }}
                     >
@@ -925,37 +924,35 @@ export const Profile = props => {
                     <Icon
                     name="chevron-small-right"
                     type="Entypo"
-                    color={style.text_secondary_color}
+                    color={theme.text_secondary_color}
                     size={20}
                     />
                 </View>
             }
             />
 
-            {
+            {/* {
                 userData?.rated.length === 0 ? (
                     <Placeholder
-                    style={style}
                     title="Пусто"
                     subtitle="Вы ещё не оценили ни одного аниме"
                     />
                 ) : userData?.rated.map(lastGradeReleasesRender)
-            }
+            } */}
 
-            <Divider style={style} dividerStyle={{marginTop: 15}} indents/>
+            <Divider dividerStyle={{marginTop: 15}} indents/>
         </View>
     );
 
     const lastWatchedRender = () => (
         <View>
             <Cell
-            style={style}
             title="Последние просмотры"
             before={
                 <Icon
                 type="Ionicons"
                 name="time-outline"
-                color={style.accent}
+                color={theme.accent}
                 size={15}
                 />
             }
@@ -968,7 +965,7 @@ export const Profile = props => {
                 >
                     <Text
                     style={{
-                        color: style.text_secondary_color,
+                        color: theme.text_secondary_color,
                         fontSize: 12
                     }}
                     >
@@ -978,64 +975,47 @@ export const Profile = props => {
                     <Icon
                     name="chevron-small-right"
                     type="Entypo"
-                    color={style.text_secondary_color}
+                    color={theme.text_secondary_color}
                     size={20}
                     />
                 </View>
             }
             />
             
-            {
+            {/* {
                 userData?.all_watched.length === 0 ? (
                     <Placeholder
-                    style={style}
                     title="Пусто"
                     subtitle="Вы ещё не посмотрели ни одного аниме"
                     />
                 ) : userData?.all_watched.map(recentlyViewsRender)
-            }
+            } */}
         </View>
     );
 
     return (
-        <GestureHandlerRootView style={style.view}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Профиль"
             height={30}
-            backgroundColor={style.header_background_color}
-            style={style}
-            subtitle="@id1"
             afterComponent={
                 <View
                 style={{
                     flexDirection: "row",
-                    justifyContent: "space-evenly",
-                    borderRadius: 100,
-                    borderWidth: 0.5,
-                    borderColor: style.divider_color,
-                    paddingVertical: 5,
-                    paddingHorizontal: 6,
                     alignItems: "center",
+                    padding: 7
                 }}
                 >
                     <PressIcon 
-                    style={style} 
-                    icon={<Icon name="dots-three-horizontal" type="Entypo" color={style.icon_color} size={20}/>}
+                    icon={<Icon name="dots-three-horizontal" type="Entypo" color={theme.icon_color} size={20}/>}
                     onPress={() => navigate("settings")}
-                    />
-
-                    <View
-                    style={{
-                        width: 1,
-                        height: "50%",
-                        backgroundColor: style.divider_color,
-                        marginHorizontal: 6
+                    containerStyle={{
+                        marginRight: 15
                     }}
                     />
 
                     <PressIcon 
-                    style={style} 
-                    icon={<Icon name="settings" type="Feather" color={style.icon_color} size={20}/>}
+                    icon={<Icon name="settings" type="Feather" color={theme.icon_color} size={20}/>}
                     onPress={() => navigate("settings")}
                     />
                 </View>
@@ -1043,20 +1023,18 @@ export const Profile = props => {
             />
 
             <BottomModal
-            style={style}
             ref={modalRef}
             >
                 {modalContent}
             </BottomModal>
 
             <ScrollView
-            style={{marginTop: -15}}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
-                progressBackgroundColor={style.refresh_control_background_color}
-                colors={[style.accent]}
+                progressBackgroundColor={theme.refresh_control_background}
+                colors={[theme.accent]}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
                 />

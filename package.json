@@ -1,5 +1,5 @@
 {
-  "name": "anicast",
+  "name": "aniyoo",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -22,6 +22,7 @@
     "axios": "^0.26.1",
     "react": "17.0.2",
     "react-native": "0.67.3",
+    "react-native-event-listeners": "^1.0.7",
     "react-native-gesture-handler": "^2.3.0",
     "react-native-image-base64": "^0.1.4",
     "react-native-image-picker": "^4.7.3",

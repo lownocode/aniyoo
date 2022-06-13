@@ -34,7 +34,7 @@ export const ConfirmExit = (props) => {
                 style={style}
                 title="Выйти"
                 onPress={() => {
-                    storage.setItem("authorization_data", null);
+                    storage.setItem("AUTHORIZATION_SIGN", null);
                     navigate("authorization");
                     onClose();
                 }}

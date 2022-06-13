@@ -1,13 +1,16 @@
-import React, { useCallback, useImperativeHandle } from "react";
+import React, { useCallback, useImperativeHandle, useContext } from "react";
 import { View, StyleSheet, Text, Dimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
+import themeContext from "../config/themeContext";
+
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export const Snackbar = React.forwardRef((props, ref) => {
+    const theme = useContext(themeContext);
+
     const {
-        style,
         text,
         before,
         after,
@@ -15,7 +18,7 @@ export const Snackbar = React.forwardRef((props, ref) => {
 
     const localStyles = StyleSheet.create({
         container: {
-            backgroundColor: style.snackbar_background,
+            backgroundColor: theme.snackbar_background,
             position: "absolute",
             zIndex: 10000,
             bottom: 19,

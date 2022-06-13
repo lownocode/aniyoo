@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const ContentHeader = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
         text, 
         align = "left", 
@@ -9,7 +13,6 @@ export const ContentHeader = (props) => {
         indents = false, 
         containerStyle, 
         textStyle,
-        style
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -24,7 +27,7 @@ export const ContentHeader = (props) => {
             fontWeight: "600",
             textAlign: align,
             fontSize: 13,
-            color: style.accent,
+            color: theme.accent,
             ...textStyle
         }
     });

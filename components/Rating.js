@@ -3,8 +3,6 @@ import { View, StyleSheet } from "react-native";
 
 export const Rating = props => {
     const {
-        style,
-        disabled,
         length,
         select,
         containerStyle,

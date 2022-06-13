@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Dimensions, View, StyleSheet } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const Divider = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style, 
         dividerStyle, 
         indents = false,
         centerComponent,
@@ -21,13 +24,13 @@ export const Divider = (props) => {
             overflow: indents ? "visible" : "hidden" 
         },
         dividerCenterComponent: {
-            backgroundColor: style.divider_color, 
+            backgroundColor: theme.divider_color, 
             height: 0.5,
             width: width,
             ...dividerStyle
         },
         divider: {
-            backgroundColor: style.divider_color, 
+            backgroundColor: theme.divider_color, 
             height: 0.5,
             marginLeft: indents ? 0 : 20,
             marginRight: indents ? 0 : 20,

@@ -1,19 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Image, Text, ScrollView, TouchableNativeFeedback } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+
+import themeContext from "../config/themeContext";
 
 import { Cell, Rating, Icon } from ".";
 import { Placeholder } from "./Placeholder";
 
 export const DiscussedTodayAnimeList = (props) => {
-    const { style, animes = [] } = props;
+    const theme = useContext(themeContext);
+
+    const { animes = [] } = props;
     
     return (
         <View>
             {
                 animes.length < 1 ? (
                     <Placeholder
-                    style={style}
                     title="Пусто"
                     subtitle="Сегодня ещё ни одно аниме не прокомментировали"
                     />
@@ -22,7 +25,6 @@ export const DiscussedTodayAnimeList = (props) => {
                     return (
                         <Cell
                         key={"anime_" + index}
-                        style={style}
                         title={item?.title}
                         maxTitleLines={2}
                         centeredBefore
@@ -30,7 +32,7 @@ export const DiscussedTodayAnimeList = (props) => {
                         before={
                             <View 
                             style={{
-                                backgroundColor: style.divider_color,
+                                backgroundColor: theme.divider_color,
                                 borderRadius: 5,
                             }}>
                                 <Image
@@ -43,7 +45,7 @@ export const DiscussedTodayAnimeList = (props) => {
                                     height: 90,
                                     resizeMode: "cover",
                                     borderRadius: 5,
-                                    borderColor: style.divider_color,
+                                    borderColor: theme.divider_color,
                                     borderWidth: 0.5
                                 }}
                                 />
@@ -86,7 +88,6 @@ export const DiscussedTodayAnimeList = (props) => {
                                         }}
                                         >
                                             <Rating
-                                            style={style}
                                             length={5}
                                             select={String(item.grade).split(".")[0]}
                                             iconSelect={<Icon type="AntDesign" name="star" color="gold"/>}
@@ -95,7 +96,7 @@ export const DiscussedTodayAnimeList = (props) => {
 
                                             <Text
                                             style={{
-                                                color: style.text_secondary_color,
+                                                color: theme.text_secondary_color,
                                                 fontSize: 10,
                                                 marginLeft: 3
                                             }}
@@ -113,9 +114,9 @@ export const DiscussedTodayAnimeList = (props) => {
                                 }}>
                                     <Text
                                     style={{
-                                        color: style.text_color,
+                                        color: theme.text_color,
                                         fontSize: 10,
-                                        borderColor: style.divider_color,
+                                        borderColor: theme.divider_color,
                                         borderWidth: 1,
                                         paddingHorizontal: 5,
                                         paddingVertical: 1,
@@ -138,9 +139,9 @@ export const DiscussedTodayAnimeList = (props) => {
                                     >
                                     <Text
                                     style={{
-                                        color: style.text_color,
+                                        color: theme.text_color,
                                         fontSize: 10,
-                                        borderColor: style.divider_color,
+                                        borderColor: theme.divider_color,
                                         borderWidth: 1,
                                         paddingHorizontal: 5,
                                         paddingVertical: 1,
@@ -162,7 +163,7 @@ export const DiscussedTodayAnimeList = (props) => {
 
                                     <View
                                     style={{
-                                        borderColor: style.divider_color,
+                                        borderColor: theme.divider_color,
                                         borderWidth: 1,
                                         paddingHorizontal: 6,
                                         paddingVertical: 1,
@@ -192,6 +193,8 @@ export const DiscussedTodayAnimeList = (props) => {
 };
 
 export const HorizontalAnimeList = (props) => {
+    const theme = useContext(themeContext);
+    
     const { style, animes = [] } = props;
 
     return (
@@ -233,7 +236,7 @@ export const HorizontalAnimeList = (props) => {
                                     style={{
                                         marginVertical: 5,
                                         marginHorizontal: 7,
-                                        backgroundColor: style.divider_color,
+                                        backgroundColor: theme.divider_color,
                                         borderRadius: 5,
                                     }}
                                     >
@@ -247,7 +250,7 @@ export const HorizontalAnimeList = (props) => {
                                             height: 150,
                                             resizeMode: "cover",
                                             borderRadius: 5,
-                                            borderColor: style.divider_color,
+                                            borderColor: theme.divider_color,
                                             borderWidth: 0.5
                                         }}
                                         />
@@ -288,7 +291,7 @@ export const HorizontalAnimeList = (props) => {
                                         numberOfLines={2}
                                         style={{
                                             fontSize: 13,
-                                            color: style.text_color,
+                                            color: theme.text_color,
                                             fontWeight: "500"
                                         }}
                                         >
@@ -304,7 +307,7 @@ export const HorizontalAnimeList = (props) => {
                                         >
                                             <View
                                             style={{
-                                                borderColor: style.divider_color,
+                                                borderColor: theme.divider_color,
                                                 borderWidth: 1,
                                                 borderRadius: 5,
                                                 paddingHorizontal: 5,
@@ -313,7 +316,7 @@ export const HorizontalAnimeList = (props) => {
                                             >
                                                 <Text
                                                 style={{
-                                                    color: style.text_color,
+                                                    color: theme.text_color,
                                                     fontSize: 10
                                                 }}
                                                 >
@@ -324,7 +327,7 @@ export const HorizontalAnimeList = (props) => {
 
                                             <View
                                             style={{
-                                                borderColor: style.divider_color,
+                                                borderColor: theme.divider_color,
                                                 borderWidth: 1,
                                                 borderRadius: 5,
                                                 paddingVertical: 4,

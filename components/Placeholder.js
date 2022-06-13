@@ -1,11 +1,13 @@
-import React from "react";
-
+import React, { useContext } from "react";
 import { View, Text, Dimensions, StyleSheet } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const Placeholder = (props) => {
+    const theme = useContext(themeContext);
+
     const {
         title = "", 
-        style, 
         subtitle = "", 
         button, 
         icon,
@@ -25,7 +27,7 @@ export const Placeholder = (props) => {
             alignItems: "center",
         },
         title: {
-            color: style.placeholder_title_color,
+            color: theme.placeholder.title,
             fontSize: 18,
             fontWeight: "bold",
             textAlign: "center",
@@ -33,7 +35,7 @@ export const Placeholder = (props) => {
         },
         subtitle: {
             textAlign: "center",
-            color: style.placeholder_subtitle_color,
+            color: theme.placeholder.subtitle,
             marginBottom: 10
         }
     });

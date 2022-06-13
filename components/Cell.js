@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const Cell = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         onPress,
         title,
         subtitle,
@@ -41,14 +44,14 @@ export const Cell = (props) => {
             alignItems: "center",
         },
         title: {
-            color: style.cell_title_color,
+            color: theme.cell.title_color,
             fontSize: 16.5,
             flex: 1,
             fontWeight: "500",
             ...titleStyle,
         },
         subtitle: {
-            color: style.cell_subtitle_color,
+            color: theme.cell.subtitle_color,
             fontSize: 15,
             flex: 1,
             ...subtitleStyle
@@ -67,7 +70,7 @@ export const Cell = (props) => {
     return (
         <TouchableNativeFeedback 
         onPress={onPress}
-        background={TouchableNativeFeedback.Ripple(style.cell_press_background, false)}
+        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
         disabled={disabled}
         >
             <View>

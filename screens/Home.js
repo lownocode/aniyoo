@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, ScrollView, Text, Image } from "react-native";
 
 import {
@@ -15,10 +15,10 @@ import {
 } from "../components";
 import { dateFormatter } from "../functions";
 
+import themeContext from "../config/themeContext";
+
 export const Home = props => {
-    const { 
-        style
-    } = props;
+    const theme = useContext(themeContext);
     
     const discussed_today_list = [
         {
@@ -124,64 +124,59 @@ export const Home = props => {
     const renderSchedule = () => (
         <View>
             <Cell
-            style={style}
             title="Ожидается сегодня"
             subtitle="Расписание выхода серий"
             after={
                 <Icon
                 name="chevron-small-right"
                 type="Entypo"
-                color={style.icon_color}
+                color={theme.icon_color}
                 size={25}
                 />
             }
             />
 
             <HorizontalAnimeList
-            style={style}
             animes={discussed_today_list}
             />
 
-            <Divider style={style} dividerStyle={{marginVertical: 10}} indents/>
+            <Divider dividerStyle={{marginVertical: 10}} indents/>
         </View>
     );
 
     const renderDiscussedToday = () => (
         <View>
             <Cell
-            style={style}
             title="Обсуждаемое сегодня"
             subtitle="Нажмите, чтобы открыть все"
             after={
                 <Icon
                 name="chevron-small-right"
                 type="Entypo"
-                color={style.icon_color}
+                color={theme.icon_color}
                 size={25}
                 />
             }
             />
 
             <DiscussedTodayAnimeList
-            style={style}
             animes={discussed_today_list}
             />
 
-            <Divider style={style} dividerStyle={{marginVertical: 10}} indents/>
+            <Divider dividerStyle={{marginVertical: 10}} indents/>
         </View>
     );
 
     const renderAssemblyOfWeek = () => (
         <View>
             <Cell
-            style={style}
             title="Сборки недели"
             subtitle="Самые популярные сборки за неделю"
             after={
                 <Icon
                 name="chevron-small-right"
                 type="Entypo"
-                color={style.icon_color}
+                color={theme.icon_color}
                 size={25}
                 />
             }
@@ -189,24 +184,22 @@ export const Home = props => {
 
             <AssemblyOfWeekCarousel
             items={assemblyItems}
-            style={style}
             />
 
-            <Divider style={style} dividerStyle={{marginVertical: 10}} indents/>
+            <Divider dividerStyle={{marginVertical: 10}} indents/>
         </View>
     );
 
     const renderCommentsOfWeek = () => (
         <View>
             <Cell
-            style={style}
             title="Комментарии недели"
             subtitle="Самые популярные комментарии за неделю"
             after={
                 <Icon
                 name="chevron-small-right"
                 type="Entypo"
-                color={style.icon_color}
+                color={theme.icon_color}
                 size={25}
                 />
             }
@@ -219,7 +212,7 @@ export const Home = props => {
                             <View
                             key={"comment_" + index}
                             style={{
-                                borderColor: style.divider_color,
+                                borderColor: theme.divider_color,
                                 borderWidth: 0.5,
                                 borderRadius: 10,
                                 overflow: "hidden"
@@ -227,7 +220,6 @@ export const Home = props => {
                             >
                                 <Cell
                                 centered={false}
-                                style={style}
                                 containerStyle={{
                                     marginTop: 0,
                                 }}
@@ -243,8 +235,7 @@ export const Home = props => {
                                 subtitle={item?.text}
                                 before={
                                     <Avatar
-                                    style={style}
-                                    overlayColor={style.background_content}
+                                    overlayColor={theme.background_content}
                                     url={item?.user?.photo}
                                     />
                                 }
@@ -294,7 +285,7 @@ export const Home = props => {
 
                                             <Text
                                             style={{
-                                                color: style.text_secondary_color,
+                                                color: theme.text_secondary_color,
                                                 fontSize: 10,
                                             }}
                                             >
@@ -304,10 +295,9 @@ export const Home = props => {
                                 }
                                 />
 
-                                <Divider style={style}/>
+                                <Divider />
 
                                 <Cell
-                                style={style}
                                 beforeStyle={{
                                     marginVertical: 10
                                 }}
@@ -345,7 +335,6 @@ export const Home = props => {
                                                 }}
                                                 >
                                                     <Rating
-                                                    style={style}
                                                     length={5}
                                                     select={String(item?.anime?.grade).split(".")[0]}
                                                     iconSelect={<Icon type="AntDesign" name="star" color="gold"/>}
@@ -354,7 +343,7 @@ export const Home = props => {
 
                                                     <Text
                                                     style={{
-                                                        color: style.text_secondary_color,
+                                                        color: theme.text_secondary_color,
                                                         fontSize: 10,
                                                         marginLeft: 3
                                                     }}
@@ -373,9 +362,9 @@ export const Home = props => {
                                         }}>
                                             <Text
                                             style={{
-                                                color: style.text_color,
+                                                color: theme.text_color,
                                                 fontSize: 10,
-                                                borderColor: style.divider_color,
+                                                borderColor: theme.divider_color,
                                                 borderWidth: 1,
                                                 paddingHorizontal: 5,
                                                 paddingVertical: 1,
@@ -407,21 +396,15 @@ export const Home = props => {
     );
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Главная"
-            titleStyle={style.header_title}
             height={30}
-            backgroundColor={style.header_background_color}
-            style={style}
             />
 
             <ScrollView 
             showsVerticalScrollIndicator={false}
-            style={{marginTop: -15}}
             >
-                <View style={{ paddingTop: 15 }}/>
-                
                 {renderSchedule()}
                 {renderDiscussedToday()}
                 {renderAssemblyOfWeek()}

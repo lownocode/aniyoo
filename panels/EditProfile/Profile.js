@@ -1,9 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { ScrollView, View, ActivityIndicator } from "react-native";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
 import ImgToBase64 from 'react-native-image-base64';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import themeContext from "../../config/themeContext";
 
 import { 
     Header,
@@ -20,8 +22,9 @@ import {
 import { storage, sleep } from "../../functions";
 
 export const EditProfile_Profile = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack,
             reset
@@ -44,7 +47,7 @@ export const EditProfile_Profile = (props) => {
 
     const changePhoto = async () => {
         const pickImage = await launchImageLibrary({
-            mediaType: "photo"
+            mediaType: "photo",
         });
 
         if(pickImage.didCancel) return;
@@ -123,26 +126,22 @@ export const EditProfile_Profile = (props) => {
     };
 
     return (
-        <GestureHandlerRootView style={style.view}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
             subtitle="Профиль"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <Snackbar
             ref={snackbarRef}
-            style={style}
             text={snackbar?.text}
             before={snackbar?.before}
             />
 
             <BottomModal
-            style={style}
             ref={modalRef}
             >
                 {modalContent}
@@ -155,14 +154,13 @@ export const EditProfile_Profile = (props) => {
                 <View style={{marginTop: 10, paddingTop: 15}}/>
 
                 <Cell
-                style={style}
                 title="Сменить аватарку"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -172,7 +170,7 @@ export const EditProfile_Profile = (props) => {
                         name="photo-library"
                         type="MaterialIcons"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -183,14 +181,13 @@ export const EditProfile_Profile = (props) => {
                 <View style={{marginTop: 5}} />
 
                 <Cell
-                style={style}
                 title="Изменить никнейм"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -200,13 +197,13 @@ export const EditProfile_Profile = (props) => {
                         name="user"
                         type="Feather"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
                 subtitle="Не нравится текущий никнейм? Просто смените его!"
                 onPress={() => {
-                    setModalContent(<ChangeNickname style={style} reset={reset} onClose={() => modalRef?.current?.hide()}/>);
+                    setModalContent(<ChangeNickname reset={reset} onClose={() => modalRef?.current?.hide()}/>);
                     modalRef?.current?.show();
                 }}
                 />
@@ -214,14 +211,13 @@ export const EditProfile_Profile = (props) => {
                 <View style={{marginTop: 5}} />
 
                 <Cell
-                style={style}
                 title="Редактировать статус"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -231,13 +227,13 @@ export const EditProfile_Profile = (props) => {
                         name="pencil"
                         type="EvilIcons"
                         size={25}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
                 subtitle="Выразите свои мысли..."
                 onPress={() => {
-                    setModalContent(<SetStatus style={style} reset={reset} onClose={() => modalRef?.current?.hide()}/>);
+                    setModalContent(<SetStatus reset={reset} onClose={() => modalRef?.current?.hide()}/>);
                     modalRef?.current?.show();
                 }}
                 />

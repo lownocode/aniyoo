@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ScrollView, View, Switch } from "react-native";
+import { EventRegister } from "react-native-event-listeners";
+import themeContext from "../../config/themeContext";
 
 import { 
     Header,
@@ -10,40 +12,40 @@ import {
 import { storage } from "../../functions";
 
 export const Settings_Application = (props) => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack
         },
-        getTheme
     } = props;
 
-    const [ darkTheme, setDarkTheme ] = useState(false);
+    const [ darkThemeMode, setDarkThemeMode ] = useState(false);
 
     useEffect(() => {
         (async () => {
-            const theme = await getTheme();
+            const theme = await storage.getItem("DARK_THEME_MODE");
 
-            setDarkTheme(theme);
+            setDarkThemeMode(theme);
         })();
     }, []);
 
-    const switchDarkTheme = () => {
-        storage.setItem("darkTheme", !darkTheme);
-        setDarkTheme(!darkTheme);
-        getTheme();
+    const switchDarkTheme = (value) => {
+        EventRegister.emit("changeTheme", value);
+        setDarkThemeMode(value);
+
+        storage.setItem("DARK_THEME_MODE", value);
+        console.log(value)
     };
 
     return (
-        <View style={style.view}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Настройки"
             subtitle="Приложение"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <ScrollView
@@ -53,26 +55,25 @@ export const Settings_Application = (props) => {
                 <View style={{marginTop: 5, paddingTop: 15}}/>
 
                 <Cell
-                style={style}
                 title="Тёмная тема"
                 before={
                     <Icon 
                     name="moon" 
                     size={23} 
                     type="Feather" 
-                    color={style.icon_color} 
+                    color={theme.icon_color} 
                     />
                 }
                 subtitle="Интерфейс приобретает тёмный цвет"
                 after={
                     <Switch
-                    value={darkTheme}
-                    onValueChange={() => switchDarkTheme()}
-                    trackColor={{ false: style.switch_track_color_off, true: style.switch_track_color_on }}
-                    thumbColor={darkTheme ? style.switch_thumb_color : style.switch_thumb_color_light}
+                    value={darkThemeMode}
+                    onValueChange={(value) => switchDarkTheme(value)}
+                    trackColor={{ false: theme.switch.track_off, true: theme.switch.track_on }}
+                    thumbColor={darkThemeMode ? theme.switch.thumb : theme.switch.thumb_light}
                     />
                 }
-                onPress={() => switchDarkTheme()}
+                disabled
                 />
             </ScrollView>
         </View>

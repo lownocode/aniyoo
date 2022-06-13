@@ -1,6 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { View, ScrollView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import themeContext from "../config/themeContext";
 
 import {
     Header,
@@ -14,8 +16,9 @@ import {
 } from "../modals";
 
 export const Settings = props => {
+    const theme = useContext(themeContext);
+
     const { 
-        style,
         navigation: {
             goBack,
             navigate
@@ -27,18 +30,15 @@ export const Settings = props => {
     const modalRef = useRef();
 
     return (
-        <GestureHandlerRootView style={style.view}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Настройки"
             height={30}
-            backgroundColor={style.header_background_color}
             backButtonOnPress={() => goBack()}
             backButton
-            style={style}
             />
 
             <BottomModal
-            style={style}
             ref={modalRef}
             >
                 {modalContent}
@@ -52,7 +52,6 @@ export const Settings = props => {
 
                 <Cell
                 centered={false}
-                style={style}
                 title="Выйти из аккаунта"
                 subtitle="Вы снова сможете войти по логину и паролю"
                 before={
@@ -75,22 +74,21 @@ export const Settings = props => {
                     </View>
                 }
                 onPress={() => {
-                    setModalContent(<ConfirmExit style={style} onClose={() => modalRef?.current?.hide()} navigate={navigate}/>);
+                    setModalContent(<ConfirmExit onClose={() => modalRef?.current?.hide()} navigate={navigate}/>);
                     modalRef?.current?.show();
                 }}
                 />
 
-                <Divider style={style} dividerStyle={{marginVertical: 10}}/>
+                <Divider dividerStyle={{marginVertical: 10}}/>
 
                 <Cell
-                style={style}
                 title="Приложение"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -100,7 +98,7 @@ export const Settings = props => {
                         name="apps"
                         type="Octicons"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -109,14 +107,13 @@ export const Settings = props => {
                 />
 
                 <Cell
-                style={style}
                 title="Другое"
                 before={
                     <View
                     style={{
                         width: 42,
                         height: 42,
-                        backgroundColor: style.accent + "10",
+                        backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
                         alignItems: "center"
@@ -126,7 +123,7 @@ export const Settings = props => {
                         name="compass"
                         type="Entypo"
                         size={20}
-                        color={style.accent}
+                        color={theme.accent}
                         />
                     </View>
                 }
@@ -134,10 +131,9 @@ export const Settings = props => {
                 onPress={() => navigate("settings.another")}
                 />
 
-                <Divider style={style} dividerStyle={{marginVertical: 10}}/>
+                <Divider dividerStyle={{marginVertical: 10}}/>
 
                 <Cell
-                style={style}
                 title="Техническая поддержка"
                 centered={false}
                 before={

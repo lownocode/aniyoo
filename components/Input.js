@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, TextInput, StyleSheet, Text } from "react-native";
 
+import themeContext from "../config/themeContext";
+
 export const Input = props => {
+    const theme = useContext(themeContext);
+    
     const {
         placeholder,
-        style,
         containerStyle,
         before,
         after,
@@ -28,14 +31,14 @@ export const Input = props => {
             ...containerStyle,
         },
         input: {
-            backgroundColor: style.input_background,
+            backgroundColor: theme.input.background,
             borderRadius: 10,
             paddingVertical: 5,
             borderWidth: 1,
-            borderColor: style.input_border_color,
+            borderColor: theme.input.border,
             paddingLeft: before ? 35 : 10,
             paddingRight: after ? 35 : 10,
-            color: style.text_color,
+            color: theme.text_color,
             zIndex: 0,
             height: height,
             justifyContent: "center",
@@ -69,7 +72,7 @@ export const Input = props => {
                 keyboardType={type}
                 style={localStyles.input}
                 placeholder={placeholder}
-                placeholderTextColor={style.input_placeholder_text_color}
+                placeholderTextColor={theme.input.placeholder}
                 onChangeText={onChangeText}
                 value={value}
                 onChange={onChange}
