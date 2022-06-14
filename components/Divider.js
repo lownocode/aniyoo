@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { Dimensions, View, StyleSheet } from "react-native";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Divider = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         dividerStyle, 

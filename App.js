@@ -22,7 +22,7 @@ import axios from 'axios';
 import { EventRegister } from 'react-native-event-listeners';
 
 import theme from "./config/theme";
-import themeContext from "./config/themeContext";
+import ThemeContext from "./config/ThemeContext";
 
 const Stack = createNativeStackNavigator();
 
@@ -87,7 +87,7 @@ export default App = () => {
   }, []);
 
   return (
-    <themeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
+    <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
       <NavigationContainer>
         <StatusBar
         backgroundColor="transparent"
@@ -163,6 +163,6 @@ export default App = () => {
           ) : null
         }
       </NavigationContainer>
-    </themeContext.Provider>
+    </ThemeContext.Provider>
   );
 };

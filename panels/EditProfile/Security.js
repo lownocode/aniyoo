@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { ScrollView, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import themeContext from "../../config/themeContext";
+import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -16,7 +16,7 @@ import { EmailConfirmation } from "../../modals";
 import { storage } from "../../functions";
 
 export const EditProfile_Security = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

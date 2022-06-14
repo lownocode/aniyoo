@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { View, TextInput, StyleSheet, Text } from "react-native";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Input = props => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
     
     const {
         placeholder,

@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet, ActivityIndicator } from "react-native";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Button = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const {
         title, 

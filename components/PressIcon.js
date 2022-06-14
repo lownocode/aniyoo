@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { StyleSheet, TouchableNativeFeedback, View } from "react-native";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const PressIcon = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         onPress, 

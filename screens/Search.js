@@ -5,10 +5,10 @@ import {
     Header
 } from "../components";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Search = () => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>

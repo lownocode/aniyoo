@@ -2,13 +2,13 @@ import React, { useCallback, useImperativeHandle, useState, useContext } from "r
 import { View, StyleSheet, Dimensions, TouchableWithoutFeedback, Modal } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, } from "react-native-reanimated";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 const { height: SCREEN_HEIGHT, width } = Dimensions.get("window");
 const MAX_TRANSLATE_Y = -SCREEN_HEIGHT / 2 + 20;
 
 export const BottomModal = React.forwardRef((props, ref) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         children, 

@@ -4,7 +4,7 @@ import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 import {
     Avatar,
@@ -29,7 +29,7 @@ import {
 import { EditSocialNetworks, SetStatus } from "../modals";
 
 export const Profile = props => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
     
     const { 
         navigation: {

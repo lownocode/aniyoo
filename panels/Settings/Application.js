@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ScrollView, View, Switch } from "react-native";
 import { EventRegister } from "react-native-event-listeners";
-import themeContext from "../../config/themeContext";
+import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -12,7 +12,7 @@ import {
 import { storage } from "../../functions";
 
 export const Settings_Application = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

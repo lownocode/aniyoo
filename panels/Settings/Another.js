@@ -7,10 +7,10 @@ import {
     Icon
 } from "../../components";
 
-import themeContext from "../../config/themeContext";
+import ThemeContext from "../../config/ThemeContext";
 
 export const Settings_Another = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

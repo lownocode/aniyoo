@@ -2,10 +2,10 @@ import React, { Fragment, useContext } from 'react';
 import { View, Text, StyleSheet, StatusBar, } from 'react-native';
 import { Icon, PressIcon } from '.';
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Header = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const {
         backgroundColor = theme.header_background_color,

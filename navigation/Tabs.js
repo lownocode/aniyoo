@@ -10,14 +10,14 @@ import {
     Profile
 } from "../screens";
 import { Icon } from "../components";
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
 export const Tabs = () => {
 
 const MyTabBar = ({ state, descriptors, navigation }) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     return (
         <View 

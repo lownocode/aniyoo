@@ -2,13 +2,13 @@ import React, { useContext } from "react";
 import { View, Image, Text, ScrollView, TouchableNativeFeedback } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 import { Cell, Rating, Icon } from ".";
 import { Placeholder } from "./Placeholder";
 
 export const DiscussedTodayAnimeList = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { animes = [] } = props;
     
@@ -193,7 +193,7 @@ export const DiscussedTodayAnimeList = (props) => {
 };
 
 export const HorizontalAnimeList = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
     
     const { style, animes = [] } = props;
 

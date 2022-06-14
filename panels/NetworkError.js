@@ -2,10 +2,10 @@ import React, { useContext } from "react";
 import { View } from "react-native";
 import { Icon, Placeholder } from "../components";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const NetworkError = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>

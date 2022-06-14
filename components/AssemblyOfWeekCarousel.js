@@ -2,10 +2,10 @@ import React, { useContext } from "react";
 import { View, ScrollView, Image, Dimensions, TouchableNativeFeedback, Text } from "react-native";
 import { Cell, Icon } from ".";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const AssemblyOfWeekCarousel = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { items = [] } = props;
 

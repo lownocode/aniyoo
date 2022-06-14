@@ -5,7 +5,7 @@ import { launchImageLibrary } from "react-native-image-picker";
 import ImgToBase64 from 'react-native-image-base64';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import themeContext from "../../config/themeContext";
+import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -22,7 +22,7 @@ import {
 import { storage, sleep } from "../../functions";
 
 export const EditProfile_Profile = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { ScrollView, View, Switch } from "react-native";
 
-import themeContext from "../../config/themeContext";
+import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -10,7 +10,7 @@ import {
 } from "../../components";
 
 export const EditProfile_Privacy = (props) => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

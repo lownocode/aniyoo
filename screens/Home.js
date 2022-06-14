@@ -15,10 +15,10 @@ import {
 } from "../components";
 import { dateFormatter } from "../functions";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 export const Home = props => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
     
     const discussed_today_list = [
         {

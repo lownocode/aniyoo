@@ -2,7 +2,7 @@ import React, { useState, useRef, useContext } from "react";
 import { View, ScrollView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 
 import {
     Header,
@@ -16,7 +16,7 @@ import {
 } from "../modals";
 
 export const Settings = props => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {

@@ -16,11 +16,11 @@ import {
     sleep
 } from "../functions";
 
-import themeContext from "../config/themeContext";
+import ThemeContext from "../config/ThemeContext";
 import appLogo from "../android/app/src/main/res/mipmap-xhdpi/ic_launcher.png";
 
 export const Authorization = props => {
-    const theme = useContext(themeContext);
+    const theme = useContext(ThemeContext);
 
     const { 
         navigation: {
