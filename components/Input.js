@@ -13,7 +13,7 @@ export const Input = props => {
         after,
         onChangeText,
         value,
-        height = 45,
+        height = 50,
         inputStyle,
         onChange,
         secureTextEntry,
@@ -22,27 +22,30 @@ export const Input = props => {
         textAlignVertical,
         badText,
         textAlign,
-        type = "default"
+        type = "default",
+        onSubmitEditing
     } = props;
 
     const localStyles = StyleSheet.create({
         container: {
             justifyContent: "center",
+            borderRadius: 17,
             ...containerStyle,
         },
         input: {
             backgroundColor: theme.input.background,
-            borderRadius: 10,
-            paddingVertical: 5,
+            borderRadius: 17,
+            paddingVertical: 10,
             borderWidth: 1,
             borderColor: theme.input.border,
             paddingLeft: before ? 35 : 10,
-            paddingRight: after ? 35 : 10,
+            paddingRight: after ? 45 : 10,
             color: theme.text_color,
             zIndex: 0,
             height: height,
             justifyContent: "center",
             alignItems: "center",
+            fontSize: 16,
             ...inputStyle,
         },
         before: {
@@ -81,6 +84,7 @@ export const Input = props => {
                 multiline={multiline}
                 textAlignVertical={textAlignVertical}
                 textAlign={textAlign}
+                onSubmitEditing={onSubmitEditing}
                 />
                 <View style={localStyles.after}>
                     {after}

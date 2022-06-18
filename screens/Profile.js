@@ -1,14 +1,20 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
-import { View, RefreshControl, ScrollView, Text, Image, Linking, TouchableNativeFeedback } from "react-native";
+import { View, RefreshControl, ScrollView, Text, Image, Linking, TouchableNativeFeedback, StyleSheet, Dimensions } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
+import { Modalize } from "react-native-modalize";
+import { EventRegister } from "react-native-event-listeners";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ru";
+dayjs.extend(relativeTime).locale("ru");
 
 import ThemeContext from "../config/ThemeContext";
 
 import {
     Avatar,
-    BottomModal,
     Button,
     Cell,
     Divider,
@@ -16,17 +22,19 @@ import {
     Icon,
     Placeholder,
     PressIcon,
-    Rating
+    Rating,
+    Snackbar
 } from "../components";
 import {
     dateFormatter, 
     storage,
-    declOfNum
+    declOfNum,
+    sleep
 } from "../functions";
 import {
     USER_SCHEMA
 } from "../variables";
-import { EditSocialNetworks, SetStatus } from "../modals";
+import { SetStatus } from "../modals";
 
 export const Profile = props => {
     const theme = useContext(ThemeContext);
@@ -41,8 +49,10 @@ export const Profile = props => {
     const [ refreshing, setRefreshing ] = useState(false);
     const [ userData, setUserData ] = useState(USER_SCHEMA);
     const [ modalContent, setModalContent ] = useState(null);
+    const [ snackbar, setSnackbar ] = useState(null);
 
     const modalRef = useRef();
+    const snackbarRef = useRef();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -51,17 +61,18 @@ export const Profile = props => {
 
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        
         axios.post("/user.signIn", null, {
             headers: {
-                "authorization": sign,
+                "Authorization": sign,
                 "Content-Type": "application/json"
             }
         })
         .then(({ data }) => {
-            setUserData(data)
+            setUserData(data);
         })
         .catch(({ response: { data } }) => {
-            console.log(data)
+            console.log(data);
         })
         .finally(() => {
             setRefreshing(false);
@@ -69,10 +80,37 @@ export const Profile = props => {
     }; 
 
     useEffect(() => {
-        onRefresh();
+        const eventListener = EventRegister.addEventListener("profile", (event) => {
+            if(event.type === "show_snackbar") {
+                getUserData();
+
+                setSnackbar({ 
+                    text: event.data.text,
+                    before: event.data.before
+                });
+
+                snackbarRef?.current?.show();
+                
+                sleep(5).then(() => snackbarRef?.current?.hide());
+            }
+        });
+
+        return () => {
+            EventRegister.removeEventListener(eventListener);
+        };
     }, []);
 
-    const statisticsChartValues = [0,0,0,0,0,0
+    useEffect(() => {
+        onRefresh();
+
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            getUserData();
+        });
+    
+        return willFocusSubscription;
+    }, []);
+
+    const statisticsChartValues = [0,0,0,0,0
         // userData.watch.length,
         // userData.watched.length,
         // userData.rewatching.length,
@@ -80,7 +118,65 @@ export const Profile = props => {
         // userData.postponed.length,
         // userData.abandoned.length
     ];
-    const statisticsChartColors = ['#25cf19','#1070de','#03fcdf','#770ecc','#f79502', '#f71202'];
+    const statisticsChartColors = ['#34c759','#5856d6','#af52de','#ff9500', '#ff453a'];
+
+    const lists = [
+        {
+            name: "Смотрю",
+            icon: (
+                <Icon
+                name="eye"
+                type="MaterialCommunityIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            ),
+        },
+        {
+            name: "Просмотрено",
+            icon: (
+                <Icon
+                name="check"
+                type="FontAwesome"
+                color={theme.text_secondary_color}
+                size={12}
+                />
+            )
+        },
+        {
+            name: "В планах",
+            icon: (
+                <Icon
+                name="calendar"
+                type="MaterialCommunityIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        },
+        {
+            name: "Отложено",
+            icon: (
+                <Icon
+                name="pause-circle-outline"
+                type="MaterialIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        },
+        {
+            name: "Брошено",
+            icon: (
+                <Icon
+                name="cancel"
+                type="MaterialIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        }
+    ];
 
     const statisticsChartData = statisticsChartValues.map((value, index) => ({
         value,
@@ -90,109 +186,20 @@ export const Profile = props => {
         key: `pie-${index}`,
     }));
 
-    const lastGradeReleasesRender = (item) => (
-        <Cell
-        key={"release-"+item.id}
-        title={item.title}
-        before={
-            <Image
-            source={{
-                uri: item.poster
-            }}
-            style={{
-                width: 50,
-                height: 80,
-                resizeMode: "cover",
-                borderRadius: 8
-            }}
-            />
-        }
-        subtitle={
-            <View>
-                <Rating
-                length={5}
-                select={item.stars}
-                iconSelect={<Icon type="AntDesign" name="star" color="gold"/>}
-                iconUnselect={<Icon type="AntDesign" name="staro" color="gray"/>}
-                containerStyle={{
-                    marginBottom: 5
-                }}
-                />
-                <View style={{
-                    flexDirection: "row",
-                    alignItems: "center"
-                }}
-                >
-                    <Icon type="Fontisto" name="date" style={{marginRight: 5}}/>
-                    <Text>
-                        {dateFormatter(item.date)}
-                    </Text>
-                </View>
-            </View>
-        }
-        after={
-            <Icon
-            name="arrow-up-right"
-            type="Feather"
-            size={20}
-            color={theme.icon_color}
-            />
-        }
-        />
-    );
-
-    const recentlyViewsRender = (item) => (
-        <Cell
-        key={"release-"+item.id}
-        title={item.title}
-        before={
-            <Image
-            source={{
-                uri: item.poster
-            }}
-            style={{
-                width: 50,
-                height: 80,
-                resizeMode: "cover",
-                borderRadius: 8
-            }}
-            />
-        }
-        subtitle={
-            <View>
-                <View style={{
-                    flexDirection: "row",
-                    alignItems: "center"
-                }}
-                >
-                    <Icon type="Fontisto" name="date" style={{marginRight: 5}}/>
-                    <Text>
-                        {dateFormatter(item.date)}
-                    </Text>
-                </View>
-
-                <View style={{
-                    flexDirection: "row",
-                    alignItems: "center"
-                }}
-                >
-                    <Icon type="AntDesign" name="eyeo" style={{marginRight: 5}}/>
-                    <Text>
-                        Просмотренная серия: {item.serie}
-                    </Text>
-                </View>
-            </View>
-        }
-        after={
-            <Icon
-            name="arrow-up-right"
-            type="Feather"
-            size={20}
-            color={theme.icon_color}
-            />
-        }
-        />
-    );
+    const styles = StyleSheet.create({
+        modalContainer: {
+            left: 10,
+            width: Dimensions.get("window").width - 20,
+            bottom: 10,
+            borderRadius: 15,
+            backgroundColor: theme.bottom_modal.background,
+            borderColor: theme.bottom_modal.border,
+            borderWidth: 0.5,
+            overflow: "hidden",
+            borderRadius: 15,
+            zIndex: 1000
+        },
+    });
 
     const socialNetworksButtonsRender = (item) => {
         let icon;
@@ -234,7 +241,8 @@ export const Profile = props => {
             textColor={textColor}
             backgroundColor={textColor + "10"}
             containerStyle={{
-                marginHorizontal: 5
+                marginHorizontal: 5,
+                marginBottom: 0
             }}
             />
         )
@@ -243,9 +251,6 @@ export const Profile = props => {
     const userInfoRender = () => (
         <View
         style={{
-            backgroundColor: theme.header_background_color,
-            borderBottomLeftRadius: 20,
-            borderBottomRightRadius: 20,
             overflow: "hidden",
         }}
         >
@@ -266,16 +271,16 @@ export const Profile = props => {
                 <View>
                     <TouchableNativeFeedback 
                     onPress={() => {
+                        EventRegister.emit("changeTabbar", { type: "hide" });
                         setModalContent(
                             <SetStatus 
+                            navigate={navigate} 
                             onClose={() => {
-                                modalRef?.current?.hide();
-                                setModalContent(null);
-                            }} 
-                            navigation={navigation} 
+                                modalRef.current?.close();
+                            }}
                             />
                         );
-                        modalRef?.current?.show();
+                        modalRef.current?.open();
                     }}
                     >
                         <Text 
@@ -299,7 +304,10 @@ export const Profile = props => {
                         style={{marginRight: 4}}
                         />
                         <Text style={{color: "gray", fontSize: 12}}>
-                            В сети
+                            {
+                                Number(userData?.online) < Number(Date.now() + (1 * 1000 * 60)) ? "Онлайн" : 
+                                `Был(-а) ${dayjs().to(Number(userData?.online) || 0)}`
+                            } 
                         </Text>
                     </View>
                 </View>
@@ -413,7 +421,6 @@ export const Profile = props => {
                 }}
                 >
                     <TouchableNativeFeedback
-                    onPress={() => console.log("assembly")}
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                     >
                         <View
@@ -452,7 +459,6 @@ export const Profile = props => {
                 }}
                 >
                     <TouchableNativeFeedback
-                    onPress={() => console.log("comments")}
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                     >
                         <View
@@ -478,7 +484,7 @@ export const Profile = props => {
                             }}
                             >
                                 <Text style={{fontWeight: "600"}}>{userData.collections} </Text>
-                                {declOfNum(userData.collections, ["коллекций","коллекции","коллекций"])}
+                                {declOfNum(userData.collections, ["коллекция","коллекции","коллекций"])}
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
@@ -497,287 +503,151 @@ export const Profile = props => {
 
     const socialNetworksRender = () => (
         <View>
-            <ScrollView 
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
+            <View
+            style={{
+                flexDirection: "row",
+                justifyContent: "center",
                 alignItems: "center",
-                justifyContent: "center"
+                flexWrap: "wrap",
+                marginHorizontal: 5,
+                marginTop: 15
             }}
             >
-                {
+                {   
                     userData?.social_networks.length > 0 && userData?.social_networks.map(socialNetworksButtonsRender)
                 }
 
                 <Button
-                title="Добавить"
+                title="Редактировать социальные сети"
                 before={
                     <Icon
-                    type="Ionicons"
-                    name="add"
-                    size={25}
+                    type="Feather"
+                    name="edit"
+                    size={20}
                     color={theme.button.primary.text_color}
                     />
                 }
                 upperTitle={false}
                 containerStyle={{
-                    marginLeft: 5
+                    marginLeft: userData?.social_networks.length > 0 ? 5 : 15
                 }}
-                onPress={() => {
-                    setModalContent(
-                        <EditSocialNetworks 
-                        onClose={() => {
-                            modalRef?.current?.hide();
-                            setModalContent(null);
-                        }} 
-                        navigation={navigation} 
-                        />
-                    );
-                    modalRef?.current?.show();
-                }}
+                onPress={() => navigate("edit_social_networks")}
                 />
-            </ScrollView>
+            </View>
         </View>
     );
 
     const statisticsRender = () => (
-        <View>
-            <View
-            style={{
-                borderWidth: 1,
-                borderColor: theme.divider_color,
-                margin: 10,
-                borderRadius: 6,
-                paddingRight: 9,
-                flexDirection: "row",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-                backgroundColor: theme.divider_color + "30",
-                overflow: "hidden"
-            }}
-            >
-                <View 
-                style={{
-                    paddingVertical: 5,
-                    paddingHorizontal: 9,
-                }}
-                >
+        <View
+        style={{
+            marginHorizontal: 10,
+            marginTop: 20,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+        }}
+        >
+            <View>
+            {
+                lists.map((item, index) => (
                     <View
+                    key={"list-" + index}
                     style={{
-                        marginBottom: 3
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: index !== 0 ? 5 : 0
                     }}
                     >
                         <View
                         style={{
+                            paddingVertical: 2,
+                            paddingLeft: 4,
+                            paddingRight: 5,
+                            borderRadius: 100,
+                            borderWidth: 0.5,
+                            borderColor: statisticsChartColors[index] + "90",
                             flexDirection: "row",
+                            justifyContent: "center",
                             alignItems: "center"
                         }}
                         >
-                            <Icon
-                            name="eye"
-                            type="MaterialCommunityIcons"
-                            color={statisticsChartColors[0]}
+                            <View
                             style={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: 100,
+                                backgroundColor: statisticsChartColors[index],
                                 marginRight: 5
                             }}
-                            size={15}
                             />
 
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                fontSize: 12
-                            }}
-                            >
-                                Смотрю <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[0]}</Text>
-                            </Text>
+                            {
+                                item.icon
+                            }
                         </View>
-                    </View> 
 
-                    <View
-                    style={{
-                        marginBottom: 3
-                    }}
-                    >
                         <View
                         style={{
                             flexDirection: "row",
+                            justifyContent: "center",
                             alignItems: "center"
                         }}
                         >
-                            <Icon
-                            name="check"
-                            type="FontAwesome"
-                            color={statisticsChartColors[1]}
+                            <Text
                             style={{
-                                marginRight: 5
+                                marginLeft: 10,
+                                fontSize: 15,
+                                fontWeight: "500",
+                                color: theme.text_secondary_color + "90"
                             }}
-                            size={14}
-                            />
+                            >
+                                {
+                                    item.name
+                                }
+                            </Text>
 
                             <Text
                             style={{
+                                marginLeft: 6,
+                                fontWeight: "700",
                                 color: theme.text_secondary_color,
-                                fontSize: 12
+                                fontSize: 16
                             }}
-                            >
-                                Просмотрено <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[1]}</Text>
+                            > 
+                                {
+                                    statisticsChartValues[index]
+                                }
                             </Text>
                         </View>
-                    </View> 
-
-                    <View
-                    style={{
-                        marginBottom: 3
-                    }}
-                    >
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Icon
-                            name="eye-refresh"
-                            type="MaterialCommunityIcons"
-                            color={statisticsChartColors[2]}
-                            style={{
-                                marginRight: 5
-                            }}
-                            size={15}
-                            />
-
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                fontSize: 12
-                            }}
-                            >
-                                Пересматриваю <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[2]}</Text>
-                            </Text>
-                        </View>
-                    </View> 
-
-                    <View
-                    style={{
-                        marginBottom: 3
-                    }}
-                    >
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Icon
-                            name="calendar"
-                            type="MaterialCommunityIcons"
-                            color={statisticsChartColors[3]}
-                            style={{
-                                marginRight: 5
-                            }}
-                            size={15}
-                            />
-
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                fontSize: 12
-                            }}
-                            >
-                                В планах <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[3]}</Text>
-                            </Text>
-                        </View>
-                    </View> 
-
-                    <View
-                    style={{
-                        marginBottom: 3
-                    }}
-                    >
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Icon
-                            name="pause-circle-outline"
-                            type="MaterialIcons"
-                            color={statisticsChartColors[4]}
-                            style={{
-                                marginRight: 5
-                            }}
-                            size={15}
-                            />
-
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                fontSize: 12
-                            }}
-                            >
-                                Отложено <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[4]}</Text>
-                            </Text>
-                        </View>
-                    </View> 
-
-                    <View>
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Icon
-                            name="cancel"
-                            type="MaterialIcons"
-                            color={statisticsChartColors[5]}
-                            style={{
-                                marginRight: 5
-                            }}
-                            size={15}
-                            />
-
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                fontSize: 12
-                            }}
-                            >
-                                Брошено: <Text style={{fontWeight: "700", color: theme.text_color}}>{statisticsChartValues[5]}</Text>
-                            </Text>
-                        </View>
-                    </View> 
-                </View>
-
-                {
-                    statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
-                        <Icon
-                        type="FontAwesome"
-                        name="pie-chart"
-                        color={theme.divider_color}
-                        size={100}
-                        />
-                    ) : (
-                        <PieChart 
-                        data={statisticsChartData}
-                        innerRadius={22}
-                        style={{ height: 117, width: 110 }}
-                        />
-                    )
-                }
+                    </View>
+                ))
+            }
             </View>
-
-            <Divider indents />
+            
+            {
+                statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
+                    <Icon
+                    type="FontAwesome"
+                    name="pie-chart"
+                    color={theme.divider_color}
+                    size={109}
+                    />
+                ) : (
+                    <PieChart 
+                    data={statisticsChartData}
+                    innerRadius={22}
+                    style={{ height: 120, width: 109 }}
+                    />
+                )
+            }
         </View>
     );
 
     const friendsRender = () => (
         <View
         style={{
-            marginVertical: 15
+            marginVertical: 20
         }}
         >
             <Cell
@@ -796,7 +666,7 @@ export const Profile = props => {
                     color: theme.text_color
                 }}
                 >
-                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friend_requests?.length}</Text>
+                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friends}</Text>
                 </Text>
             }
             after={
@@ -804,7 +674,7 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.friend_requests?.length >= 1 ? theme.accent : theme.divider_color,
+                    backgroundColor: userData?.friends >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -816,7 +686,7 @@ export const Profile = props => {
                         fontSize: 12
                     }}
                     >
-                        {userData?.friend_requests?.length || 0} {declOfNum(userData?.friend_requests?.length, ["заявка","заявки","заявок"])}
+                        {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["заявка","заявки","заявок"])}
                     </Text>
 
                     <Icon
@@ -894,105 +764,6 @@ export const Profile = props => {
         </View>
     );
 
-    const ratedRender = () => (
-        <View>
-            <Cell
-            title="Оценённые"
-            before={
-                <Icon
-                type="AntDesign"
-                name="star"
-                color="gold"
-                />
-            }
-            after={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}
-                >
-                    <Text
-                    style={{
-                        color: theme.text_secondary_color,
-                        fontSize: 13
-                    }}
-                    >
-                        Все
-                    </Text>
-
-                    <Icon
-                    name="chevron-small-right"
-                    type="Entypo"
-                    color={theme.text_secondary_color}
-                    size={20}
-                    />
-                </View>
-            }
-            />
-
-            {/* {
-                userData?.rated.length === 0 ? (
-                    <Placeholder
-                    title="Пусто"
-                    subtitle="Вы ещё не оценили ни одного аниме"
-                    />
-                ) : userData?.rated.map(lastGradeReleasesRender)
-            } */}
-
-            <Divider dividerStyle={{marginTop: 15}} indents/>
-        </View>
-    );
-
-    const lastWatchedRender = () => (
-        <View>
-            <Cell
-            title="Последние просмотры"
-            before={
-                <Icon
-                type="Ionicons"
-                name="time-outline"
-                color={theme.accent}
-                size={15}
-                />
-            }
-            after={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}
-                >
-                    <Text
-                    style={{
-                        color: theme.text_secondary_color,
-                        fontSize: 12
-                    }}
-                    >
-                        Все
-                    </Text>
-
-                    <Icon
-                    name="chevron-small-right"
-                    type="Entypo"
-                    color={theme.text_secondary_color}
-                    size={20}
-                    />
-                </View>
-            }
-            />
-            
-            {/* {
-                userData?.all_watched.length === 0 ? (
-                    <Placeholder
-                    title="Пусто"
-                    subtitle="Вы ещё не посмотрели ни одного аниме"
-                    />
-                ) : userData?.all_watched.map(recentlyViewsRender)
-            } */}
-        </View>
-    );
-
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
@@ -1022,11 +793,25 @@ export const Profile = props => {
             }
             />
 
-            <BottomModal
+            <Modalize
             ref={modalRef}
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            modalStyle={styles.modalContainer}
+            adjustToContentHeight
+            onClose={() => {
+                getUserData();
+                EventRegister.emit("changeTabbar", { type: "show" });
+            }}
             >
                 {modalContent}
-            </BottomModal>
+            </Modalize>
+
+            <Snackbar
+            ref={snackbarRef}
+            text={snackbar?.text}
+            before={snackbar?.before}
+            containerStyle={{ bottom: 80 }}
+            />
 
             <ScrollView
             showsHorizontalScrollIndicator={false}
@@ -1041,9 +826,7 @@ export const Profile = props => {
             }
             >
                 {userInfoRender()}
-                {statisticsRender()}          
-                {ratedRender()}                
-                {lastWatchedRender()}
+                {statisticsRender()}      
             </ScrollView>
         </GestureHandlerRootView>
     )

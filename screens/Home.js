@@ -405,10 +405,10 @@ export const Home = props => {
             <ScrollView 
             showsVerticalScrollIndicator={false}
             >
-                {renderSchedule()}
-                {renderDiscussedToday()}
-                {renderAssemblyOfWeek()}
-                {renderCommentsOfWeek()}
+                {/* {renderSchedule()} */}
+                {/* {renderDiscussedToday()} */}
+                {/* {renderAssemblyOfWeek()} */}
+                {/* {renderCommentsOfWeek()} */}
             </ScrollView>
         </View>
     )

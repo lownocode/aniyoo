@@ -1,6 +1,7 @@
-import React, { useState, useRef, useContext } from "react";
-import { View, ScrollView } from "react-native";
+import React, { useState, useRef, useContext, useEffect } from "react";
+import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Modalize } from "react-native-modalize";
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -9,7 +10,6 @@ import {
     Cell,
     Icon,
     Divider,
-    BottomModal
 } from "../components";
 import {
     ConfirmExit,
@@ -29,6 +29,20 @@ export const Settings = props => {
 
     const modalRef = useRef();
 
+    const styles = StyleSheet.create({
+        modalContainer: {
+            left: 10,
+            width: Dimensions.get("window").width - 20,
+            bottom: 10,
+            borderRadius: 15,
+            backgroundColor: theme.bottom_modal.background,
+            borderColor: theme.bottom_modal.border,
+            borderWidth: 0.5,
+            overflow: "hidden",
+            borderRadius: 15,
+        },
+    });
+
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
@@ -38,11 +52,14 @@ export const Settings = props => {
             backButton
             />
 
-            <BottomModal
+            <Modalize
             ref={modalRef}
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            modalStyle={styles.modalContainer}
+            adjustToContentHeight
             >
                 {modalContent}
-            </BottomModal>
+            </Modalize>
             
             <ScrollView 
             showsVerticalScrollIndicator={false}
@@ -74,8 +91,8 @@ export const Settings = props => {
                     </View>
                 }
                 onPress={() => {
-                    setModalContent(<ConfirmExit onClose={() => modalRef?.current?.hide()} navigate={navigate}/>);
-                    modalRef?.current?.show();
+                    setModalContent(<ConfirmExit navigate={navigate} onClose={() => modalRef.current?.close()}/>);
+                    modalRef.current?.open();
                 }}
                 />
 

@@ -30,7 +30,6 @@ export const EditProfile_Privacy = (props) => {
 
             <ScrollView
             showsVerticalScrollIndicator={false}
-            style={{ marginTop: -15 }}
             >
                 <View style={{marginTop: 5, paddingTop: 15}}/>
 

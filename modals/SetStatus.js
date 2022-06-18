@@ -1,51 +1,95 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text } from "react-native";
 import axios from "axios";
 
 import {
     Button,
     Cell,
-    Input
+    Input,
+    Icon
 } from "../components";
-import { storage } from "../functions";
+import { storage, EventEmit } from "../functions";
+import ThemeContext from "../config/ThemeContext";
+import { EventRegister } from "react-native-event-listeners";
 
 export const SetStatus = (props) => {
-    const { style, onClose, navigation } = props;
+    const theme = useContext(ThemeContext);
+
+    const { onClose } = props;
     
     const [ text, setText ] = useState("");
-    const [ authData, setAuthData ] = useState({});
     const [ loading, setLoading ] = useState(false);
 
-    useEffect(() => {
-        (async () => {
-            const authorizationData = await storage.getItem("authorization_data");
-            
-            const { data } = await axios.post("/user.signIn", authorizationData);
+    const getStatus = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-            setAuthData(authorizationData);
-            setText(data.user_data.status);
-        })();
+        axios.post("/user.signIn", null, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            setText(data.status);
+        })
+        .catch(({ response: { data } }) => {
+            console.log(data)
+        });
+    };
+
+    useEffect(() => {
+        getStatus();
     }, []);
 
     const setStatus = async () => {
         setLoading(true);
-        await axios.post("/user.setStatus", {
-            ...authData,
-            status: text
-        });
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        onClose();
-        navigation.reset({
-            index: 0,
-            routes: [{name: "profile"}]
+        axios.post("/settings.setStatus", {
+            status: text
+        }, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            EventEmit(["edit_profile.profile", "profile"], {
+                type: "show_snackbar",
+                data: {
+                    text: data.message,
+                    before: (
+                        <Icon
+                        name="checkmark-done"
+                        type="Ionicons"
+                        color="#fff"
+                        size={17}
+                        />
+                    )
+                }
+            });
+        })
+        .catch(({ response: { data } }) => {
+            EventEmit(["edit_profile.profile", "profile"], {
+                type: "show_snackbar",
+                data: {
+                    text: data.message,
+                    before: (
+                        <Icon
+                        name="error-outline"
+                        type="MaterialIcons"
+                        color="#fff"
+                        size={17}
+                        />
+                    )
+                }
+            });
         });
+        
         setLoading(false);
     };
 
     return (
         <View>
             <Cell
-            style={style}
             title="Редактирование статуса"
             subtitle="Максимальное количество символов в статусе - 100, но при этом максимальное число строк - 3"
             disabled
@@ -58,7 +102,6 @@ export const SetStatus = (props) => {
             }}
             >
                 <Input
-                style={style}
                 placeholder="Введите свой статус"
                 multiline
                 height={100}
@@ -73,8 +116,8 @@ export const SetStatus = (props) => {
                     marginTop: -5,
                     textAlign: "right",
                     marginRight: 5,
-                    fontSize: 10 + text.length / 20,
-                    color: style.text_color
+                    fontSize: 10,
+                    color: theme.text_color
                 }}
                 >
                     {text.length} / 100
@@ -83,7 +126,6 @@ export const SetStatus = (props) => {
 
             <View style={{flexDirection: "row"}}>
                 <Button
-                style={style}
                 title="Отмена"
                 type="outline"
                 onPress={() => onClose()}
@@ -94,7 +136,6 @@ export const SetStatus = (props) => {
                 />
 
                 <Button
-                style={style}
                 title="Редактировать статус"
                 upperTitle={false}
                 containerStyle={{

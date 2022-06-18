@@ -17,7 +17,7 @@ import {
 } from "../functions";
 
 import ThemeContext from "../config/ThemeContext";
-import appLogo from "../android/app/src/main/res/mipmap-xhdpi/ic_launcher.png";
+import appLogo from "../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png";
 
 export const Authorization = props => {
     const theme = useContext(ThemeContext);
@@ -51,10 +51,6 @@ export const Authorization = props => {
             storage.setItem("AUTHORIZATION_SIGN", data.sign);
 
             setLoading(false);
-            navigation.reset({
-                index: 0,
-                routes: [{name: "tabs"}]
-            });
             navigate("tabs");
         })
         .catch(({ response: { data } }) => {
@@ -340,8 +336,8 @@ export const Authorization = props => {
                     <Image
                     source={appLogo}
                     style={{
-                        width: 100,
-                        height: 100,
+                        width: 150,
+                        height: 150,
                     }}
                     />  
                 </View> 
@@ -386,6 +382,7 @@ export const Authorization = props => {
                     authType === "signin" ? "#04b84f"
                     : authType === "registration" && theme.accent
                 }
+                textColor="#ffffff"
                 />
             </View>
         </GestureHandlerRootView>

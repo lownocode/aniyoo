@@ -22,12 +22,12 @@ export const Avatar = props => {
             height: size ? size :  50,
             borderRadius: borderRadius,
             overflow: "hidden",
+            borderWidth: 1,
+            borderColor: theme.divider_color,
             ...containerStyle
         },
         image: {
             height: "100%",
-            borderWidth: 1,
-            borderColor: theme.divider_color,
         },
     });
 
@@ -39,7 +39,8 @@ export const Avatar = props => {
             borderRadius={borderRadius}
             onLoadEnd={() => setImageLoadEnd(true)}
             source={{
-                uri: url
+                uri: url,
+                cache: "reload"
             }}
             />
         </View>

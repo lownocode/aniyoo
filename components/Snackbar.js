@@ -14,6 +14,7 @@ export const Snackbar = React.forwardRef((props, ref) => {
         text,
         before,
         after,
+        containerStyle
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -26,7 +27,8 @@ export const Snackbar = React.forwardRef((props, ref) => {
             right: 10,
             borderRadius: 7,
             paddingVertical: 15,
-            paddingHorizontal: 10
+            paddingHorizontal: 10,
+            ...containerStyle
         },
         text: {
             color: "#fff",
@@ -60,7 +62,7 @@ export const Snackbar = React.forwardRef((props, ref) => {
     const show = () => {
         "worklet";
 
-        if(open.value) return hide();
+        // if(open.value) return hide();
 
         open.value = true;
         scrollTo(0);

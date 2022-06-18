@@ -8,7 +8,7 @@ export const Header = (props) => {
     const theme = useContext(ThemeContext);
 
     const {
-        backgroundColor = theme.header_background_color,
+        backgroundColor = theme.header_background,
         backButton,
         title,
         titleStyle,
@@ -58,13 +58,19 @@ export const Header = (props) => {
     const renderTitle = () => {
         return (
             <View>
-                <Text style={[styles.title, titleStyle]}>
+                <Text 
+                style={[styles.title, titleStyle]}
+                numberOfLines={1}
+                >
                     {title}
                 </Text>
 
                 {
                     subtitle &&
-                    <Text style={[styles.subtitle, subtitleStyle]}>
+                    <Text 
+                    style={[styles.subtitle, subtitleStyle]}
+                    numberOfLines={1}
+                    >
                         {subtitle}
                     </Text>
                 }

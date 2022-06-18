@@ -1,6 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, TouchableNativeFeedback } from "react-native";
+import { Text, View, TouchableNativeFeedback, Keyboard } from "react-native";
+import { EventRegister } from "react-native-event-listeners";
 
 import {
     Bookmarks,
@@ -14,108 +15,121 @@ import ThemeContext from "../config/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
-export const Tabs = () => {
+export const Tabs = (props) => {
+    const [ hideTabs, setHideTabs ] = useState(false);
 
-const MyTabBar = ({ state, descriptors, navigation }) => {
-    const theme = useContext(ThemeContext);
-
-    return (
-        <View 
-        style={{
-            backgroundColor: theme.bottom_tabbar.background, 
-            height: 60, 
-            shadowColor: "transparent",
-            flexDirection: "row", 
-            alignItems: "center",
-            borderWidth: 1,
-            borderTopWidth: 1,
-            borderTopColor: theme.divider_color,
-            borderColor: theme.divider_color,
-            position: "absolute",
-            bottom: 13,
-            right: 13,
-            left: 13,
-            borderRadius: 12,
-        }}
-        >
-            {
-                state.routes.map((route, index) => {
-                    const { options } = descriptors[route.key];
-            
-                    const isFocused = state.index === index;
-            
-                    const onPress = () => {
-                        const event = navigation.emit({
-                            type: 'tabPress',
-                            target: route.key,
-                            canPreventDefault: true,
-                        });
-            
-                        if (!isFocused && !event.defaultPrevented) {
-                            navigation.navigate({ name: route.name, merge: true });
-                        }
-                    };
-
-                    return (
-                        <TouchableNativeFeedback 
-                        key={"tab-" + index}
-                        onPress={() => onPress()}
-                        delayPressIn={0}
-                        background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
-                        >
-                            <View  
-                            style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                                borderRadius: 12,
-                                paddingVertical: 7,
-                                backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
-                                flex: 1,
-                                height: 59
-                            }}
-                            >
-                                <Icon
-                                name={isFocused ? options.iconFocus.name : options.iconUnfocus.name}
-                                type={isFocused ? options.iconFocus.type : options.iconUnfocus.type}
-                                size={isFocused ? options.iconFocus.size - 5 : options.iconUnfocus.size}
-                                color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
-                                />
-
-                                {
-                                    isFocused && (
-                                        <Text
-                                        numberOfLines={1}
-                                        style={{
-                                            marginHorizontal: 5,
-                                            color: theme.bottom_tabbar.active_icon_color,
-                                            fontWeight: "500",
-                                            fontSize: 12
-                                        }}
-                                        >
-                                            {
-                                                options.label
-                                            }
-                                        </Text> 
-                                    )
-                                }
-                                
-                            </View>
-                        </TouchableNativeFeedback>
-                    )
-                })
+    useEffect(() => {
+        const eventListener = EventRegister.addEventListener("changeTabbar", data => {
+            if(data.type === "hide") {
+                return setHideTabs(true);
             }
-        </View>
-    )
-};
+
+            else if(data.type === "show") {
+                return setHideTabs(false);
+            }
+        });
+
+        return () => {
+            EventRegister.removeEventListener(eventListener);
+        };
+    }, []);
+
+    const MyTabBar = ({ state, descriptors, navigation }) => {
+        const theme = useContext(ThemeContext);
+
+        return (
+            <View 
+            style={{
+                backgroundColor: theme.bottom_tabbar.background, 
+                height: 60, 
+                shadowColor: "transparent",
+                flexDirection: "row", 
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: theme.bottom_tabbar.border_color,
+                position: "absolute",
+                bottom: 13,
+                right: 13,
+                left: 13,
+                borderRadius: 12,
+            }}
+            >
+                {
+                    state.routes.map((route, index) => {
+                        const { options } = descriptors[route.key];
+                
+                        const isFocused = state.index === index;
+                
+                        const onPress = () => {
+                            const event = navigation.emit({
+                                type: 'tabPress',
+                                target: route.key,
+                                canPreventDefault: true,
+                            });
+                
+                            if (!isFocused && !event.defaultPrevented) {
+                                navigation.navigate({ name: route.name, merge: true });
+                            }
+                        };
+
+                        return (
+                            <TouchableNativeFeedback 
+                            key={"tab-" + index}
+                            onPress={() => onPress()}
+                            delayPressIn={0}
+                            background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
+                            >
+                                <View  
+                                style={{
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 12,
+                                    paddingVertical: 7,
+                                    backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
+                                    flex: 1,
+                                    height: 59
+                                }}
+                                >
+                                    <Icon
+                                    name={isFocused ? options.iconFocus.name : options.iconUnfocus.name}
+                                    type={isFocused ? options.iconFocus.type : options.iconUnfocus.type}
+                                    size={isFocused ? options.iconFocus.size - 5 : options.iconUnfocus.size}
+                                    color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
+                                    />
+
+                                    {
+                                        isFocused && (
+                                            <Text
+                                            numberOfLines={1}
+                                            style={{
+                                                marginHorizontal: 5,
+                                                color: theme.bottom_tabbar.active_icon_color,
+                                                fontWeight: "500",
+                                                fontSize: 12
+                                            }}
+                                            >
+                                                {
+                                                    options.label
+                                                }
+                                            </Text> 
+                                        )
+                                    }
+                                    
+                                </View>
+                            </TouchableNativeFeedback>
+                        )
+                    })
+                }
+            </View>
+        )
+    };
 
     return (
         <Tab.Navigator
         screenOptions={{
-            tabBarAllowFontScaling: true,
             headerShown: false,
-            tabBarHideOnKeyboard: true,
         }}
-        tabBar={props => <MyTabBar {...props} />}
+        tabBar={props => hideTabs ? null : <MyTabBar {...props} />}
         >
             <Tab.Screen
             name="home"

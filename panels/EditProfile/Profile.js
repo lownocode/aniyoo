@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { ScrollView, View, ActivityIndicator } from "react-native";
+import { ScrollView, View, ActivityIndicator, StyleSheet, Dimensions } from "react-native";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
-import ImgToBase64 from 'react-native-image-base64';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Modalize } from "react-native-modalize";
+import { EventRegister } from "react-native-event-listeners";
 
 import ThemeContext from "../../config/ThemeContext";
 
@@ -11,11 +12,9 @@ import {
     Header,
     Cell,
     Icon,
-    BottomModal,
     Snackbar
 } from "../../components";
 import {
-    ChangeNickname,
     SetStatus
 } from "../../modals";
 
@@ -27,67 +26,86 @@ export const EditProfile_Profile = (props) => {
     const { 
         navigation: {
             goBack,
-            reset
-        }
+            reset,
+            navigate
+        },
     } = props;
 
     const [ modalContent, setModalContent ] = useState(null);
-    const [ authData, setAuthData ] = useState({});
     const [ snackbar, setSnackbar ] = useState(null);
 
     const modalRef = useRef();
     const snackbarRef = useRef();
 
     useEffect(() => {
-        (async () => {
-            const authorizationData = await storage.getItem("authorization_data");
-            setAuthData(authorizationData);
-        })();
+        const eventListener = EventRegister.addEventListener("edit_profile.profile", (event) => {
+            if(event.type === "show_snackbar") {
+                setSnackbar({ 
+                    text: event.data.text,
+                    before: event.data.before
+                });
+
+                snackbarRef?.current?.show();
+                sleep(5).then(() => snackbarRef?.current?.hide());
+            }
+        });
+
+        return () => {
+            EventRegister.removeEventListener(eventListener);
+        };
     }, []);
 
     const changePhoto = async () => {
-        const pickImage = await launchImageLibrary({
+        launchImageLibrary({
             mediaType: "photo",
-        });
+        })
+        .then(async (image) => {
+            const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        if(pickImage.didCancel) return;
-        if(pickImage.assets[0].fileSize > 5242880) {
+            const formData = new FormData();
+            formData.append("avatar", {
+                uri: image.assets[0].uri,
+                type: image.assets[0].type,
+                name: image.assets[0].fileName
+            });
+
             setSnackbar({ 
-                text: "Максимальный размер изображения - 5MB",
+                text: "Загрузка картинки на сервер, подождите немного...",
                 before: (
-                    <Icon
-                    name="md-images-outline"
-                    type="Ionicons"
-                    color="#fff"
-                    size={17}
-                    />
+                    <ActivityIndicator size={17} color="#fff"/>
                 )
             });
-
             snackbarRef?.current?.show();
-            sleep(5).then(() => snackbarRef?.current?.hide());
 
-            return;
-        }
-
-        setSnackbar({ 
-            text: "Загрузка картинки на сервер, подождите немного...",
-            before: (
-                <ActivityIndicator size={17} color="#fff"/>
-            )
-        });
-        snackbarRef?.current?.show();
-
-        ImgToBase64.getBase64String(pickImage.assets[0].uri)
-        .then(async (base64String) => {
-            const { data } = await axios.post("/user.updateAvatar", {
-                ...authData,
-                picture: base64String
-            });
-
-            if(!data.success) {
+            axios({
+                method: "post",
+                url: "/settings.updateAvatar",
+                data: formData,
+                headers: { 
+                    "Content-Type": `multipart/form-data`,
+                    "Authorization": sign,
+                    Accept: 'application/json',
+                },
+            })
+            .then(() => {
                 setSnackbar({ 
-                    text: data.message,
+                    text: "Аватарка успешно загружена",
+                    before: (
+                        <Icon
+                        name="checkmark-done"
+                        type="Ionicons"
+                        color="#fff"
+                        size={17}
+                        />
+                    )
+                });
+
+                snackbarRef?.current?.show();
+                sleep(5).then(() => snackbarRef?.current?.close());
+            })
+            .catch(({ response: { data } }) => {
+                setSnackbar({ 
+                    text: data?.message,
                     before: (
                         <Icon
                         name="error-outline"
@@ -98,32 +116,25 @@ export const EditProfile_Profile = (props) => {
                     )
                 });
 
-                sleep(5).then(() => snackbarRef?.current?.hide());
-
-                return;
-            }
-
-            reset({
-                index: 0,
-                routes: [{name: "profile"}]
+                snackbarRef?.current?.show();
+                sleep(5).then(() => snackbarRef?.current?.close());
             });
-
-            setSnackbar({ 
-                text: "Успешно! Аватарка профиля обновлена",
-                before: (
-                    <Icon
-                    name="checkmark-done"
-                    type="Ionicons"
-                    color="#fff"
-                    size={17}
-                    />
-                )
-            });
-
-            sleep(5).then(() => snackbarRef?.current?.hide());
-        })
-        .catch(err => console.log(err));
+        });
     };
+
+    const styles = StyleSheet.create({
+        modalContainer: {
+            left: 10,
+            width: Dimensions.get("window").width - 20,
+            bottom: 10,
+            borderRadius: 15,
+            backgroundColor: theme.bottom_modal.background,
+            borderColor: theme.bottom_modal.border,
+            borderWidth: 0.5,
+            overflow: "hidden",
+            borderRadius: 15,
+        },
+    });
 
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
@@ -135,17 +146,20 @@ export const EditProfile_Profile = (props) => {
             backButton
             />
 
+            <Modalize
+            ref={modalRef}
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            modalStyle={styles.modalContainer}
+            adjustToContentHeight
+            >
+                {modalContent}
+            </Modalize>
+
             <Snackbar
             ref={snackbarRef}
             text={snackbar?.text}
             before={snackbar?.before}
             />
-
-            <BottomModal
-            ref={modalRef}
-            >
-                {modalContent}
-            </BottomModal>
 
             <ScrollView
             showsVerticalScrollIndicator={false}
@@ -202,10 +216,7 @@ export const EditProfile_Profile = (props) => {
                     </View>
                 }
                 subtitle="Не нравится текущий никнейм? Просто смените его!"
-                onPress={() => {
-                    setModalContent(<ChangeNickname reset={reset} onClose={() => modalRef?.current?.hide()}/>);
-                    modalRef?.current?.show();
-                }}
+                onPress={() => navigate("edit_profile.change_nickname")}
                 />
 
                 <View style={{marginTop: 5}} />
@@ -233,8 +244,8 @@ export const EditProfile_Profile = (props) => {
                 }
                 subtitle="Выразите свои мысли..."
                 onPress={() => {
-                    setModalContent(<SetStatus reset={reset} onClose={() => modalRef?.current?.hide()}/>);
-                    modalRef?.current?.show();
+                    setModalContent(<SetStatus onClose={() => modalRef?.current?.close()}/>);
+                    modalRef?.current?.open();
                 }}
                 />
             </ScrollView>

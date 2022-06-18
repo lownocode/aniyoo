@@ -8,7 +8,6 @@ import {
     Header,
     Cell,
     Icon,
-    BottomModal,
     Button
 } from "../../components";
 import { EmailConfirmation } from "../../modals";
@@ -95,12 +94,6 @@ export const EditProfile_Security = (props) => {
             backButtonOnPress={() => goBack()}
             backButton
             />
-
-            <BottomModal
-            ref={modalRef}
-            >
-                {modalContent}
-            </BottomModal>
 
             <ScrollView
             showsVerticalScrollIndicator={false}

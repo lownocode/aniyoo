@@ -14,7 +14,8 @@ const theme = {
         //components
         press_icon_background: "rgba(0, 0, 0, 0.1)",
         snackbar_background: "#0077ff",
-        header_background: "#f0f6ff",
+        header_background: "#ffffff",
+        profile_header_background: "#f0f6ff",
         icon_color: "#757575",
         cell: {
             title_color: "#000000",
@@ -50,7 +51,7 @@ const theme = {
         input: {
             background: "#21212110",
             border: "#d9d9d9",
-            placeholder: "#gray"
+            placeholder: "gray"
         },
         placeholder: {
             title: "#000000",
@@ -59,7 +60,8 @@ const theme = {
         bottom_tabbar: {
             background: "#ffffff",
             active_tab_background: palette.accent + "19",
-            active_icon_color: palette.accent
+            active_icon_color: palette.accent,
+            border_color: palette.accent + "29"
         },
         switch: {
             track_off: "#d4d4d4",
@@ -80,7 +82,8 @@ const theme = {
         //components
         press_icon_background: "rgba(255, 255, 255, 0.1)",
         snackbar_background: "#383838",
-        header_background: "#1a1a1a",
+        header_background: "#141414",
+        profile_header_background: "#1a1a1a",
         icon_color: "#969696",
         cell: {
             title_color: "#ffffff",
@@ -114,9 +117,9 @@ const theme = {
             },
         },
         input: {
-            background: "#21212130",
+            background: "#212121",
             border: "#2A2A2A",
-            placeholder: "#gray"
+            placeholder: "gray"
         },
         placeholder: {
             title: "#ffffff",
@@ -125,7 +128,8 @@ const theme = {
         bottom_tabbar: {
             background: "#212121",
             active_tab_background: "rgba(255, 255, 255, .19)",
-            active_icon_color: "#ffffff"
+            active_icon_color: "#ffffff",
+            border_color: "#2A2A2A"
         },
         switch: {
             track_off: "gray",

@@ -3,9 +3,21 @@ import { View, Image, Text, ScrollView, TouchableNativeFeedback } from "react-na
 import LinearGradient from "react-native-linear-gradient";
 
 import ThemeContext from "../config/ThemeContext";
+import { declOfNum } from "../functions";
 
 import { Cell, Rating, Icon } from ".";
 import { Placeholder } from "./Placeholder";
+
+const checkEpisodesStatus = (total, aired) => {
+    if(typeof total !== "number" || Number.isNaN(total) || typeof aired !== "number" || Number.isNaN(aired)) {
+        return "? серий"
+    }
+    else if(total === aired) {
+        return `${total} ${declOfNum(total, [`серия`, `серии`, `серий`])}`
+    }
+
+    return `${aired} из ${total} серий`;
+};
 
 export const DiscussedTodayAnimeList = (props) => {
     const theme = useContext(ThemeContext);
@@ -353,4 +365,143 @@ export const HorizontalAnimeList = (props) => {
             }
         </ScrollView>
     )
+};
+
+export const FoundedAnimeList = (props) => {
+    const theme = useContext(ThemeContext);
+
+    const {
+        animes
+    } = props;
+
+    return (
+        <View>
+            {
+                animes.map((item, index) => {
+                    return (
+                        <Cell
+                        key={"anime_" + index}
+                        title={item?.title}
+                        centered={false}
+                        maxTitleLines={2}
+                        before={
+                            <Image
+                            resizeMethod="resize"
+                            source={{
+                                uri: item?.poster
+                            }}
+                            style={{
+                                width: 100,
+                                height: 145,
+                                resizeMode: "cover",
+                                borderRadius: 5,
+                                borderColor: theme.divider_color,
+                                borderWidth: 0.5
+                            }}
+                            />
+                        }
+                        subtitle={
+                            <View>
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    flexWrap: "wrap"
+                                }}
+                                >
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginTop: 5,
+                                        marginRight: 10
+                                    }}
+                                    >
+                                        {
+                                            `${item.season || "?"} сезон`
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {
+                                            checkEpisodesStatus(item.episodesTotal, item.episodesAired)
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {
+                                            item.type === "anime-serial" && "Сериал"
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {
+                                            item.status === "released" ? "Вышел" :
+                                            item.status === "ongoing" ? "Выходит" : "Неизвестно"
+                                        }
+                                    </Text>
+                                </View>
+
+                                <Text
+                                numberOfLines={3}
+                                style={{
+                                    color: theme.cell.subtitle_color
+                                }}
+                                >
+                                    {
+                                        item.description ? item.description : "Описание не указано"
+                                    }
+                                </Text>
+                            </View>
+                        }
+                        />
+                    )
+                })     
+            }
+        </View>
+    );
 };

@@ -24,7 +24,15 @@
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+            <!-- <action android:name="com.google.firebase.MESSAGING_EVENT" /> -->
         </intent-filter>
+
+        <!-- <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@mipmap/ic_launch_screen" />
+        <meta-data
+        android:name="com.google.firebase.messaging.default_notification_color"
+        android:resource="@color/notification_icon_color" /> -->
       </activity>
     </application>
 </manifest>

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "746738249066",
+    "project_id": "aniyoo",
+    "storage_bucket": "aniyoo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746738249066:android:5efc0116808568abf20913",
+        "android_client_info": {
+          "package_name": "com.quickrise.aniyoo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "746738249066-7cjjp5ukf6hm6c0gcpjis8mr97oknt3l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzQhtAUcazg3-Ol01BwtpUOc9INxPCTZE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "746738249066-7cjjp5ukf6hm6c0gcpjis8mr97oknt3l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
