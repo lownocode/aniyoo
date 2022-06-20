@@ -110,13 +110,12 @@ export const Profile = props => {
         return willFocusSubscription;
     }, []);
 
-    const statisticsChartValues = [0,0,0,0,0
-        // userData.watch.length,
-        // userData.watched.length,
-        // userData.rewatching.length,
-        // userData.in_plans.length,
-        // userData.postponed.length,
-        // userData.abandoned.length
+    const statisticsChartValues = [
+        userData?.list?.watching || 0,
+        userData?.list?.completed || 0,
+        userData?.list?.planned || 0,
+        userData?.list?.postponed || 0,
+        userData?.list?.dropped || 0,
     ];
     const statisticsChartColors = ['#34c759','#5856d6','#af52de','#ff9500', '#ff453a'];
 
@@ -828,6 +827,8 @@ export const Profile = props => {
                 {userInfoRender()}
                 {statisticsRender()}      
             </ScrollView>
+
+            <View style={{ marginBottom: 60 }}/>
         </GestureHandlerRootView>
     )
 };

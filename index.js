@@ -5,7 +5,8 @@ import App from "./App";
 import { REQUEST_DOMAIN } from "./variables";
 
 LogBox.ignoreLogs([
-    "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!"
+    "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
+    "VirtualizedLists should never be nested"
 ]);
 
 axios.defaults.baseURL = REQUEST_DOMAIN;

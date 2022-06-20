@@ -6,7 +6,8 @@ import {
     StatusBar,
     Text,
     Keyboard,
-    ActivityIndicator
+    ActivityIndicator,
+    BackHandler
 } from "react-native";
 
 import { EventRegister } from "react-native-event-listeners";
@@ -25,8 +26,10 @@ import {
 
 import ThemeContext from "../config/ThemeContext";
 
-export const Search = () => {
+export const Search = (props) => {
     const theme = useContext(ThemeContext);
+
+    const { navigation } = props;
 
     const [ searchTitle, setSearchTitle ] = useState("");
     const [ searchMode, setSearchMode ] = useState(false);
@@ -42,6 +45,11 @@ export const Search = () => {
     };
 
     useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', () => {
+            setSearchTitle("");
+            EventRegister.emit("changeTabbar", { type: "show" });
+        });
+
         keyboardListeners();
     }, []);
 
@@ -63,7 +71,7 @@ export const Search = () => {
         setSearchTitle(title);
 
         axios.post("/anime.search", {
-            title: searchTitle,
+            title: title,
             order: {
                 season: 0
             }
@@ -79,6 +87,24 @@ export const Search = () => {
             console.log(JSON.stringify(response, null, "\t"))
         })
         .finally(() => setLoadingSearchAnimes(false));
+    };
+
+    const loadMoreAnimes = () => {
+        axios.post("/anime.search", {
+            title: searchTitle,
+            order: {
+                season: 0
+            },
+            offset: foundedAnimes.length,
+            limit: 15
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(({ data }) => {
+            setFoundedAnimes(foundedAnimes.concat(data));
+        });
     };
 
     return (
@@ -107,7 +133,7 @@ export const Search = () => {
                         }
                         onPress={() => {
                             Keyboard.dismiss();
-                            searchAnime("");
+                            setFoundedAnimes([]);
                             setSearchMode(false);
                             EventRegister.emit("changeTabbar", { type: "show" });
                         }}
@@ -195,21 +221,11 @@ export const Search = () => {
                             )
                         ) 
                     ) : (
-                        <ScrollView>
-                            <FoundedAnimeList
-                            animes={foundedAnimes}
-                            />
-
-                            <Text
-                            style={{
-                                color: theme.text_secondary_color,
-                                textAlign: "center",
-                                marginVertical: 15
-                            }}
-                            >
-                                Всего найдено {foundedAnimes.length} аниме
-                            </Text>
-                        </ScrollView>
+                        <FoundedAnimeList
+                        animes={foundedAnimes}
+                        loadMoreAnimes={loadMoreAnimes}
+                        navigation={navigation}
+                        />
                     )
                 )
             }

@@ -11,3 +11,6 @@ export * from "./EditProfile/ChangeNickname";
 
 export * from "./Settings/Another";
 export * from "./Settings/Application";
+
+export * from "./Anime";
+export * from "./Anime/LinkedAnime";

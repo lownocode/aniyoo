@@ -45,8 +45,8 @@ export const Button = (props) => {
             : theme.button[type][`background`],
             borderWidth: type === 'outline' ? 1 : 0,
             borderColor: backgroundColor ? backgroundColor : theme.button.outline.background,
-            paddingLeft: size === "l" ? 20 : 10,
-            paddingRight: size === "l" ? 20 : 10,
+            paddingLeft: size === "l" ? 20 : 15,
+            paddingRight: size === "l" ? 20 : 15,
             alignItems: 
             align === "center" ? "center" : 
             align === "left" ? "flex-start" : 
@@ -60,7 +60,7 @@ export const Button = (props) => {
             fontWeight: "600",
             letterSpacing: 0.5,
             color: textColor ? textColor : theme.button[type][`text_color`],
-            marginLeft: before && 5,
+            marginLeft: before && title ? 8 : 0,
             ...textStyle
         },
         textContainer: {
@@ -112,16 +112,20 @@ export const Button = (props) => {
                                     before
                                 }
 
-                                <Text 
-                                style={localStyles.text}
-                                numberOfLines={1}
-                                >
-                                    {
-                                        upperTitle ? 
-                                        String(title).toLocaleUpperCase() :
-                                        title
-                                    }
-                                </Text>
+                                {
+                                    title ? (
+                                        <Text 
+                                        style={localStyles.text}
+                                        numberOfLines={1}
+                                        >
+                                            {
+                                                upperTitle ? 
+                                                String(title).toLocaleUpperCase() :
+                                                title
+                                            }
+                                        </Text>
+                                    ) : null
+                                }
 
                                 {
                                     after

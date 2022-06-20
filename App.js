@@ -29,7 +29,9 @@ import {
   EditProfile_ChangeNickname,
   Settings_Another,
   Settings_Application,
-  EditSocialNetworks
+  EditSocialNetworks,
+  Anime,
+  LinkedAnime
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -200,6 +202,18 @@ export default App = () => {
               name="edit_social_networks" 
               options={{ animation: "none" }}
               component={EditSocialNetworks}
+              />
+
+              <Stack.Screen 
+              name="anime" 
+              options={{ animation: "none" }}
+              component={Anime}
+              />
+
+              <Stack.Screen 
+              name="linked_anime" 
+              options={{ animation: "none" }}
+              component={LinkedAnime}
               />
             </Stack.Navigator>
           ) : null

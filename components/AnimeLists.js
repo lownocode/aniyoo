@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { View, Image, Text, ScrollView, TouchableNativeFeedback } from "react-native";
+import React, { useContext, useState } from "react";
+import { View, Image, Text, ScrollView, TouchableNativeFeedback, FlatList } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 import ThemeContext from "../config/ThemeContext";
@@ -8,12 +8,18 @@ import { declOfNum } from "../functions";
 import { Cell, Rating, Icon } from ".";
 import { Placeholder } from "./Placeholder";
 
-const checkEpisodesStatus = (total, aired) => {
+const checkEpisodesStatus = (total, aired, status) => {
     if(typeof total !== "number" || Number.isNaN(total) || typeof aired !== "number" || Number.isNaN(aired)) {
         return "? серий"
     }
     else if(total === aired) {
         return `${total} ${declOfNum(total, [`серия`, `серии`, `серий`])}`
+    }
+    else if(total && !aired) {
+        return `${total} ${declOfNum(total, [`серия`, `серии`, `серий`])}`
+    }
+    else if(!total && aired && status === "ongoing") {
+        return `${aired} из ? серий`
     }
 
     return `${aired} из ${total} серий`;
@@ -371,137 +377,241 @@ export const FoundedAnimeList = (props) => {
     const theme = useContext(ThemeContext);
 
     const {
-        animes
+        animes,
+        loadMoreAnimes,
+        navigation
     } = props;
 
-    return (
-        <View>
-            {
-                animes.map((item, index) => {
-                    return (
-                        <Cell
-                        key={"anime_" + index}
-                        title={item?.title}
-                        centered={false}
-                        maxTitleLines={2}
-                        before={
-                            <Image
-                            resizeMethod="resize"
-                            source={{
-                                uri: item?.poster
-                            }}
-                            style={{
-                                width: 100,
-                                height: 145,
-                                resizeMode: "cover",
-                                borderRadius: 5,
-                                borderColor: theme.divider_color,
-                                borderWidth: 0.5
-                            }}
-                            />
+    const renderList = ({ item, index }) => {
+        return (
+            <Cell
+            key={"anime_" + index}
+            title={
+                <View>
+                    <Text
+                    numberOfLines={2}
+                    style={{
+                        color: theme.cell.title_color,
+                        fontWeight: "500",
+                        fontSize: 16,
+                    }}
+                    >
+                        {
+                            item.isFavorite && (
+                                <Icon
+                                type="Ionicons"
+                                name="bookmarks"
+                                color="#e2b227"
+                                size={17}
+                                />
+                            )
+                        } {
+                            item?.title
                         }
-                        subtitle={
-                            <View>
-                                <View
-                                style={{
-                                    flexDirection: "row",
-                                    flexWrap: "wrap"
-                                }}
-                                >
-                                    <Text
-                                    style={{
-                                        color: theme.text_color,
-                                        fontSize: 12,
-                                        borderColor: theme.divider_color,
-                                        backgroundColor: theme.divider_color + "98",
-                                        borderWidth: 1,
-                                        paddingHorizontal: 5,
-                                        paddingVertical: 1,
-                                        borderRadius: 5,
-                                        marginTop: 5,
-                                        marginRight: 10
-                                    }}
-                                    >
-                                        {
-                                            `${item.season || "?"} сезон`
-                                        }
-                                    </Text>
+                    </Text>
+                </View>
+            }
+            centered={false}
+            maxTitleLines={2}
+            before={
+                <View
+                style={{
+                    backgroundColor: theme.divider_color,
+                    borderRadius: 7,
+                    position: "relative",
+                    overflow: "hidden",
+                }}
+                >
+                    <Image
+                    resizeMethod="resize"
+                    source={{
+                        uri: item?.poster
+                    }}
+                    style={{
+                        width: 100,
+                        height: 145,
+                        resizeMode: "cover",
+                        borderRadius: 7,
+                        borderColor: theme.divider_color,
+                        borderWidth: 0.5
+                    }}
+                    />
 
-                                    <Text
-                                    style={{
-                                        color: theme.text_color,
-                                        fontSize: 12,
-                                        borderColor: theme.divider_color,
-                                        backgroundColor: theme.divider_color + "98",
-                                        borderWidth: 1,
-                                        paddingHorizontal: 5,
-                                        paddingVertical: 1,
-                                        borderRadius: 5,
-                                        marginRight: 10,
-                                        marginTop: 5,
-                                    }}
-                                    >
-                                        {
-                                            checkEpisodesStatus(item.episodesTotal, item.episodesAired)
-                                        }
-                                    </Text>
-
-                                    <Text
-                                    style={{
-                                        color: theme.text_color,
-                                        fontSize: 12,
-                                        borderColor: theme.divider_color,
-                                        backgroundColor: theme.divider_color + "98",
-                                        borderWidth: 1,
-                                        paddingHorizontal: 5,
-                                        paddingVertical: 1,
-                                        borderRadius: 5,
-                                        marginRight: 10,
-                                        marginTop: 5,
-                                    }}
-                                    >
-                                        {
-                                            item.type === "anime-serial" && "Сериал"
-                                        }
-                                    </Text>
-
-                                    <Text
-                                    style={{
-                                        color: theme.text_color,
-                                        fontSize: 12,
-                                        borderColor: theme.divider_color,
-                                        backgroundColor: theme.divider_color + "98",
-                                        borderWidth: 1,
-                                        paddingHorizontal: 5,
-                                        paddingVertical: 1,
-                                        borderRadius: 5,
-                                        marginRight: 10,
-                                        marginTop: 5,
-                                    }}
-                                    >
-                                        {
-                                            item.status === "released" ? "Вышел" :
-                                            item.status === "ongoing" ? "Выходит" : "Неизвестно"
-                                        }
-                                    </Text>
-                                </View>
-
+                    {
+                        item.inList !== "none" && (
+                            <Text
+                            numberOfLines={1}
+                            style={{
+                                backgroundColor: (
+                                    item.inList === "watching" ? "#34c75999" :
+                                    item.inList === "completed" ? "#5856d699" :
+                                    item.inList === "planned" ? "#af52de99" :
+                                    item.inList === "postponed" ? "#ff950099" :
+                                    item.inList === "dropped" ? "#ff453a99" : null
+                                ),
+                                position: "absolute",
+                                bottom: 0,
+                                width: "100%",
+                                textAlign: "center",
+                                color: "#fff",
+                                fontSize: 12,
+                                paddingVertical: 1,
+                                paddingHorizontal: 3,
+                                fontWeight: "500"
+                            }}
+                            >
+                                {
+                                    item.inList === "watching" ? "Смотрю" :
+                                    item.inList === "completed" ? "Просмотрено" :
+                                    item.inList === "planned" ? "В планах" :
+                                    item.inList === "postponed" ? "Отложено" :
+                                    item.inList === "dropped" ? "Брошено" : "Неизвестно"
+                                }
+                            </Text>
+                        )
+                    }
+                </View>
+            }
+            subtitle={
+                <View>
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                    }}
+                    >
+                        {
+                            item.type === "anime-serial" && item.season ? (
                                 <Text
-                                numberOfLines={3}
                                 style={{
-                                    color: theme.cell.subtitle_color
+                                    color: theme.text_color,
+                                    fontSize: 12,
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginTop: 5,
+                                    marginRight: 10
                                 }}
                                 >
                                     {
-                                        item.description ? item.description : "Описание не указано"
+                                        `${item.season || "?"} сезон`
                                     }
                                 </Text>
-                            </View>
+                            )  : null
                         }
-                        />
-                    )
-                })     
+
+                        {
+                            item.type === "anime-serial" && (
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: 12,
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginRight: 10,
+                                    marginTop: 5,
+                                }}
+                                >
+                                    {
+                                        checkEpisodesStatus(item.episodesTotal, item.episodesAired, item.status)
+                                    }
+                                </Text>
+                            )
+                        }
+
+                        <Text
+                        style={{
+                            color: theme.text_color,
+                            fontSize: 12,
+                            borderColor: theme.divider_color,
+                            backgroundColor: theme.divider_color + "98",
+                            borderWidth: 1,
+                            paddingHorizontal: 5,
+                            paddingVertical: 1,
+                            borderRadius: 5,
+                            marginRight: 10,
+                            marginTop: 5,
+                        }}
+                        >
+                            {
+                                item.other.kind === "tv" ? "Сериал" :
+                                item.other.kind === "ona" ? "ONA" :
+                                item.other.kind === "ova" ? "OVA" :
+                                item.other.kind === "special" ? "Спешл" :
+                                item.other.kind === "movie" ? "Фильм" : "Неизвестно"
+                            }, {
+                                item.status === "released" ? "вышел" :
+                                item.status === "ongoing" ? "выходит" : "неизвестно"
+                            }
+                        </Text>
+
+                        <Text
+                        style={{
+                            color: theme.text_color,
+                            fontSize: 12,
+                            borderColor: theme.divider_color,
+                            backgroundColor: theme.divider_color + "98",
+                            borderWidth: 1,
+                            paddingHorizontal: 5,
+                            paddingVertical: 1,
+                            borderRadius: 5,
+                            marginRight: 10,
+                            marginTop: 5,
+                        }}
+                        >
+                            {item.other.year} год
+                        </Text>
+                    </View>
+
+                    <Text
+                    numberOfLines={3}
+                    style={{
+                        color: theme.cell.subtitle_color,
+                        fontStyle: item.description ? "normal" : "italic"
+                    }}
+                    >
+                        {
+                            item.description ? item.description : "Описание не указано"
+                        }
+                    </Text>
+                </View>
             }
-        </View>
+            onPress={() => navigation.navigate("anime", { animeData: item })}
+            />
+        )
+    };
+
+    const renderFooter = () => {
+        return (
+            <Text
+            style={{
+                color: theme.text_secondary_color,
+                textAlign: "center",
+                marginHorizontal: 10,
+                marginBottom: 15
+            }}
+            >
+                Всего найдено {animes.length} аниме
+            </Text>
+        )
+    };
+
+    return (
+        <FlatList
+        data={animes}
+        renderItem={renderList}
+        keyExtractor={(item, index) => index.toString()}
+        onEndReached={loadMoreAnimes}
+        scrollEnabled
+        // onEndReachedThreshold={0}
+        ListFooterComponent={renderFooter}
+        />
     );
 };

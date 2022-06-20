@@ -11,7 +11,9 @@ const theme = {
         text_color: "#000000",
         text_secondary_color: "#666666",
         refresh_control_background: "#ffffff",
+
         //components
+
         press_icon_background: "rgba(0, 0, 0, 0.1)",
         snackbar_background: "#0077ff",
         header_background: "#ffffff",
@@ -68,6 +70,21 @@ const theme = {
             track_on: palette.accent + "50",
             thumb: palette.accent,
             thumb_light: "#f0f0f0"
+        },
+
+        //panels
+
+        anime: {
+            back_button_background: "rgba(0, 0, 0, 0.1)",
+            button_start_watch_background: "#546161",
+            button_start_watch_text_color: "#fff",
+            //lists
+            watching: "#34c759",
+            completed: "#5856d6",
+            planned: "#af52de",
+            postponed: "#ff9500",
+            dropped: "#ff453a",
+            none: "#757575"
         }
     },
 
@@ -79,7 +96,9 @@ const theme = {
         text_color: "#ffffff",
         text_secondary_color: "#b8b8b8",
         refresh_control_background: "#1c1c1c",
+
         //components
+
         press_icon_background: "rgba(255, 255, 255, 0.1)",
         snackbar_background: "#383838",
         header_background: "#141414",
@@ -136,6 +155,21 @@ const theme = {
             track_on: "gray",
             thumb: "#ffffff",
             thumb_light: "#ffffff"
+        },
+
+        //panels
+
+        anime: {
+            back_button_background: "#1f1f1f",
+            button_start_watch_background: "#546161",
+            button_start_watch_text_color: "#fff",
+            //lists
+            watching: "#34c759",
+            completed: "#5856d6",
+            planned: "#af52de",
+            postponed: "#ff9500",
+            dropped: "#ff453a",
+            none: "#969696"
         }
     }
 };
