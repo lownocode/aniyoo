@@ -42,7 +42,7 @@ export const LinkedAnime = (props) => {
                     }
                     
                     navigation.reset({
-                        index: 1,
+                        // index: 1,
                         routes: [
                             { 
                                 name: "anime",

@@ -23,7 +23,8 @@ export const Cell = (props) => {
         subtitleStyle,
         contentStyle,
         additionalContentTop = null,
-        additionalContentBottom = null
+        additionalContentBottom = null,
+        centeredAfter
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -63,7 +64,7 @@ export const Cell = (props) => {
             ...beforeStyle
         },
         after: {
-            justifyContent: "center",
+            justifyContent: centered || centeredAfter ? "center" : "flex-start",
         }
     });
 

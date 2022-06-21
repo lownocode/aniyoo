@@ -79,13 +79,10 @@ export const Authorization = props => {
             nickname: nickname
         })
         .then(({ data }) => {
+            console.log(JSON.stringify(data))
             storage.setItem("AUTHORIZATION_SIGN", data.sign);
 
             setLoading(false);
-            navigation.reset({
-                index: 0,
-                routes: [{name: "tabs"}]
-            });
             navigate("tabs");
         })
         .catch(({ response: { data } }) => {

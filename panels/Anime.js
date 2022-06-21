@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { 
     View, 
     ScrollView, 
@@ -7,7 +7,10 @@ import {
     TouchableNativeFeedback,
     Dimensions,
     Text,
-    StyleSheet
+    StyleSheet,
+    ToastAndroid,
+    RefreshControl,
+    BackHandler
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -28,9 +31,12 @@ import {
     Button,
     Divider,
     Cell,
-    ContentHeader
+    ContentHeader,
+    Avatar,
+    PressIcon
 } from "../components";
 import { AnimeSetList } from "../modals";
+import { FLAGS } from "../variables";
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
@@ -48,11 +54,15 @@ export const Anime = (props) => {
     const scrollViewRef = useRef();
     const modalRef = useRef();
 
+    const [ refreshing, setRefreshing ] = useState(false);
     const [ animeData, setAnimeData ] = useState(route.params?.animeData);
     const [ hideDescription, setHideDescription ] = useState(true);
     const [ modalContent, setModalContent ] = useState(null);
+    const [ linkedAnimes, setLinkedAnimes ] = useState([]);
+    const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
 
     const getAnimeData = async (id) => {
+        setRefreshing(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.get", {
@@ -64,14 +74,40 @@ export const Anime = (props) => {
         })
         .then(({ data }) => {
             setAnimeData(data);
+            setLinkedAnimes(data?.linked?.sort(sortLinkedAnimes)?.slice(0, 3));
+            console.log(JSON.stringify(data, null, "\t"))
+
+            setRefreshing(false);
         })
         .catch(({ response: { data}  }) => {
             console.log("err\n", data);
         });
     };
 
-    useEffect(() => {
+    const setIsFavorite = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/anime.setStatus", {
+            animeId: animeData?.id,
+            status: animeData?.isFavorite ? "noFavorite" : "favorite"
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(({ data }) => {
+            getAnimeData();
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+        });
+    };
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
         getAnimeData();
+    }, []);
+
+    useEffect(() => {
+        onRefresh();
 
         const willFocusSubscription = navigation.addListener('focus', () => {
             getAnimeData();
@@ -107,7 +143,6 @@ export const Anime = (props) => {
                 paddingVertical: 2,
                 borderRadius: 100,
                 marginLeft: 7,
-                marginRight: 7,
                 marginBottom: 7
             }}
             key={"genre-" + index}
@@ -220,6 +255,13 @@ export const Anime = (props) => {
         )
     };
 
+    const sortLinkedAnimes = (a, b) => {
+        if(b.year > a.year) return -1;
+        if(b.year < a.year) return 1;
+
+        return 0;
+    };
+
     const renderLinked = (item, index) => {
         if(index > 2) return;
 
@@ -271,39 +313,43 @@ export const Anime = (props) => {
                         flexWrap: "wrap"
                     }}
                     >
-                        <Text
-                        style={{
-                            color: theme.text_color,
-                            fontSize: 12,
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
-                        }}
-                        >
-                            {item?.year} год
-                        </Text>
+                        <View>
+                            <Text
+                            style={{
+                                color: theme.text_color,
+                                fontSize: 12,
+                                borderColor: theme.divider_color,
+                                backgroundColor: theme.divider_color + "98",
+                                borderWidth: 1,
+                                paddingHorizontal: 5,
+                                paddingVertical: 1,
+                                borderRadius: 5,
+                                marginRight: 10,
+                                marginTop: 5,
+                            }}
+                            >
+                                {item?.year || "Неизвестный"} год
+                            </Text>
+                        </View>
 
-                        <Text
-                        style={{
-                            color: theme.text_color,
-                            fontSize: 12,
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
-                        }}
-                        >
-                            {item?.kind}
-                        </Text>
+                        <View>
+                            <Text
+                            style={{
+                                color: theme.text_color,
+                                fontSize: 12,
+                                borderColor: theme.divider_color,
+                                backgroundColor: theme.divider_color + "98",
+                                borderWidth: 1,
+                                paddingHorizontal: 5,
+                                paddingVertical: 1,
+                                borderRadius: 5,
+                                marginRight: 10,
+                                marginTop: 5,
+                            }}
+                            >
+                                {item?.kind}
+                            </Text>
+                        </View>
                     </View>
                 }
                 />
@@ -326,6 +372,163 @@ export const Anime = (props) => {
 
         return durationFormatter(duration * episodesTotal);
     };
+
+    const renderComments = (comment, index) => {
+        const markComment = async (commentId, mark) => {
+            const sign = await storage.getItem("AUTHORIZATION_SIGN");
+    
+            axios.post("/comment.mark", {
+                commentId: commentId,
+                mark: mark
+            }, {
+                headers: {
+                    "Authorization": sign
+                }
+            })
+            .then(({ data }) => {
+                const newCommentsData = animeData.comments.map(comment => {
+                    if(comment.id === commentId) {
+                        return { 
+                            ...comment, 
+                            mark: mark,
+                            rating: mark === "up" ? comment.rating + 1 : mark === "down" ? comment.rating - 1 : comment.rating
+                        }
+                    }
+
+                    return comment;
+                });
+
+                setAnimeData({
+                    ...animeData,
+                    comments: newCommentsData
+                });
+                
+                ToastAndroid.show(data.message, ToastAndroid.CENTER);
+                
+            })
+            .catch(({ response: { data } }) => {
+                ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            });
+        };
+
+        return (
+            <Cell
+            key={"comment-" + index}
+            title={comment.user.nickname}
+            centered={false}
+            after={
+                <PressIcon
+                icon={
+                    <Icon
+                    name="dots-three-horizontal"
+                    type="Entypo"
+                    color={theme.icon_color}
+                    size={18}
+                    />
+                }
+                onPress={() => markComment(comment.id, "down")}
+                />
+            }
+            subtitle={
+                <View>
+                    <Text
+                    style={{
+                        color: theme.cell.subtitle_color
+                    }}
+                    >
+                        {dayjs().to(comment.createdAt)}
+                    </Text>
+
+                    <Text
+                    selectable
+                    style={{
+                        marginTop: 3,
+                        color: theme.text_color
+                    }}
+                    >
+                        {comment.text}
+                    </Text>
+                </View>
+            }
+            additionalContentBottom={
+                <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginRight: 15,
+                }}
+                >
+                    <View>
+                        {
+                            comment.replies >= 1 && (
+                                <Button
+                                title="Смотреть 1 ответ"
+                                upperTitle={false}
+                                type="overlay"
+                                textColor={theme.text_color}
+                                containerStyle={{
+                                    marginTop: 0
+                                }}
+                                before={
+                                    <Icon
+                                    name="reply-all"
+                                    type="Entypo"
+                                    color={theme.text_color}
+                                    size={15}
+                                    />
+                                }
+                                />
+                            )
+                        }
+                    </View>
+                    
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                    >
+                        <PressIcon
+                        icon={
+                            <Icon
+                            name="chevron-down-outline"
+                            type="Ionicons"
+                            color={comment.mark === "down" ? "#f54242" : theme.icon_color}
+                            size={18}
+                            />
+                        }
+                        onPress={() => markComment(comment.id, "down")}
+                        />
+
+                        <Text
+                        style={{
+                            marginHorizontal: 7,
+                            color: comment.mark === "up" ? "#42f554" : comment.mark === "down" ? "#f54242" : theme.text_secondary_color
+                        }}
+                        >
+                            {comment.rating}
+                        </Text>
+
+                        <PressIcon
+                        icon={
+                            <Icon
+                            name="chevron-up-outline"
+                            type="Ionicons"
+                            size={18}
+                            color={comment.mark === "up" ? "#42f554" : theme.icon_color}
+                            />
+                        }
+                        onPress={() => markComment(comment.id, "up")}
+                        />
+                    </View>
+                </View>
+            }
+            before={<Avatar url={comment.user.photo}/>}
+            />
+        )
+    }; 
 
     const styles = StyleSheet.create({
         modalContainer: {
@@ -392,6 +595,14 @@ export const Anime = (props) => {
                 showsVerticalScrollIndicator={false} 
                 ref={scrollViewRef}
                 overScrollMode="never"
+                refreshControl={
+                    <RefreshControl
+                    progressBackgroundColor={theme.refresh_control_background}
+                    colors={[theme.accent]}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    />
+                }
                 >
                     <View
                     style={{
@@ -428,6 +639,7 @@ export const Anime = (props) => {
                             zIndex: 12,
                             backgroundColor: theme.divider_color
                         }}
+                        onError={(e) => ToastAndroid.show("Возникла ошибка при попытке загрузки постера", ToastAndroid.CENTER)}
                         />
                     </View>
 
@@ -504,13 +716,18 @@ export const Anime = (props) => {
                                     animeData?.inList === "dropped" ? "Брошено" : "Не в списке"
                                 }
                                 onPress={() => {
-                                    setModalContent(<AnimeSetList animeId={animeData?.id} inList={animeData?.inList}/>);
+                                    setModalContent(
+                                        <AnimeSetList 
+                                        animeId={animeData?.id} 
+                                        inList={animeData?.inList}
+                                        getAnimeData={getAnimeData}
+                                        />
+                                    );
                                     modalRef.current?.open();
                                 }}
                                 upperTitle={false}
-                                type="outline"
                                 backgroundColor={theme.anime[animeData?.inList || "none"]}
-                                textColor={theme.anime[animeData?.inList || "none"]}
+                                textColor="#ffffff"
                                 size={35}
                                 before={
                                     animeData?.inList === "watching" ? (
@@ -518,7 +735,7 @@ export const Anime = (props) => {
                                         name="eye"
                                         type="MaterialCommunityIcons"
                                         size={17}
-                                        color={theme.anime.watching}
+                                        color="#ffffff"
                                         />
                                     ) :
                                     animeData?.inList === "completed" ? (
@@ -526,7 +743,7 @@ export const Anime = (props) => {
                                         name="check"
                                         type="FontAwesome"
                                         size={17}
-                                        color={theme.anime.completed}
+                                        color="#ffffff"
                                         />
                                     )  :
                                     animeData?.inList === "planned" ? (
@@ -534,7 +751,7 @@ export const Anime = (props) => {
                                         name="calendar"
                                         type="MaterialCommunityIcons"
                                         size={17}
-                                        color={theme.anime.planned}
+                                        color="#ffffff"
                                         />
                                     )  :
                                     animeData?.inList === "postponed" ? (
@@ -542,7 +759,7 @@ export const Anime = (props) => {
                                         name="pause-circle-outline"
                                         type="MaterialIcons"
                                         size={17}
-                                        color={theme.anime.postponed}
+                                        color="#ffffff"
                                         />
                                     )  :
                                     animeData?.inList === "dropped" ? (
@@ -550,14 +767,14 @@ export const Anime = (props) => {
                                         name="cancel"
                                         type="MaterialIcons"
                                         size={17}
-                                        color={theme.anime.dropped}
+                                        color="#ffffff"
                                         />
                                     )  : (
                                         <Icon
                                         name="chevron-down"
                                         type="Feather"
                                         size={17}
-                                        color={theme.anime[animeData?.inList || "none"]}
+                                        color="#ffffff"
                                         />
                                     )
                                 }
@@ -595,6 +812,7 @@ export const Anime = (props) => {
                                 containerStyle={{
                                     marginRight: 0
                                 }}
+                                onPress={() => setIsFavorite()}
                                 />
                             </View>
 
@@ -688,7 +906,7 @@ export const Anime = (props) => {
                             />
 
                             <WrapperAnimeInfo
-                            title={animeData?.studios?.join(", ")}
+                            title={animeData?.studios?.join(", ") || "Неизвестна"}
                             subtitle="Студия"
                             icon={
                                 <Icon
@@ -700,8 +918,33 @@ export const Anime = (props) => {
                             }
                             />
 
+                            {
+                                animeData?.country && (
+                                    <WrapperAnimeInfo
+                                    title={animeData?.country}
+                                    subtitle="Страна"
+                                    icon={
+                                        <Image
+                                        style={{
+                                            width: 22,
+                                            height: 14,
+                                            borderRadius: 2
+                                        }}
+                                        resizeMethod="resize"
+                                        source={{
+                                            uri: (
+                                                String(animeData?.country).toLowerCase() === "япония" ? FLAGS.Japan :
+                                                String(animeData?.country).toLowerCase() === "китай" ? FLAGS.China : null
+                                            )
+                                        }}
+                                        />
+                                    }
+                                    />
+                                )
+                            }
+
                             <WrapperAnimeInfo
-                            title={dayjs(animeData?.other?.releasedAt).format('D MMM YYYY')}
+                            title={dayjs(animeData?.other?.releasedAt || animeData?.other?.airedAt).format('D MMM YYYY')}
                             subtitle="Дата выхода"
                             icon={
                                 <Icon
@@ -735,7 +978,7 @@ export const Anime = (props) => {
                             subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
                             icon={
                                 <Icon
-                                name="clock"
+                                name="progress-clock"
                                 type="MaterialCommunityIcons"
                                 size={17}
                                 color={theme.cell.subtitle_color}
@@ -750,7 +993,7 @@ export const Anime = (props) => {
                                     subtitle={"Время просмотра"}
                                     icon={
                                         <Icon
-                                        name="progress-clock"
+                                        name="clock"
                                         type="MaterialCommunityIcons"
                                         size={17}
                                         color={theme.cell.subtitle_color}
@@ -775,6 +1018,7 @@ export const Anime = (props) => {
                             <Text
                             selectable
                             numberOfLines={hideDescription ? 5 : 10000}
+                            onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
                             style={{
                                 fontStyle: animeData?.description ? "normal" : "italic",
                                 color: theme.text_color,
@@ -784,7 +1028,7 @@ export const Anime = (props) => {
                             </Text>
 
                             {
-                                animeData?.description && (
+                                animeData?.description && descriptionLinesCount >= 6 ? (
                                     <Button
                                     title={hideDescription ? "Показать весь текст" : "Скрыть лишний текст"}
                                     upperTitle={false}
@@ -809,7 +1053,7 @@ export const Anime = (props) => {
                                     }
                                     onPress={() => setHideDescription(!hideDescription)}
                                     />
-                                )
+                                ) : null
                             }
                         </View>
 
@@ -838,7 +1082,7 @@ export const Anime = (props) => {
                         }
 
                         {
-                            animeData?.linked?.length >= 1 && (
+                            linkedAnimes.length >= 1 && (
                                 <View
                                 style={{
                                     marginTop: 15
@@ -850,7 +1094,7 @@ export const Anime = (props) => {
                                     />
 
                                     {
-                                        animeData?.linked?.reverse().map(renderLinked)
+                                        linkedAnimes.map(renderLinked)
                                     }
 
                                     <Button
@@ -873,9 +1117,28 @@ export const Anime = (props) => {
                                 </View>
                             )
                         }
-
-                        <View style={{ marginBottom: 50 }} />
                     </View>
+
+                    <Divider />
+
+                    <Cell
+                    title="Комментарии"
+                    subtitle="Популярные за всё время"
+                    before={
+                        <Icon
+                        name="comment-discussion"
+                        type="Octicons"
+                        size={20}
+                        color={theme.icon_color}
+                        />
+                    }
+                    />
+
+                    {
+                        animeData?.comments?.map(renderComments)
+                    }
+
+                    <View style={{ marginBottom: 60 }}/>
                 </ScrollView>
             </View>
         </GestureHandlerRootView>

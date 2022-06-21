@@ -45,12 +45,15 @@ export const Search = (props) => {
     };
 
     useEffect(() => {
-        BackHandler.addEventListener('hardwareBackPress', () => {
-            setSearchTitle("");
-            EventRegister.emit("changeTabbar", { type: "show" });
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            if(searchMode) {
+                return EventRegister.emit("changeTabbar", { type: "hide" });
+            }
         });
 
         keyboardListeners();
+
+        return willFocusSubscription;
     }, []);
 
     useEffect(() => {

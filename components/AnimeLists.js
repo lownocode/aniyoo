@@ -19,7 +19,7 @@ const checkEpisodesStatus = (total, aired, status) => {
         return `${total} ${declOfNum(total, [`серия`, `серии`, `серий`])}`
     }
     else if(!total && aired && status === "ongoing") {
-        return `${aired} из ? серий`
+        return `${aired} из ? серий`;
     }
 
     return `${aired} из ${total} серий`;
@@ -439,35 +439,37 @@ export const FoundedAnimeList = (props) => {
 
                     {
                         item.inList !== "none" && (
-                            <Text
-                            numberOfLines={1}
-                            style={{
-                                backgroundColor: (
-                                    item.inList === "watching" ? "#34c75999" :
-                                    item.inList === "completed" ? "#5856d699" :
-                                    item.inList === "planned" ? "#af52de99" :
-                                    item.inList === "postponed" ? "#ff950099" :
-                                    item.inList === "dropped" ? "#ff453a99" : null
-                                ),
-                                position: "absolute",
-                                bottom: 0,
-                                width: "100%",
-                                textAlign: "center",
-                                color: "#fff",
-                                fontSize: 12,
-                                paddingVertical: 1,
-                                paddingHorizontal: 3,
-                                fontWeight: "500"
-                            }}
-                            >
-                                {
-                                    item.inList === "watching" ? "Смотрю" :
-                                    item.inList === "completed" ? "Просмотрено" :
-                                    item.inList === "planned" ? "В планах" :
-                                    item.inList === "postponed" ? "Отложено" :
-                                    item.inList === "dropped" ? "Брошено" : "Неизвестно"
-                                }
-                            </Text>
+                            <View>
+                                <Text
+                                numberOfLines={1}
+                                style={{
+                                    backgroundColor: (
+                                        item.inList === "watching" ? "#34c75999" :
+                                        item.inList === "completed" ? "#5856d699" :
+                                        item.inList === "planned" ? "#af52de99" :
+                                        item.inList === "postponed" ? "#ff950099" :
+                                        item.inList === "dropped" ? "#ff453a99" : null
+                                    ),
+                                    position: "absolute",
+                                    bottom: 0,
+                                    width: "100%",
+                                    textAlign: "center",
+                                    color: "#fff",
+                                    fontSize: 12,
+                                    paddingVertical: 1,
+                                    paddingHorizontal: 3,
+                                    fontWeight: "500"
+                                }}
+                                >
+                                    {
+                                        item.inList === "watching" ? "Смотрю" :
+                                        item.inList === "completed" ? "Просмотрено" :
+                                        item.inList === "planned" ? "В планах" :
+                                        item.inList === "postponed" ? "Отложено" :
+                                        item.inList === "dropped" ? "Брошено" : "Неизвестно"
+                                    }
+                                </Text>
+                            </View>
                         )
                     }
                 </View>
@@ -482,92 +484,104 @@ export const FoundedAnimeList = (props) => {
                     >
                         {
                             item.type === "anime-serial" && item.season ? (
-                                <Text
-                                style={{
-                                    color: theme.text_color,
-                                    fontSize: 12,
-                                    borderColor: theme.divider_color,
-                                    backgroundColor: theme.divider_color + "98",
-                                    borderWidth: 1,
-                                    paddingHorizontal: 5,
-                                    paddingVertical: 1,
-                                    borderRadius: 5,
-                                    marginTop: 5,
-                                    marginRight: 10
-                                }}
-                                >
-                                    {
-                                        `${item.season || "?"} сезон`
-                                    }
-                                </Text>
+                                <View>
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginTop: 5,
+                                        marginRight: 10
+                                    }}
+                                    >
+                                        {
+                                            `${item.season || "?"} сезон`
+                                        }
+                                    </Text>
+                                </View>
                             )  : null
                         }
 
                         {
                             item.type === "anime-serial" && (
-                                <Text
-                                style={{
-                                    color: theme.text_color,
-                                    fontSize: 12,
-                                    borderColor: theme.divider_color,
-                                    backgroundColor: theme.divider_color + "98",
-                                    borderWidth: 1,
-                                    paddingHorizontal: 5,
-                                    paddingVertical: 1,
-                                    borderRadius: 5,
-                                    marginRight: 10,
-                                    marginTop: 5,
-                                }}
-                                >
-                                    {
-                                        checkEpisodesStatus(item.episodesTotal, item.episodesAired, item.status)
-                                    }
-                                </Text>
+                                <View>
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {
+                                            checkEpisodesStatus(item.episodesTotal, item.episodesAired, item.status)
+                                        }
+                                    </Text>
+                                </View>
                             )
                         }
 
-                        <Text
-                        style={{
-                            color: theme.text_color,
-                            fontSize: 12,
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
-                        }}
-                        >
-                            {
-                                item.other.kind === "tv" ? "Сериал" :
-                                item.other.kind === "ona" ? "ONA" :
-                                item.other.kind === "ova" ? "OVA" :
-                                item.other.kind === "special" ? "Спешл" :
-                                item.other.kind === "movie" ? "Фильм" : "Неизвестно"
-                            }, {
-                                item.status === "released" ? "вышел" :
-                                item.status === "ongoing" ? "выходит" : "неизвестно"
-                            }
-                        </Text>
+                        <View>
+                            <Text
+                            style={{
+                                color: theme.text_color,
+                                fontSize: 12,
+                                borderColor: theme.divider_color,
+                                backgroundColor: theme.divider_color + "98",
+                                borderWidth: 1,
+                                paddingHorizontal: 5,
+                                paddingVertical: 1,
+                                borderRadius: 5,
+                                marginRight: 10,
+                                marginTop: 5,
+                            }}
+                            >
+                                {
+                                    item.other.kind === "tv" ? "Сериал" :
+                                    item.other.kind === "ona" ? "ONA" :
+                                    item.other.kind === "ova" ? "OVA" :
+                                    item.other.kind === "special" ? "Спешл" :
+                                    item.other.kind === "movie" ? "Фильм" : "Неизвестно"
+                                }, { 
+                                    item.status === "released" ? "вышел" :
+                                    item.status === "ongoing" ? "выходит" : "неизвестно"
+                                }
+                            </Text>
+                        </View>
 
-                        <Text
-                        style={{
-                            color: theme.text_color,
-                            fontSize: 12,
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
-                        }}
-                        >
-                            {item.other.year} год
-                        </Text>
+                        {
+                            item.other.year && (
+                                <View>
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {item.other.year} год
+                                    </Text>
+                                </View>
+                            )
+                        }
                     </View>
 
                     <Text

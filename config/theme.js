@@ -84,7 +84,7 @@ const theme = {
             planned: "#af52de",
             postponed: "#ff9500",
             dropped: "#ff453a",
-            none: "#757575"
+            none: "#2A2A2A"
         }
     },
 
@@ -169,7 +169,7 @@ const theme = {
             planned: "#af52de",
             postponed: "#ff9500",
             dropped: "#ff453a",
-            none: "#969696"
+            none: "#323232"
         }
     }
 };

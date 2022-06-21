@@ -61,6 +61,7 @@ export const Profile = props => {
 
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        console.log(sign)
         
         axios.post("/user.signIn", null, {
             headers: {
@@ -283,10 +284,13 @@ export const Profile = props => {
                     }}
                     >
                         <Text 
-                        style={{color: theme.text_secondary_color}}
+                        style={{
+                            color: theme.text_secondary_color,
+                            fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic"
+                        }}
                         numberOfLines={3}
                         >
-                            {userData.status.trim().length < 1 ? "Статус не установлен" : userData.status}
+                            {userData?.status?.trim()?.length >= 1 ? userData.status : "Статус не установлен"}
                         </Text>
                     </TouchableNativeFeedback>
 
@@ -815,6 +819,7 @@ export const Profile = props => {
             <ScrollView
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
+            overScrollMode="never"
             refreshControl={
                 <RefreshControl
                 progressBackgroundColor={theme.refresh_control_background}
