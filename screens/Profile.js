@@ -118,7 +118,7 @@ export const Profile = props => {
         userData?.list?.postponed || 0,
         userData?.list?.dropped || 0,
     ];
-    const statisticsChartColors = ['#34c759','#5856d6','#af52de','#ff9500', '#ff453a'];
+    const statisticsChartColors = [theme.anime.watching, theme.anime.completed, theme.anime.planned, theme.anime.postponed, theme.anime.dropped];
 
     const lists = [
         {
@@ -264,7 +264,7 @@ export const Profile = props => {
                     fontWeight: "600"
                 }}
                 >
-                    {userData.nickname || ""}
+                    {userData?.nickname || ""}
                 </Text>
             }
             subtitle={
@@ -290,7 +290,7 @@ export const Profile = props => {
                         }}
                         numberOfLines={3}
                         >
-                            {userData?.status?.trim()?.length >= 1 ? userData.status : "Статус не установлен"}
+                            {userData?.status?.trim()?.length >= 1 ? userData?.status : "Статус не установлен"}
                         </Text>
                     </TouchableNativeFeedback>
 
@@ -318,7 +318,7 @@ export const Profile = props => {
             disabled
             before={
                 <Avatar
-                url={userData.photo || ""}
+                url={userData?.photo || ""}
                 size={85}
                 borderRadius={29}
                 />
@@ -448,8 +448,8 @@ export const Profile = props => {
                                 fontWeight: "500"
                             }}
                             >
-                                <Text style={{fontWeight: "600"}}>{userData.comments} </Text>
-                                {declOfNum(userData.comments, ["комментарий","комментария","комментариев"])}
+                                <Text style={{fontWeight: "600"}}>{userData?.comments} </Text>
+                                {declOfNum(userData?.comments, ["комментарий","комментария","комментариев"])}
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
@@ -486,8 +486,8 @@ export const Profile = props => {
                                 fontWeight: "500"
                             }}
                             >
-                                <Text style={{fontWeight: "600"}}>{userData.collections} </Text>
-                                {declOfNum(userData.collections, ["коллекция","коллекции","коллекций"])}
+                                <Text style={{fontWeight: "600"}}>{userData?.collections} </Text>
+                                {declOfNum(userData?.collections, ["коллекция","коллекции","коллекций"])}
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
@@ -532,7 +532,7 @@ export const Profile = props => {
                 }
                 upperTitle={false}
                 containerStyle={{
-                    marginLeft: userData?.social_networks.length > 0 ? 5 : 15
+                    marginLeft: userData?.social_networks?.length > 0 ? 5 : 15
                 }}
                 onPress={() => navigate("edit_social_networks")}
                 />
@@ -703,7 +703,7 @@ export const Profile = props => {
             />
 
             {
-                userData.friends >= 1 ? (
+                userData?.friends >= 1 ? (
                     <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -770,8 +770,8 @@ export const Profile = props => {
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
+            divider={false}
             title="Профиль"
-            height={30}
             afterComponent={
                 <View
                 style={{

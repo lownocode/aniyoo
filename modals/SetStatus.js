@@ -10,7 +10,6 @@ import {
 } from "../components";
 import { storage, EventEmit } from "../functions";
 import ThemeContext from "../config/ThemeContext";
-import { EventRegister } from "react-native-event-listeners";
 
 export const SetStatus = (props) => {
     const theme = useContext(ThemeContext);
@@ -29,7 +28,7 @@ export const SetStatus = (props) => {
             }
         })
         .then(({ data }) => {
-            setText(data.status);
+            setText(data?.status || "");
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -120,7 +119,7 @@ export const SetStatus = (props) => {
                     color: theme.text_color
                 }}
                 >
-                    {text.length} / 100
+                    {text.length} из 100
                 </Text>
             </View>
 

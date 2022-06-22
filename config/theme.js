@@ -11,6 +11,7 @@ const theme = {
         text_color: "#000000",
         text_secondary_color: "#666666",
         refresh_control_background: "#ffffff",
+        incomplete_text_secondary_color: "#c2c2c2",
 
         //components
 
@@ -96,6 +97,7 @@ const theme = {
         text_color: "#ffffff",
         text_secondary_color: "#b8b8b8",
         refresh_control_background: "#1c1c1c",
+        incomplete_text_secondary_color: "#c2c2c2",
 
         //components
 

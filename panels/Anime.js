@@ -10,8 +10,8 @@ import {
     StyleSheet,
     ToastAndroid,
     RefreshControl,
-    BackHandler
 } from "react-native";
+import { PieChart } from "react-native-svg-charts";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -33,14 +33,14 @@ import {
     Cell,
     ContentHeader,
     Avatar,
-    PressIcon
+    PressIcon,
+    Placeholder
 } from "../components";
 import { AnimeSetList } from "../modals";
 import { FLAGS } from "../variables";
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
-    StatusBar.setBackgroundColor("#14141499");
 
     const {
         navigation: {
@@ -61,8 +61,9 @@ export const Anime = (props) => {
     const [ linkedAnimes, setLinkedAnimes ] = useState([]);
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
 
-    const getAnimeData = async (id) => {
-        setRefreshing(true);
+    const getAnimeData = async (id, refreshing = false) => {
+        console.log(JSON.stringify(animeData, null, "\t"))
+        setRefreshing(refreshing);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.get", {
@@ -75,7 +76,7 @@ export const Anime = (props) => {
         .then(({ data }) => {
             setAnimeData(data);
             setLinkedAnimes(data?.linked?.sort(sortLinkedAnimes)?.slice(0, 3));
-            console.log(JSON.stringify(data, null, "\t"))
+            // console.log(JSON.stringify(data, null, "\t"))
 
             setRefreshing(false);
         })
@@ -84,7 +85,23 @@ export const Anime = (props) => {
         });
     };
 
+    const addAnimeToList = (list) => {
+        const newAnimeStatsData = Object.defineProperty(animeData?.stats, list, { value: animeData?.isFavorite ? animeData?.stats?.favorite - 1 : animeData?.stats?.favorite + 1 });
+        setAnimeData({
+            ...animeData,
+            stats: newAnimeStatsData,
+            inList: list
+        });
+    };
+
     const setIsFavorite = async () => {
+        const newAnimeStatsData = Object.defineProperty(animeData?.stats, "favorite", { value: animeData?.isFavorite ? animeData?.stats?.favorite - 1 : animeData?.stats?.favorite + 1 });
+        setAnimeData({
+            ...animeData,
+            stats: newAnimeStatsData,
+            isFavorite: !animeData?.isFavorite
+        });
+
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.setStatus", {
@@ -95,15 +112,18 @@ export const Anime = (props) => {
                 "Authorization": sign,
             }
         })
-        .then(({ data }) => {
-            getAnimeData();
+        .then(() => {
+            getAnimeData(animeData?.id, false);
+        })
+        .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
-        });
+            getAnimeData(animeData?.id, false);
+        })
     };
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        getAnimeData();
+        getAnimeData(route.params?.animeData?.id, true);
     }, []);
 
     useEffect(() => {
@@ -160,6 +180,7 @@ export const Anime = (props) => {
 ;
     const durationFormatter = (minutes) => {
         minutes = Number(minutes);
+        if(minutes === null || minutes === NaN) return null;
 
         if(minutes <= 60) {
             return minutes + " " + declOfNum(minutes, ["минута", "минуты", "минут"]);
@@ -358,7 +379,7 @@ export const Anime = (props) => {
     };
 
     const totalWatchingTime = (type, episodesTotal, episodesAired, duration) => {
-        if(type !== "anime-serial") return "Неизвестно";
+        if(type !== "anime-serial" || episodesTotal === 0 && episodesAired === 0) return null;
 
         if(episodesTotal === episodesAired) {
             return durationFormatter(duration * episodesTotal);
@@ -390,8 +411,8 @@ export const Anime = (props) => {
                     if(comment.id === commentId) {
                         return { 
                             ...comment, 
-                            mark: mark,
-                            rating: mark === "up" ? comment.rating + 1 : mark === "down" ? comment.rating - 1 : comment.rating
+                            mark: data.mark,
+                            rating: data.rating
                         }
                     }
 
@@ -403,8 +424,6 @@ export const Anime = (props) => {
                     comments: newCommentsData
                 });
                 
-                ToastAndroid.show(data.message, ToastAndroid.CENTER);
-                
             })
             .catch(({ response: { data } }) => {
                 ToastAndroid.show(data.message, ToastAndroid.CENTER);
@@ -413,20 +432,20 @@ export const Anime = (props) => {
 
         return (
             <Cell
-            key={"comment-" + index}
+            key={"comment-" + comment.id}
             title={comment.user.nickname}
             centered={false}
+            centeredAfter={false}
             after={
                 <PressIcon
                 icon={
                     <Icon
-                    name="dots-three-horizontal"
+                    name="reply"
                     type="Entypo"
                     color={theme.icon_color}
                     size={18}
                     />
                 }
-                onPress={() => markComment(comment.id, "down")}
                 />
             }
             subtitle={
@@ -463,19 +482,23 @@ export const Anime = (props) => {
                         {
                             comment.replies >= 1 && (
                                 <Button
-                                title="Смотреть 1 ответ"
+                                title={`Смотреть ${comment.replies} ${declOfNum(comment.replies, ["ответ", "ответа", "ответов"])}`}
                                 upperTitle={false}
                                 type="overlay"
                                 textColor={theme.text_color}
                                 containerStyle={{
                                     marginTop: 0
                                 }}
+                                onPress={() => navigate("anime.reply_comments", {
+                                    commentId: comment.id,
+                                })}
+                                size="s"
                                 before={
                                     <Icon
                                     name="reply-all"
                                     type="Entypo"
                                     color={theme.text_color}
-                                    size={15}
+                                    size={13}
                                     />
                                 }
                                 />
@@ -529,6 +552,156 @@ export const Anime = (props) => {
             />
         )
     }; 
+
+    const lists = [
+        {
+            name: "Смотрю",
+            icon: (
+                <Icon
+                name="eye"
+                type="MaterialCommunityIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            ),
+        },
+        {
+            name: "Просмотрено",
+            icon: (
+                <Icon
+                name="check"
+                type="FontAwesome"
+                color={theme.text_secondary_color}
+                size={12}
+                />
+            )
+        },
+        {
+            name: "В планах",
+            icon: (
+                <Icon
+                name="calendar"
+                type="MaterialCommunityIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        },
+        {
+            name: "Отложено",
+            icon: (
+                <Icon
+                name="pause-circle-outline"
+                type="MaterialIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        },
+        {
+            name: "Брошено",
+            icon: (
+                <Icon
+                name="cancel"
+                type="MaterialIcons"
+                color={theme.text_secondary_color}
+                size={13}
+                />
+            )
+        }
+    ];
+
+    const statisticsChartValues = [
+        animeData?.stats?.watching || 0,
+        animeData?.stats?.completed || 0,
+        animeData?.stats?.planned || 0,
+        animeData?.stats?.postponed || 0,
+        animeData?.stats?.dropped || 0,
+    ];
+    const statisticsChartColors = [theme.anime.watching, theme.anime.completed, theme.anime.planned, theme.anime.postponed, theme.anime.dropped];
+    
+    const statisticsChartData = statisticsChartValues.map((value, index) => ({
+        value,
+        svg: {
+            fill: statisticsChartColors[index],
+        },
+        key: `pie-${index}`,
+    }));
+
+    const renderStatistics = (item, index) => {
+        return (
+            <View
+            key={"list-" + index}
+            style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: index !== 0 ? 5 : 0
+            }}
+            >
+                <View
+                style={{
+                    paddingVertical: 2,
+                    paddingLeft: 4,
+                    paddingRight: 5,
+                    borderRadius: 100,
+                    borderWidth: 0.5,
+                    borderColor: statisticsChartColors[index] + "90",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}
+                >
+                    <View
+                    style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 100,
+                        backgroundColor: statisticsChartColors[index],
+                        marginRight: 5
+                    }}
+                    />
+
+                    {
+                        item.icon
+                    }
+                </View>
+
+                <View
+                style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}
+                >
+                    <Text
+                    style={{
+                        marginLeft: 10,
+                        fontSize: 15,
+                        fontWeight: "500",
+                        color: theme.text_secondary_color + "90"
+                    }}
+                    >
+                        {
+                            item.name
+                        }
+                    </Text>
+
+                    <Text
+                    style={{
+                        marginLeft: 6,
+                        fontWeight: "700",
+                        color: theme.text_secondary_color,
+                        fontSize: 16
+                    }}
+                    > 
+                        {
+                            statisticsChartValues[index]
+                        }
+                    </Text>
+                </View>
+            </View>
+        )
+    };
 
     const styles = StyleSheet.create({
         modalContainer: {
@@ -721,6 +894,8 @@ export const Anime = (props) => {
                                         animeId={animeData?.id} 
                                         inList={animeData?.inList}
                                         getAnimeData={getAnimeData}
+                                        addAnimeToList={addAnimeToList}
+                                        onClose={() => modalRef.current?.close()}
                                         />
                                     );
                                     modalRef.current?.open();
@@ -786,7 +961,7 @@ export const Anime = (props) => {
 
                             <View>
                                 <Button
-                                title={animeData?.isFavorite ? "В избранном" : "Не в избранном"}
+                                title={animeData?.stats?.favorite || "0"}
                                 upperTitle={false}
                                 type={animeData?.isFavorite ? "primary" : "outline"}
                                 backgroundColor={animeData?.isFavorite ? "#e2b22799" : theme.icon_color}
@@ -892,7 +1067,7 @@ export const Anime = (props) => {
                             title={
                                 animeData?.status === "ongoing" ? "Выходит" :
                                 animeData?.status === "released" ? "Вышел" :
-                                animeData?.status === "announcement" ? "Анонс" : "Неизвестно"
+                                animeData?.status === "anons" ? "Анонс" : "Неизвестно"
                             }
                             subtitle="Статус"
                             icon={
@@ -944,7 +1119,11 @@ export const Anime = (props) => {
                             }
 
                             <WrapperAnimeInfo
-                            title={dayjs(animeData?.other?.releasedAt || animeData?.other?.airedAt).format('D MMM YYYY')}
+                            title={
+                                animeData?.status === "anons" ? new Date(animeData?.other?.airedAt) < Date.now() ? "Неизвестна" : 
+                                dayjs(animeData?.other?.airedAt).format('D MMM YYYY') : 
+                                dayjs(animeData?.other?.releasedAt).format('D MMM YYYY')
+                            }
                             subtitle="Дата выхода"
                             icon={
                                 <Icon
@@ -973,21 +1152,25 @@ export const Anime = (props) => {
                                 )
                             }
 
-                            <WrapperAnimeInfo
-                            title={`≈ ` + durationFormatter(animeData?.other?.duration)}
-                            subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
-                            icon={
-                                <Icon
-                                name="progress-clock"
-                                type="MaterialCommunityIcons"
-                                size={17}
-                                color={theme.cell.subtitle_color}
-                                />
+                            {
+                                !durationFormatter(animeData?.other?.duration) && (
+                                    <WrapperAnimeInfo
+                                    title={`≈ ` + durationFormatter(animeData?.other?.duration)}
+                                    subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
+                                    icon={
+                                        <Icon
+                                        name="progress-clock"
+                                        type="MaterialCommunityIcons"
+                                        size={17}
+                                        color={theme.cell.subtitle_color}
+                                        />
+                                    }
+                                    />
+                                )
                             }
-                            />
 
                             {
-                                animeData?.other?.kind !== "movie" && (
+                                animeData?.other?.kind !== "movie" && totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration) !== null ? (
                                     <WrapperAnimeInfo
                                     title={`≈ ` + totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration)}
                                     subtitle={"Время просмотра"}
@@ -1000,7 +1183,7 @@ export const Anime = (props) => {
                                         />
                                     }
                                     />
-                                )
+                                ) : null
                             }
                         </View>
 
@@ -1081,6 +1264,75 @@ export const Anime = (props) => {
                             )
                         }
 
+                        <View
+                        style={{
+                            marginTop: 15
+                        }}
+                        >
+                            <ContentHeader
+                            text="Статистика"
+                            containerStyle={{ marginBottom: 10, marginLeft: 15  }}
+                            />
+
+                            {
+                                animeData?.status === "anons" ? (
+                                    <View>
+                                        <Text 
+                                        style={{ 
+                                            color: theme.anime.planned, 
+                                            fontSize: 25,
+                                            textAlign: "center",
+                                            fontWeight: "500"
+                                        }}
+                                        >
+                                            {animeData?.stats?.planned}
+                                        </Text>
+
+                                        <Text
+                                        style={{
+                                            textAlign: "center",
+                                            marginTop: 10
+                                        }}
+                                        >
+                                            Столько пользователей планирует смотреть это аниме
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <View 
+                                    style={{ 
+                                        marginHorizontal: 15,
+                                        flexDirection: "row",
+                                        flexWrap: "wrap",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                    }}>
+                                        <View>
+                                            {
+                                                lists.map(renderStatistics)
+                                            }
+                                        </View>
+
+                                        {
+                                            statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
+                                                <Icon
+                                                type="FontAwesome"
+                                                name="pie-chart"
+                                                color={theme.divider_color}
+                                                size={109}
+                                                />
+                                            ) : (
+                                                <PieChart 
+                                                data={statisticsChartData}
+                                                innerRadius={22}
+                                                style={{ height: 120, width: 109 }}
+                                                />
+                                            )
+                                        }
+                                    </View>
+                                )
+                            }
+                        </View>
+
                         {
                             linkedAnimes.length >= 1 && (
                                 <View
@@ -1119,11 +1371,15 @@ export const Anime = (props) => {
                         }
                     </View>
 
-                    <Divider />
+                    <Divider dividerStyle={{ marginTop: 15 }} />
 
                     <Cell
                     title="Комментарии"
                     subtitle="Популярные за всё время"
+                    onPress={() => navigate("anime.all_comments", {
+                        animeId: animeData?.id,
+                        replyMode: false
+                    })}
                     before={
                         <Icon
                         name="comment-discussion"
@@ -1132,10 +1388,43 @@ export const Anime = (props) => {
                         color={theme.icon_color}
                         />
                     }
+                    after={
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            paddingHorizontal: 8
+                        }}
+                        >
+                            <Text
+                            style={{
+                                color: theme.accent
+                            }}
+                            >
+                                {
+                                    animeData?.commentsCount
+                                }
+                            </Text>
+
+                            <Icon
+                            name="chevron-right"
+                            type="Feather"
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
                     />
 
                     {
-                        animeData?.comments?.map(renderComments)
+                        animeData?.comments?.length < 1 ? (
+                            <Placeholder
+                            title="Здесть пусто"
+                            subtitle="Ещё никто не комментировал это аниме, будьте первым!"
+                            />
+                        ) : animeData?.comments?.map(renderComments)
                     }
 
                     <View style={{ marginBottom: 60 }}/>

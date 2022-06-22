@@ -12,3 +12,4 @@ export * from "./Input";
 export * from "./Snackbar";
 export * from "./AnimeLists";
 export * from "./AssemblyOfWeekCarousel";
+export * from "./WriteBar";

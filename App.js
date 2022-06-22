@@ -31,7 +31,9 @@ import {
   Settings_Application,
   EditSocialNetworks,
   Anime,
-  LinkedAnime
+  LinkedAnime,
+  Anime_ReplyComments,
+  Anime_AllComments
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -214,6 +216,18 @@ export default App = () => {
               name="linked_anime" 
               options={{ animation: "none" }}
               component={LinkedAnime}
+              />
+
+              <Stack.Screen 
+              name="anime.reply_comments" 
+              options={{ animation: "none" }}
+              component={Anime_ReplyComments}
+              />
+
+              <Stack.Screen 
+              name="anime.all_comments" 
+              options={{ animation: "none" }}
+              component={Anime_AllComments}
               />
             </Stack.Navigator>
           ) : null

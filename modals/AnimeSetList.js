@@ -12,13 +12,21 @@ import ThemeContext from "../config/ThemeContext";
 export const AnimeSetList = (props) => {
     const theme = useContext(ThemeContext);
 
-    const { animeId, inList, getAnimeData } = props;
+    const { 
+        animeId, 
+        inList, 
+        getAnimeData,
+        onClose,
+        addAnimeToList
+    } = props;
 
     const [ list, setList ] = useState(inList); 
-    const [ loading, setLoading ] = useState(false);
 
     const setAnimeList = async (list) => {
-        setLoading(true);
+        addAnimeToList(list);
+        setList(list);
+        onClose();
+        
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.setStatus", {
@@ -32,11 +40,11 @@ export const AnimeSetList = (props) => {
         .then(({ data }) => {
             setList(list);
 
-            getAnimeData(animeId);
-            setLoading(false);
+            getAnimeData(animeId, false);
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
         })
         .catch(({ response: { data } }) => {
+            getAnimeData(animeId, false);
             console.log(data)
         })
     };
@@ -132,7 +140,7 @@ export const AnimeSetList = (props) => {
         }}
         >
             <TouchableWithoutFeedback
-            onPress={() => loading ? null : list === item.list ? null : setAnimeList(item.list)}
+            onPress={() => list === item.list ? null : setAnimeList(item.list)}
             >
                 <View
                 style={{
@@ -153,9 +161,7 @@ export const AnimeSetList = (props) => {
                     }}
                     >
                         {
-                            loading ? (
-                                <ActivityIndicator color={theme.text_secondary_color}/>
-                            ) : item.icon
+                            item.icon
                         }
                     </View>
 

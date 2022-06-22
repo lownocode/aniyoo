@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from 'react';
 import { View, Text, StyleSheet, StatusBar, } from 'react-native';
-import { Icon, PressIcon } from '.';
+import { Icon, PressIcon, Divider } from '.';
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -15,7 +15,8 @@ export const Header = (props) => {
         subtitleStyle,
         subtitle,
         backButtonOnPress,
-        afterComponent
+        afterComponent,
+        divider = true
     } = props;
 
     const statusBarHeight = StatusBar.currentHeight;
@@ -111,6 +112,10 @@ export const Header = (props) => {
                         {afterComponent}
                     </View>
                 </View>
+
+                {
+                    divider && <Divider />
+                }
             </Fragment>
         );
 };

@@ -159,6 +159,7 @@ export const Search = (props) => {
                         size={17}
                         />
                     }
+                    returnKeyType="search"
                     after={
                         searchTitle.trim().length >= 1 &&
                         <PressIcon

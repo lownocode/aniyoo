@@ -405,7 +405,7 @@ export const FoundedAnimeList = (props) => {
                                 size={17}
                                 />
                             )
-                        } {
+                        }{item.isFavorite && " "}{
                             item?.title
                         }
                     </Text>
@@ -555,7 +555,8 @@ export const FoundedAnimeList = (props) => {
                                     item.other.kind === "movie" ? "Фильм" : "Неизвестно"
                                 }, { 
                                     item.status === "released" ? "вышел" :
-                                    item.status === "ongoing" ? "выходит" : "неизвестно"
+                                    item.status === "ongoing" ? "выходит" : 
+                                    item.status === "anons" ? "анонсирован" : "неизвестно"
                                 }
                             </Text>
                         </View>

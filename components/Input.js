@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, TextInput, StyleSheet, Text } from "react-native";
+import { View, TextInput, StyleSheet, Text, KeyboardAvoidingView } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -23,7 +23,8 @@ export const Input = props => {
         badText,
         textAlign,
         type = "default",
-        onSubmitEditing
+        onSubmitEditing,
+        returnKeyType="done"
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -85,6 +86,7 @@ export const Input = props => {
                 textAlignVertical={textAlignVertical}
                 textAlign={textAlign}
                 onSubmitEditing={onSubmitEditing}
+                returnKeyType={returnKeyType}
                 />
                 <View style={localStyles.after}>
                     {after}

@@ -14,3 +14,5 @@ export * from "./Settings/Application";
 
 export * from "./Anime";
 export * from "./Anime/LinkedAnime";
+export * from "./Anime/AllComments";
+export * from "./Anime/ReplyComments";

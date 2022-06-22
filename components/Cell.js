@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet } from "react-native";
-
 import ThemeContext from "../config/ThemeContext";
 
 export const Cell = (props) => {
@@ -24,7 +23,7 @@ export const Cell = (props) => {
         contentStyle,
         additionalContentTop = null,
         additionalContentBottom = null,
-        centeredAfter
+        centeredAfter = true
     } = props;
 
     const localStyles = StyleSheet.create({
