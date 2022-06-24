@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from "react-native-splash-screen";
@@ -43,12 +43,14 @@ import { EventRegister } from 'react-native-event-listeners';
 
 import theme from "./config/theme";
 import ThemeContext from "./config/ThemeContext";
+import UserContext from "./config/UserContext";
 
 const Stack = createNativeStackNavigator();
 
 export default App = () => {
   const [ darkThemeMode, setDarkThemeMode ] = useState(false);
   const [ initialScreenName, setInitialScreenName ] = useState();
+  const [ UserData, setUserData ] = useState({});
 
   const getTheme = async () => {
     const theme = await storage.getItem("DARK_THEME_MODE");
@@ -87,10 +89,10 @@ export default App = () => {
       // notifySign: notifySign
     }, {
         headers: {
-            "authorization": sign,
-            "Content-Type": "application/json"
+          "Authorization": sign,
         }
     })
+    .then(({ data }) => setUserData(data))
     .catch((error) => {
       if(error.toJSON().message === "Network Error") {
         SplashScreen.hide();
@@ -124,115 +126,117 @@ export default App = () => {
 
   return (
     <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
-      <NavigationContainer>
-        <StatusBar
-        backgroundColor="transparent"
-        translucent
-        />
+      <UserContext.Provider value={UserData}>
+        <NavigationContainer>
+          <StatusBar
+          backgroundColor="transparent"
+          translucent
+          />
 
-        {
-          initialScreenName ? (
-            <Stack.Navigator 
-            initialRouteName={initialScreenName} 
-            screenOptions={{ headerShown: false }}
-            >
-              <Stack.Screen 
-              name="tabs" 
-              component={Tabs}
-              />
+          {
+            initialScreenName ? (
+              <Stack.Navigator 
+              initialRouteName={initialScreenName} 
+              screenOptions={{ headerShown: false }}
+              >
+                <Stack.Screen 
+                name="tabs" 
+                component={Tabs}
+                />
 
-              <Stack.Screen 
-              name="settings" 
-              options={{ animation: "none" }}
-              component={Settings}
-              />
+                <Stack.Screen 
+                name="settings" 
+                options={{ animation: "none" }}
+                component={Settings}
+                />
 
-              <Stack.Screen 
-              name="authorization"
-              component={Authorization}
-              />
+                <Stack.Screen 
+                name="authorization"
+                component={Authorization}
+                />
 
-              <Stack.Screen 
-              name="edit_profile" 
-              options={{ animation: "none" }}
-              component={EditProfile}
-              />
+                <Stack.Screen 
+                name="edit_profile" 
+                options={{ animation: "none" }}
+                component={EditProfile}
+                />
 
-              <Stack.Screen 
-              name="network_error" 
-              options={{ animation: "none" }}
-              component={NetworkError}
-              />
+                <Stack.Screen 
+                name="network_error" 
+                options={{ animation: "none" }}
+                component={NetworkError}
+                />
 
-              <Stack.Screen 
-              name="edit_profile.profile" 
-              options={{ animation: "none" }}
-              component={EditProfile_Profile}
-              />
+                <Stack.Screen 
+                name="edit_profile.profile" 
+                options={{ animation: "none" }}
+                component={EditProfile_Profile}
+                />
 
-              <Stack.Screen 
-              name="edit_profile.privacy" 
-              options={{ animation: "none" }}
-              component={EditProfile_Privacy}
-              />
+                <Stack.Screen 
+                name="edit_profile.privacy" 
+                options={{ animation: "none" }}
+                component={EditProfile_Privacy}
+                />
 
-              <Stack.Screen 
-              name="edit_profile.security" 
-              options={{ animation: "none" }}
-              component={EditProfile_Security}
-              />
+                <Stack.Screen 
+                name="edit_profile.security" 
+                options={{ animation: "none" }}
+                component={EditProfile_Security}
+                />
 
-              <Stack.Screen 
-              name="edit_profile.change_nickname" 
-              options={{ animation: "none" }}
-              component={EditProfile_ChangeNickname}
-              />
+                <Stack.Screen 
+                name="edit_profile.change_nickname" 
+                options={{ animation: "none" }}
+                component={EditProfile_ChangeNickname}
+                />
 
-              <Stack.Screen 
-              name="settings.application" 
-              options={{ animation: "none" }}
-              component={Settings_Application}
-              />
+                <Stack.Screen 
+                name="settings.application" 
+                options={{ animation: "none" }}
+                component={Settings_Application}
+                />
 
-              <Stack.Screen 
-              name="settings.another" 
-              options={{ animation: "none" }}
-              component={Settings_Another}
-              />
+                <Stack.Screen 
+                name="settings.another" 
+                options={{ animation: "none" }}
+                component={Settings_Another}
+                />
 
-              <Stack.Screen 
-              name="edit_social_networks" 
-              options={{ animation: "none" }}
-              component={EditSocialNetworks}
-              />
+                <Stack.Screen 
+                name="edit_social_networks" 
+                options={{ animation: "none" }}
+                component={EditSocialNetworks}
+                />
 
-              <Stack.Screen 
-              name="anime" 
-              options={{ animation: "none" }}
-              component={Anime}
-              />
+                <Stack.Screen 
+                name="anime" 
+                options={{ animation: "none" }}
+                component={Anime}
+                />
 
-              <Stack.Screen 
-              name="linked_anime" 
-              options={{ animation: "none" }}
-              component={LinkedAnime}
-              />
+                <Stack.Screen 
+                name="linked_anime" 
+                options={{ animation: "none" }}
+                component={LinkedAnime}
+                />
 
-              <Stack.Screen 
-              name="anime.reply_comments" 
-              options={{ animation: "none" }}
-              component={Anime_ReplyComments}
-              />
+                <Stack.Screen 
+                name="anime.reply_comments" 
+                options={{ animation: "none" }}
+                component={Anime_ReplyComments}
+                />
 
-              <Stack.Screen 
-              name="anime.all_comments" 
-              options={{ animation: "none" }}
-              component={Anime_AllComments}
-              />
-            </Stack.Navigator>
-          ) : null
-        }
-      </NavigationContainer>
+                <Stack.Screen 
+                name="anime.all_comments" 
+                options={{ animation: "none" }}
+                component={Anime_AllComments}
+                />
+              </Stack.Navigator>
+            ) : null
+          }
+        </NavigationContainer>
+      </UserContext.Provider>
     </ThemeContext.Provider>
   );
 };

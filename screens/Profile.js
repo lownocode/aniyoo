@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
-import { View, RefreshControl, ScrollView, Text, Image, Linking, TouchableNativeFeedback, StyleSheet, Dimensions } from "react-native";
+import { View, RefreshControl, ScrollView, Text, FlatList, Linking, TouchableNativeFeedback, StyleSheet, Dimensions } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
@@ -50,6 +50,7 @@ export const Profile = props => {
     const [ userData, setUserData ] = useState(USER_SCHEMA);
     const [ modalContent, setModalContent ] = useState(null);
     const [ snackbar, setSnackbar ] = useState(null);
+    const [ friends, setFriends ] = useState([]);
 
     const modalRef = useRef();
     const snackbarRef = useRef();
@@ -61,22 +62,41 @@ export const Profile = props => {
 
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        console.log(sign)
         
         axios.post("/user.signIn", null, {
             headers: {
                 "Authorization": sign,
-                "Content-Type": "application/json"
             }
         })
         .then(({ data }) => {
             setUserData(data);
+            storage.setItem("USER_DATA", { id: data.id });
+            if(data?.friendsCount >= 1) {
+                getFriends();
+            }
         })
         .catch(({ response: { data } }) => {
             console.log(data);
         })
         .finally(() => {
             setRefreshing(false);
+        });
+    }; 
+
+    const getFriends = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        console.log(sign)
+        
+        axios.post("/friends.get", null, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(({ data }) => {
+            setFriends(data);
+        })
+        .catch(({ response: { data } }) => {
+            console.log(data);
         });
     }; 
 
@@ -102,8 +122,6 @@ export const Profile = props => {
     }, []);
 
     useEffect(() => {
-        onRefresh();
-
         const willFocusSubscription = navigation.addListener('focus', () => {
             getUserData();
         });
@@ -360,13 +378,13 @@ export const Profile = props => {
                                 }}
                                 >
                                     <Icon
-                                    name="hashtag"
-                                    type="Fontisto"
-                                    color={item.color || theme.accent}
+                                    name={item?.icon?.name}
+                                    type={item?.icon?.type}
+                                    color={item?.icon?.color || item?.color || theme.accent}
                                     style={{
                                         marginRight: 5
                                     }}
-                                    size={9}
+                                    size={item?.icon?.size || 9}
                                     />
 
                                     <Text
@@ -647,6 +665,49 @@ export const Profile = props => {
         </View>
     );
 
+    const friendsListRender = ({ item }) => {
+        return (
+            <View
+            key={"friend-" + item.id}
+            style={{
+                overflow: "hidden",
+                borderRadius: 8,
+                marginHorizontal: 3,
+            }}
+            >
+                <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                >
+                    <View
+                    style={{
+                        paddingVertical: 7,
+                        paddingHorizontal: 5,
+                        width: 70,
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Avatar
+                        size={55}
+                        url={item.photo}
+                        />
+
+                        <Text
+                        numberOfLines={2}
+                        style={{
+                            color: theme.text_color,
+                            fontSize: 12,
+                            textAlign: "center"
+                        }}
+                        >
+                            {item.nickname}
+                        </Text>
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
+        )
+    };
+
     const friendsRender = () => (
         <View
         style={{
@@ -669,7 +730,7 @@ export const Profile = props => {
                     color: theme.text_color
                 }}
                 >
-                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friends}</Text>
+                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friendsCount}</Text>
                 </Text>
             }
             after={
@@ -677,7 +738,7 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.friends >= 1 ? theme.accent : theme.divider_color,
+                    backgroundColor: userData?.subscribers >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -686,7 +747,8 @@ export const Profile = props => {
                     <Text
                     style={{
                         color: "#fff",
-                        fontSize: 12
+                        fontSize: 12,
+                        textAlignVertical: "center"
                     }}
                     >
                         {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["заявка","заявки","заявок"])}
@@ -703,60 +765,13 @@ export const Profile = props => {
             />
 
             {
-                userData?.friends >= 1 ? (
-                    <ScrollView
+                friends?.length >= 1 ? (
+                    <FlatList
                     horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    >
-                        {
-                            userData?.friends?.map((item, index) => {
-                                return (
-                                    <View
-                                    key={"friend_" + index}
-                                    style={{
-                                        overflow: "hidden",
-                                        borderRadius: 8,
-                                        marginHorizontal: 3,
-                                    }}
-                                    >
-                                        <TouchableNativeFeedback
-                                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                                        >
-                                            <View
-                                            style={{
-                                                paddingVertical: 7,
-                                                paddingHorizontal: 5,
-                                                width: 70,
-                                                justifyContent: "center",
-                                                alignItems: "center"
-                                            }}
-                                            >
-                                                <Avatar
-                                                size={55}
-                                                url={item.photo}
-                                                />
-
-                                                <Text
-                                                numberOfLines={2}
-                                                style={{
-                                                    color: theme.text_color,
-                                                    fontSize: 12,
-                                                    textAlign: "center"
-                                                }}
-                                                >
-                                                    {item.nickname}
-                                                </Text>
-                                            </View>
-                                        </TouchableNativeFeedback>
-                                    </View>
-                                )
-                            })
-                        }
-                    </ScrollView>
+                    data={friends}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={friendsListRender}
+                    />
                 ) : (
                     <Placeholder
                     title="Пусто"

@@ -443,13 +443,8 @@ export const FoundedAnimeList = (props) => {
                                 <Text
                                 numberOfLines={1}
                                 style={{
-                                    backgroundColor: (
-                                        item.inList === "watching" ? "#34c75999" :
-                                        item.inList === "completed" ? "#5856d699" :
-                                        item.inList === "planned" ? "#af52de99" :
-                                        item.inList === "postponed" ? "#ff950099" :
-                                        item.inList === "dropped" ? "#ff453a99" : null
-                                    ),
+                                    backgroundColor: theme.anime[item.inList],
+                                    opacity: 0.85,
                                     position: "absolute",
                                     bottom: 0,
                                     width: "100%",
@@ -625,7 +620,7 @@ export const FoundedAnimeList = (props) => {
         keyExtractor={(item, index) => index.toString()}
         onEndReached={loadMoreAnimes}
         scrollEnabled
-        // onEndReachedThreshold={0}
+        keyboardShouldPersistTaps="always"
         ListFooterComponent={renderFooter}
         />
     );

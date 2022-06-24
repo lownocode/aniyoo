@@ -36,7 +36,7 @@ import {
     PressIcon,
     Placeholder
 } from "../components";
-import { AnimeSetList } from "../modals";
+import { AnimeSetList, CommentActions } from "../modals";
 import { FLAGS } from "../variables";
 
 export const Anime = (props) => {
@@ -62,7 +62,7 @@ export const Anime = (props) => {
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
 
     const getAnimeData = async (id, refreshing = false) => {
-        console.log(JSON.stringify(animeData, null, "\t"))
+        // console.log(JSON.stringify(animeData, null, "\t"))
         setRefreshing(refreshing);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
@@ -127,10 +127,8 @@ export const Anime = (props) => {
     }, []);
 
     useEffect(() => {
-        onRefresh();
-
         const willFocusSubscription = navigation.addListener('focus', () => {
-            getAnimeData();
+            onRefresh();
         });
     
         return willFocusSubscription;
@@ -284,8 +282,6 @@ export const Anime = (props) => {
     };
 
     const renderLinked = (item, index) => {
-        if(index > 2) return;
-
         return (
             <View
             key={"linked-anime-" + index}
@@ -296,21 +292,57 @@ export const Anime = (props) => {
                 maxTitleLines={2}
                 onPress={() => {
                     getAnimeData(item.id);
-                    scrollViewRef.current?.scrollTo({  x: 0, y: 0, animated: true  });
+                    scrollViewRef.current?.scrollTo({ y: 0, animated: true  });
                 }}
                 before={
-                    <View style={{borderRadius: 10, backgroundColor: theme.divider_color}}>
+                    <View 
+                    style={{
+                        borderRadius: 6, 
+                        backgroundColor: theme.divider_color,
+                        position: "relative",
+                        overflow: "hidden",
+                    }}
+                    >
                         <Image
                         resizeMethod="resize"
                         style={{
                             width: 55,
                             height: 80,
-                            borderRadius: 8
                         }}
                         source={{
                             uri: item.poster
                         }}
                         />
+                        
+                        {
+                            item.inList !== "none" && (
+                                <View>
+                                    <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        backgroundColor: theme.anime[item.inList], 
+                                        opacity: 0.85,
+                                        position: "absolute",
+                                        bottom: 0,
+                                        width: "100%",
+                                        textAlign: "center",
+                                        color: "#fff",
+                                        fontSize: 12,
+                                        paddingHorizontal: 3,
+                                        fontWeight: "500"
+                                    }}
+                                    >
+                                        {
+                                            item.inList === "watching" ? "Смотрю" :
+                                            item.inList === "completed" ? "Просмотрено" :
+                                            item.inList === "planned" ? "В планах" :
+                                            item.inList === "postponed" ? "Отложено" :
+                                            item.inList === "dropped" ? "Брошено" : null
+                                        }
+                                    </Text>
+                                </View>
+                            )
+                        }
                     </View>
                 }
                 containerStyle={{
@@ -436,27 +468,47 @@ export const Anime = (props) => {
             title={comment.user.nickname}
             centered={false}
             centeredAfter={false}
-            after={
-                <PressIcon
-                icon={
-                    <Icon
-                    name="reply"
-                    type="Entypo"
-                    color={theme.icon_color}
-                    size={18}
+            onPress={() => {
+                setModalContent(
+                    <CommentActions 
+                    onClose={() => modalRef.current?.close()} 
+                    comment={comment} 
+                    successEditing={() => {
+                        getAnimeData();
+                    }}
                     />
-                }
-                />
-            }
+                );
+                modalRef.current?.open();
+            }}
             subtitle={
                 <View>
-                    <Text
+                    <View
                     style={{
-                        color: theme.cell.subtitle_color
+                        flexDirection: "row",
+                        alignItems: "center"
                     }}
                     >
-                        {dayjs().to(comment.createdAt)}
-                    </Text>
+                        <Text
+                        style={{
+                            color: theme.cell.subtitle_color
+                        }}
+                        >
+                            {dayjs().to(comment.createdAt)}
+                        </Text>
+
+                        {
+                            comment.editedAt && (
+                                <Icon
+                                name="pencil"
+                                type="EvilIcons"
+                                size={16}
+                                style={{
+                                    marginLeft: 5
+                                }}
+                                />
+                            )
+                        }
+                    </View>
 
                     <Text
                     selectable
@@ -478,39 +530,72 @@ export const Anime = (props) => {
                     marginRight: 15,
                 }}
                 >
-                    <View>
-                        {
-                            comment.replies >= 1 && (
-                                <Button
-                                title={`Смотреть ${comment.replies} ${declOfNum(comment.replies, ["ответ", "ответа", "ответов"])}`}
-                                upperTitle={false}
-                                type="overlay"
-                                textColor={theme.text_color}
-                                containerStyle={{
-                                    marginTop: 0
-                                }}
-                                onPress={() => navigate("anime.reply_comments", {
-                                    commentId: comment.id,
-                                })}
-                                size="s"
-                                before={
-                                    <Icon
-                                    name="reply-all"
-                                    type="Entypo"
-                                    color={theme.text_color}
-                                    size={13}
-                                    />
+                    <View
+                    style={{
+                        marginTop: -10
+                    }}
+                    >
+                        <View style={{ alignItems: "flex-start" }}>
+                            <Button
+                            title="Ответить"
+                            upperTitle={false}
+                            type="overlay"
+                            containerStyle={{
+                                marginTop: 0,
+                                marginBottom: 3
+                            }}
+                            onPress={() => navigate("anime.reply_comments", {
+                                commentId: comment.id,
+                                animeId: animeData?.id,
+                                reply: {
+                                    id: comment.id,
+                                    user: comment.user
                                 }
-                                />
-                            )
-                        }
+                            })}
+                            size="s"
+                            textColor={theme.text_secondary_color}
+                            />
+                        </View>
+                        
+                        <View>
+                            {
+                                comment.replies >= 1 && (
+                                    <Button
+                                    title={`Смотреть ${comment.replies} ${declOfNum(comment.replies, ["ответ", "ответа", "ответов"])}`}
+                                    upperTitle={false}
+                                    type="overlay"
+                                    textColor={theme.text_secondary_color}
+                                    containerStyle={{
+                                        marginTop: 0
+                                    }}
+                                    onPress={() => navigate("anime.reply_comments", {
+                                        commentId: comment.id,
+                                        animeId: animeData?.id
+                                    })}
+                                    size={30}
+                                    textStyle={{
+                                        fontSize: 14
+                                    }}
+                                    before={
+                                        <Icon
+                                        name="reply-all"
+                                        type="Entypo"
+                                        color={theme.text_secondary_color}
+                                        size={13}
+                                        />
+                                    }
+                                    />
+                                )
+                            }
+                        </View>
                     </View>
                     
                     <View
                     style={{
                         flexDirection: "row",
                         justifyContent: "center",
-                        alignItems: "center"
+                        alignItems: "center",
+                        marginTop: -10
                     }}
                     >
                         <PressIcon
@@ -812,7 +897,7 @@ export const Anime = (props) => {
                             zIndex: 12,
                             backgroundColor: theme.divider_color
                         }}
-                        onError={(e) => ToastAndroid.show("Возникла ошибка при попытке загрузки постера", ToastAndroid.CENTER)}
+                        onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
                         />
                     </View>
 
@@ -1153,7 +1238,7 @@ export const Anime = (props) => {
                             }
 
                             {
-                                !durationFormatter(animeData?.other?.duration) && (
+                                durationFormatter(animeData?.other?.duration) && (
                                     <WrapperAnimeInfo
                                     title={`≈ ` + durationFormatter(animeData?.other?.duration)}
                                     subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
@@ -1341,7 +1426,7 @@ export const Anime = (props) => {
                                 }}
                                 >
                                     <ContentHeader
-                                    text="Связанное"
+                                    text="Связанные"
                                     containerStyle={{ marginBottom: 10, marginLeft: 15  }}
                                     />
 
@@ -1349,23 +1434,27 @@ export const Anime = (props) => {
                                         linkedAnimes.map(renderLinked)
                                     }
 
-                                    <Button
-                                    title="Открыть все"
-                                    upperTitle={false}
-                                    type="overlay"
-                                    before={
-                                        <Icon
-                                        name="plus-square-o"
-                                        type="FontAwesome"
-                                        color={theme.icon_color}
-                                        size={15}
-                                        />
+                                    {
+                                        animeData?.linked?.length >= 4 && (
+                                            <Button
+                                            title="Открыть все"
+                                            upperTitle={false}
+                                            type="overlay"
+                                            before={
+                                                <Icon
+                                                name="plus-square-o"
+                                                type="FontAwesome"
+                                                color={theme.icon_color}
+                                                size={15}
+                                                />
+                                            }
+                                            containerStyle={{
+                                                marginTop: 0
+                                            }}
+                                            onPress={() => navigate("linked_anime", { animeList: animeData?.linked, selectedAnimeId: animeData?.id })}
+                                            />
+                                        )
                                     }
-                                    containerStyle={{
-                                        marginTop: 0
-                                    }}
-                                    onPress={() => navigate("linked_anime", { animeList: animeData?.linked, selectedAnimeId: animeData?.id })}
-                                    />
                                 </View>
                             )
                         }
@@ -1378,7 +1467,6 @@ export const Anime = (props) => {
                     subtitle="Популярные за всё время"
                     onPress={() => navigate("anime.all_comments", {
                         animeId: animeData?.id,
-                        replyMode: false
                     })}
                     before={
                         <Icon

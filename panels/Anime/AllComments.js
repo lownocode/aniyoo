@@ -1,7 +1,22 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
-import { View, FlatList, Text, ToastAndroid, Switch, ActivityIndicator, Keyboard, RefreshControl, TouchableNativeFeedback } from "react-native";
+import React, { useContext, useEffect, useState, useCallback, useRef } from "react";
+import { 
+    View, 
+    FlatList, 
+    Text, 
+    ToastAndroid, 
+    Switch, 
+    ActivityIndicator, 
+    Keyboard, 
+    RefreshControl, 
+    TouchableNativeFeedback,
+    StyleSheet,
+    Dimensions
+} from "react-native";
+
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -16,8 +31,11 @@ import {
     Icon,
     Avatar,
     Button,
-    WriteBar
+    WriteBar,
+    Placeholder
 } from "../../components";
+import { CommentActions } from "../../modals";
+
 import { declOfNum, storage } from "../../functions";
 
 export const Anime_AllComments = (props) => {
@@ -31,6 +49,11 @@ export const Anime_AllComments = (props) => {
     const [ refreshing, setRefreshing ] = useState(false);
     const [ spoilers, setSpoilers ] = useState([]);
     const [ loadingMoreComments, setLoadingMoreComments ] = useState(false);
+    const [ loadingComments, setLoadingComments ] = useState(true);
+    const [ modalContent, setModalContent ] = useState(null);
+
+    const flatListRef = useRef();
+    const modalRef = useRef();
 
     const {
         navigation: {
@@ -45,6 +68,7 @@ export const Anime_AllComments = (props) => {
     }, []);
 
     const getComments = async () => {
+        setLoadingComments(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/comment.getList", {
@@ -58,19 +82,12 @@ export const Anime_AllComments = (props) => {
             }
         })
         .then(({ data }) => {
+            const findedSpoilers = data.filter(x => x.isSpoiler).map(item => { return { id: item.id, closed: true }});
+
+            setSpoilers(findedSpoilers);
             setComments(data);
-            data.map((item) => {
-                if(item.isSpoiler && spoilers.findIndex(x => x.id === item.id) === -1) {
-                    setSpoilers([ 
-                        ...spoilers,
-                        {
-                            id: item.id,
-                            closed: true
-                        }  
-                    ]);
-                }
-            });
             setRefreshing(false);
+            setLoadingComments(false);
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -94,17 +111,9 @@ export const Anime_AllComments = (props) => {
         })
         .then(({ data }) => {
             setComments(comments.concat(data));
-            data.map((item) => {
-                if(item.isSpoiler && spoilers.findIndex(x => x.id === item.id) === -1) {
-                    setSpoilers([ 
-                        ...spoilers,
-                        {
-                            id: item.id,
-                            closed: true
-                        }  
-                    ]);
-                }
-            });
+            const findedSpoilers = data.filter(x => x.isSpoiler).map(item => { return { id: item.id, closed: true }});
+
+            setSpoilers(spoilers.concat(findedSpoilers));
             setLoadingMoreComments(false);
         })
         .catch(({ response: { data } }) => {
@@ -161,15 +170,34 @@ export const Anime_AllComments = (props) => {
             }
         })
         .then(({ data }) => {
+            if(data.isSpoiler) {
+                setSpoilers([...spoilers, { id: data.id, closed: true }]);
+            }
             setComments([data, ...comments]);
             setSendLoading(false);
 
             setNewCommentText("");
             Keyboard.dismiss();
+            flatListRef.current?.scrollTo({ y: 0, animated: true });
         })
         .catch(({ response: { data } }) => {
             console.log(data)
         });
+    };
+
+    const changeSpoiler = (id, closed) => {
+        const newSpoilersData = spoilers.map((item) => {
+            if(item.id === id) {
+                return {
+                    id: id,
+                    closed: closed
+                }
+            }
+
+            return item;
+        });
+
+        setSpoilers(newSpoilersData);
     };
 
     const renderComments = ({ item }) => {
@@ -179,18 +207,18 @@ export const Anime_AllComments = (props) => {
             title={item.user.nickname}
             centered={false}
             centeredAfter={false}
-            after={
-                <PressIcon
-                icon={
-                    <Icon
-                    name="reply"
-                    type="Entypo"
-                    color={theme.icon_color}
-                    size={18}
+            onPress={() => {
+                setModalContent(
+                    <CommentActions 
+                    onClose={() => modalRef.current?.close()} 
+                    comment={item} 
+                    successEditing={() => {
+                        getComments();
+                    }}
                     />
-                }
-                />
-            }
+                );
+                modalRef.current?.open();
+            }}
             subtitle={
                 <View>
                     <View
@@ -210,7 +238,7 @@ export const Anime_AllComments = (props) => {
                         </Text>
 
                         {
-                            item.createdAt !== item.updatedAt && (
+                            item.editedAt && (
                                 <Icon
                                 name="pencil"
                                 type="EvilIcons"
@@ -224,11 +252,10 @@ export const Anime_AllComments = (props) => {
                     </View>
 
                     {
-                        spoilers.findIndex(x => x.id === item.id && x.closed) > -1 ? (
+                        spoilers.findIndex(x => x?.id === item.id && x?.closed) > -1 ? (
                             <View
                             style={{
                                 backgroundColor: theme.divider_color + "80",
-                                padding: 10,
                                 borderRadius: 8,
                                 marginTop: 5,
                                 borderWidth: 1,
@@ -238,28 +265,23 @@ export const Anime_AllComments = (props) => {
                             }}
                             >
                                 <TouchableNativeFeedback
-                                onPress={() => {
-                                    const newSpoilersData = spoilers.map((spoilerItem) => {
-                                        if(spoilerItem.id === item.id) {
-                                            return {
-                                                id: item.id,
-                                                closed: false
-                                            }
-                                        }
-                                    });
-
-                                    setSpoilers(newSpoilersData);
-                                }}
+                                onPress={() => changeSpoiler(item.id, false)}
                                 >
-                                    <Text
+                                    <View
                                     style={{
-                                        textAlign: "center",
-                                        color: theme.text_secondary_color,
-                                        fontSize: 12.5
+                                        padding: 10
                                     }}
                                     >
-                                        Автор комментария указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
-                                    </Text>
+                                        <Text
+                                        style={{
+                                            textAlign: "center",
+                                            color: theme.text_secondary_color,
+                                            fontSize: 12.5
+                                        }}
+                                        >
+                                            Автор указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
+                                        </Text>
+                                    </View>
                                 </TouchableNativeFeedback>
                             </View>
                         ) : (
@@ -275,11 +297,10 @@ export const Anime_AllComments = (props) => {
                                 </Text>
 
                                 {
-                                    spoilers.findIndex(x => x.id === item.id && !x.closed) > -1 && (
+                                    spoilers.findIndex(x => x?.id === item.id && !x?.closed) > -1 && (
                                         <View
                                         style={{
                                             backgroundColor: theme.divider_color + "80",
-                                            padding: 10,
                                             borderRadius: 8,
                                             marginTop: 5,
                                             borderWidth: 1,
@@ -289,28 +310,23 @@ export const Anime_AllComments = (props) => {
                                         }}
                                         >
                                             <TouchableNativeFeedback
-                                            onPress={() => {
-                                                const newSpoilersData = spoilers.map((spoilerItem) => {
-                                                    if(spoilerItem.id === item.id) {
-                                                        return {
-                                                            id: item.id,
-                                                            closed: true
-                                                        }
-                                                    }
-                                                });
-
-                                                setSpoilers(newSpoilersData);
-                                            }}
+                                            onPress={() => changeSpoiler(item.id, true)}
                                             >
-                                                <Text
+                                                <View
                                                 style={{
-                                                    textAlign: "center",
-                                                    color: theme.text_secondary_color,
-                                                    fontSize: 12.5
+                                                    padding: 10,
                                                 }}
                                                 >
-                                                    Нажмите, чтобы скрыть
-                                                </Text>
+                                                    <Text
+                                                    style={{
+                                                        textAlign: "center",
+                                                        color: theme.text_secondary_color,
+                                                        fontSize: 12.5
+                                                    }}
+                                                    >
+                                                        Нажмите, чтобы скрыть
+                                                    </Text>
+                                                </View>
                                             </TouchableNativeFeedback>
                                         </View>
                                     )
@@ -329,30 +345,64 @@ export const Anime_AllComments = (props) => {
                     marginRight: 15,
                 }}
                 >
-                    <View>
-                        {
-                            item.replies >= 1 && (
-                                <Button
-                                title={`Смотреть ${item.replies} ${declOfNum(item.replies, ["ответ", "ответа", "ответов"])}`}
-                                upperTitle={false}
-                                type="overlay"
-                                textColor={theme.text_color}
-                                containerStyle={{
-                                    marginTop: 0
-                                }}
-                                size="s"
-                                before={
-                                    <Icon
-                                    name="reply-all"
-                                    type="Entypo"
-                                    color={theme.text_color}
-                                    size={13}
-                                    />
+                    <View
+                    style={{
+                        marginTop: -10
+                    }}
+                    >
+                        <View style={{ alignItems: "flex-start" }}>
+                            <Button
+                            title="Ответить"
+                            upperTitle={false}
+                            type="overlay"
+                            containerStyle={{
+                                marginTop: 0,
+                                marginBottom: 3
+                            }}
+                            onPress={() => navigate("anime.reply_comments", {
+                                commentId: item.id,
+                                animeId: route.params?.animeId,
+                                reply: {
+                                    id: item.id,
+                                    user: item.user
                                 }
-                                onPress={() => navigate("anime.reply_comments", { commentId: item.id })}
-                                />
-                            )
-                        }
+                            })}
+                            size="s"
+                            textColor={theme.text_secondary_color}
+                            />
+                        </View>
+                        
+                        <View>
+                            {
+                                item.replies >= 1 && (
+                                    <Button
+                                    title={`Смотреть ${item.replies} ${declOfNum(item.replies, ["ответ", "ответа", "ответов"])}`}
+                                    upperTitle={false}
+                                    type="overlay"
+                                    textColor={theme.text_secondary_color}
+                                    containerStyle={{
+                                        marginTop: 0
+                                    }}
+                                    onPress={() => navigate("anime.reply_comments", {
+                                        commentId: item.id,
+                                        animeId: route.params?.animeId
+                                    })}
+                                    size={30}
+                                    textStyle={{
+                                        fontSize: 14
+                                    }}
+                                    before={
+                                        <Icon
+                                        name="reply-all"
+                                        type="Entypo"
+                                        color={theme.text_secondary_color}
+                                        size={13}
+                                        />
+                                    }
+                                    />
+                                )
+                            }
+                        </View>
                     </View>
                     
                     <View
@@ -402,101 +452,141 @@ export const Anime_AllComments = (props) => {
         )
     };
 
+    const styles = StyleSheet.create({
+        modalContainer: {
+            left: 10,
+            width: Dimensions.get("window").width - 20,
+            bottom: 10,
+            borderRadius: 15,
+            backgroundColor: theme.bottom_modal.background,
+            borderColor: theme.bottom_modal.border,
+            borderWidth: 0.5,
+            overflow: "hidden",
+            borderRadius: 15,
+        },
+    });
+
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1}}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1}}>
             <Header
             title="Комментарии"
             backButton
             backButtonOnPress={() => goBack()}
             />
 
-            <FlatList
-            data={comments}
-            renderItem={renderComments}
-            keyExtractor={(item, index) => index.toString()}
-            onEndReached={loadMoreComments}
-            scrollEnabled
-            refreshControl={
-                <RefreshControl
-                progressBackgroundColor={theme.refresh_control_background}
-                colors={[theme.accent]}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                />
-            }
-            />
+            <Modalize
+            ref={modalRef}
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            modalStyle={styles.modalContainer}
+            adjustToContentHeight
+            >
+                {modalContent}
+            </Modalize>
 
-            <View>
-                <View
-                style={{
-                    width: "100%",
-                    height: 30,
-                    backgroundColor: theme.divider_color,
-                    justifyContent: "center",
-                    paddingHorizontal: 10,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between"
-                }}
-                >
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
-                    >
-                        <Text style={{ color: theme.text_secondary_color }}>
-                            Спойлер
-                        </Text>
-
-                        <Switch 
-                        style={{ transform: [{ scaleX: .7 }, { scaleY: .7 }] }}
-                        value={newCommentIsSpoiler}
-                        onValueChange={(value) => setNewCommentIsSpoiler(value)}
-                        trackColor={{ false: theme.switch.track_off, true: theme.switch.track_on }}
-                        thumbColor={newCommentIsSpoiler ? theme.switch.thumb : theme.switch.thumb_light}
+            {
+                loadingComments ? (
+                    <Placeholder
+                    icon={<ActivityIndicator size={35} color={theme.activity_indicator_color}/>}
+                    title="Загрузка комментариев"
+                    subtitle="Пожалуйста, подождите"
+                    />
+                ) : (
+                    <FlatList
+                    keyboardShouldPersistTaps="always"
+                    data={comments}
+                    keyboardDismissMode="on-drag"
+                    renderItem={renderComments}
+                    keyExtractor={(item, index) => index.toString()}
+                    onEndReached={loadMoreComments}
+                    scrollEnabled
+                    refreshControl={
+                        <RefreshControl
+                        progressBackgroundColor={theme.refresh_control_background}
+                        colors={[theme.accent]}
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
                         />
-                    </View>
+                    }
+                    ref={flatListRef}
+                    />
+                )
+            }
 
-                    {
-                        loadingMoreComments && (
+            {
+                !loadingComments && (
+                    <View>
+                        <View
+                        style={{
+                            width: "100%",
+                            height: 30,
+                            backgroundColor: theme.divider_color + "80",
+                            justifyContent: "center",
+                            paddingHorizontal: 10,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between"
+                        }}
+                        >
                             <View
                             style={{
                                 flexDirection: "row",
                                 alignItems: "center",
                             }}
                             >
-                                <ActivityIndicator size={11} color={theme.activity_indicator_color}/>
-                                <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: 10 }}>Загрузка комментариев...</Text>
+                                <Text style={{ color: theme.text_secondary_color }}>
+                                    Спойлер
+                                </Text>
+
+                                <Switch 
+                                style={{ transform: [{ scaleX: .7 }, { scaleY: .7 }] }}
+                                value={newCommentIsSpoiler}
+                                onValueChange={(value) => setNewCommentIsSpoiler(value)}
+                                trackColor={{ false: theme.switch.track_off, true: theme.switch.track_on }}
+                                thumbColor={newCommentIsSpoiler ? theme.switch.thumb : theme.switch.thumb_light}
+                                />
                             </View>
-                        )
-                    }
-                </View>
+
+                            {
+                                loadingMoreComments && (
+                                    <View
+                                    style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                    }}
+                                    >
+                                        <ActivityIndicator size={11} color={theme.activity_indicator_color}/>
+                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: 10 }}>Загрузка комментариев...</Text>
+                                    </View>
+                                )
+                            }
+                        </View>
                 
-                <WriteBar
-                placeholder="Комментарий"
-                value={newCommentText}
-                onChangeText={text => setNewCommentText(text)}
-                after={
-                    <PressIcon
-                    icon={
-                        sendLoading ? (
-                            <ActivityIndicator color={theme.activity_indicator_color}/>
-                        ) : (
-                            <Icon
-                            name="send"
-                            type="Ionicons"
-                            color={newCommentText.length >= 2 ? theme.accent : theme.icon_color}
-                            size={20}
+                        <WriteBar
+                        placeholder="Комментарий"
+                        value={newCommentText}
+                        onChangeText={text => setNewCommentText(text)}
+                        after={
+                            <PressIcon
+                            icon={
+                                sendLoading ? (
+                                    <ActivityIndicator color={theme.activity_indicator_color}/>
+                                ) : (
+                                    <Icon
+                                    name="send"
+                                    type="Ionicons"
+                                    color={newCommentText.length >= 3 ? theme.accent : theme.icon_color}
+                                    size={20}
+                                    />
+                                ) 
+                            }
+                            disabled={sendLoading || newCommentText.length < 3}
+                            onPress={sendNewComment}
                             />
-                        ) 
-                    }
-                    disabled={sendLoading || newCommentText.length < 3}
-                    onPress={sendNewComment}
-                    />
-                }
-                />
-            </View>
-        </View>
+                        }
+                        />
+                    </View>
+                ) 
+            }
+        </GestureHandlerRootView>
     )
 };

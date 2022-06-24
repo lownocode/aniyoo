@@ -41,6 +41,8 @@ target 'aniyoo' do
 
 
 
+  pod 'RNCClipboard', :path => '../node_modules/@react-native-community/clipboard'
+
   target 'aniyooTests' do
     inherit! :complete
     # Pods for testing

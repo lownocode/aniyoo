@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, ScrollView, Image, Text , ToastAndroid} from "react-native";
+import { View, ScrollView, Image, Text , ToastAndroid, FlatList } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -23,11 +23,9 @@ export const LinkedAnime = (props) => {
 
     const route = useRoute();
 
-    const [ animeList, setAnimeList ] = useState(route.params?.animeList || {});
+    const [ animeList ] = useState(route.params?.animeList || {});
 
-    const renderList = (item, index) => {
-        console.log(JSON.stringify(item, null, "\t"));
-
+    const renderList = ({ item, index }) => {
         return (
             <View
             key={"linked-anime-" + index}
@@ -42,7 +40,6 @@ export const LinkedAnime = (props) => {
                     }
                     
                     navigation.reset({
-                        // index: 1,
                         routes: [
                             { 
                                 name: "anime",
@@ -56,7 +53,14 @@ export const LinkedAnime = (props) => {
                     })
                 }}
                 before={
-                    <View style={{borderRadius: 10, backgroundColor: theme.divider_color}}>
+                    <View
+                    style={{
+                        borderRadius: 6, 
+                        backgroundColor: theme.divider_color,
+                        position: "relative",
+                        overflow: "hidden",
+                    }}
+                    >
                         <Image
                         resizeMethod="resize"
                         style={{
@@ -68,6 +72,36 @@ export const LinkedAnime = (props) => {
                             uri: item.poster
                         }}
                         />
+
+                        {
+                            item.inList !== "none" && (
+                                <View>
+                                    <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        backgroundColor: theme.anime[item.inList], 
+                                        opacity: 0.85,
+                                        position: "absolute",
+                                        bottom: 0,
+                                        width: "100%",
+                                        textAlign: "center",
+                                        color: "#fff",
+                                        fontSize: 12,
+                                        paddingHorizontal: 3,
+                                        fontWeight: "500"
+                                    }}
+                                    >
+                                        {
+                                            item.inList === "watching" ? "Смотрю" :
+                                            item.inList === "completed" ? "Просмотрено" :
+                                            item.inList === "planned" ? "В планах" :
+                                            item.inList === "postponed" ? "Отложено" :
+                                            item.inList === "dropped" ? "Брошено" : null
+                                        }
+                                    </Text>
+                                </View>
+                            )
+                        }
                     </View>
                 }
                 containerStyle={{
@@ -139,12 +173,13 @@ export const LinkedAnime = (props) => {
             title="Связанные аниме"
             />
 
-            <ScrollView
-            showsVerticalScrollIndicator={false}
+            <FlatList
             overScrollMode="never"
-            >
-                {animeList?.map(renderList)}
-            </ScrollView>
+            showsVerticalScrollIndicator={false}
+            data={animeList}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderList}
+            />
         </View>
     )
 };
