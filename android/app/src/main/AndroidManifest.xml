@@ -20,12 +20,24 @@
         android:label="@string/app_name"
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
         android:launchMode="singleTask"
-        android:screenOrientation="portrait"
         android:windowSoftInputMode="adjustResize">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
             <!-- <action android:name="com.google.firebase.MESSAGING_EVENT" /> -->
+        </intent-filter>
+
+        <intent-filter android:label="@string/app_name">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            
+            <data
+            android:scheme="aniyoo"
+            android:host="anime"
+            />
+            <data android:scheme="http" android:host="aniyoo.localhostov.ru" />
+            <data android:scheme="https" android:host="aniyoo.localhostov.ru" />
         </intent-filter>
 
         <!-- <meta-data

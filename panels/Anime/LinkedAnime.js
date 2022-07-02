@@ -39,18 +39,7 @@ export const LinkedAnime = (props) => {
                         return ToastAndroid.show("К сожалению, такого аниме ещё нет в нашем приложении", ToastAndroid.CENTER)
                     }
                     
-                    navigation.reset({
-                        routes: [
-                            { 
-                                name: "anime",
-                                params: {
-                                    animeData: {
-                                        id: item.id
-                                    }
-                                }
-                            }
-                        ]
-                    })
+                    navigation.push("anime", { animeData: { id: item.id } })
                 }}
                 before={
                     <View

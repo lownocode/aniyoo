@@ -195,9 +195,14 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
-    implementation 'com.facebook.fresco:fresco:2.0.0'
-    implementation 'com.facebook.fresco:animated-gif:2.6.0'
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "com.facebook.fresco:fresco:2.0.0"
+    implementation "com.facebook.fresco:animated-gif:2.6.0"
+    implementation "androidx.appcompat:appcompat:1.0.0"
+
+    compile project(':react-native-video')
+    compile project(':react-native-orientation')
+    // implementation project(':react-native-pager-view')
     
     // implementation platform('com.google.firebase:firebase-bom:30.1.0')
     // implementation 'com.google.firebase:firebase-analytics'

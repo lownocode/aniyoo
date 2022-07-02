@@ -5,3 +5,6 @@ export * from "./AnimeSetList";
 export * from "./CommentActions";
 export * from "./EditComment";
 export * from "./DeleteComment";
+export * from "./ChangeVideoQuality";
+export * from "./ChangeVideoRate";
+export * from "./SelectVideoSource";

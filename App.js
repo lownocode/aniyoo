@@ -1,8 +1,9 @@
-import React, { useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SplashScreen from "react-native-splash-screen";
-import { StatusBar } from 'react-native';
+import { StatusBar, Linking } from 'react-native';
+import Orientation from 'react-native-orientation';
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 // import FBMessaging from "@react-native-firebase/messaging";
 // import Firebase from "@react-native-firebase/app";
@@ -33,7 +34,11 @@ import {
   Anime,
   LinkedAnime,
   Anime_ReplyComments,
-  Anime_AllComments
+  Anime_AllComments,
+  SplashScreen,
+  Anime_SelectTranslation,
+  Anime_SelectEpisode,
+  Anime_VideoPlayer
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -46,29 +51,30 @@ import ThemeContext from "./config/ThemeContext";
 import UserContext from "./config/UserContext";
 
 const Stack = createNativeStackNavigator();
+Orientation.lockToPortrait();
 
 export default App = () => {
   const [ darkThemeMode, setDarkThemeMode ] = useState(false);
-  const [ initialScreenName, setInitialScreenName ] = useState();
+  const [ initialScreenName, setInitialScreenName ] = useState(null);
   const [ UserData, setUserData ] = useState({});
 
   const getTheme = async () => {
-    const theme = await storage.getItem("DARK_THEME_MODE");
-    if(theme === null) {
+    const darkMode = await storage.getItem("DARK_THEME_MODE");
+    if(darkMode === null) {
       await storage.setItem("DARK_THEME_MODE", true);
       return setDarkThemeMode(true);
     }
 
-    setDarkThemeMode(theme);
-    return theme;
+    changeNavigationBarColor(darkMode ? theme.DARK.background_content : theme.LIGHT.background_content, false, true);
+    setDarkThemeMode(darkMode);
+    return darkMode;
   }; 
 
   const authorization = async () => {
     const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
     if(!sign) {
-      setInitialScreenName("authorization");
-      return SplashScreen.hide();
+      return setInitialScreenName("authorization");
     }
 
     // await FBMessaging().registerDeviceForRemoteMessages();
@@ -95,17 +101,15 @@ export default App = () => {
     .then(({ data }) => setUserData(data))
     .catch((error) => {
       if(error.toJSON().message === "Network Error") {
-        SplashScreen.hide();
         return setInitialScreenName("network_error");
       }
 
       storage.setItem("AUTHORIZATION_SIGN", null);
-      setInitialScreenName("authorization");
-      return SplashScreen.hide();
+      return setInitialScreenName("authorization");
     });
 
-    setInitialScreenName("tabs");
-    SplashScreen.hide();
+    handleDeeplink();
+    setInitialScreenName("tabs")
   };
 
   useEffect(() => {
@@ -118,6 +122,42 @@ export default App = () => {
       EventRegister.removeEventListener(eventListener);
     };
   }, []);
+
+  const handleDeeplink = async () => {
+    const getUrlVars = (url) => {
+      if(!url) return;
+
+      let hash;
+      let myJson = {};
+      let hashes = url.slice(url.indexOf('?') + 1).split('&');
+      for (let i = 0; i < hashes.length; i++) {
+          hash = hashes[i].split('=');
+          myJson[hash[0]] = hash[1];
+      }
+      return myJson;
+    }
+
+    const url = await Linking.getInitialURL();
+    const params = getUrlVars(url);
+
+    if(url) {
+      storage.setItem("DEEPLINK_INITIAL_PARAMS", params);
+    }
+    if(/\/anime/i.test(url)) {
+      return setInitialScreenName("anime");
+    }
+
+    Linking.addEventListener("url", ({ url }) => {
+      if(url) {
+        storage.setItem("DEEPLINK_INITIAL_PARAMS", getUrlVars(url));
+      }
+      if(/\/anime/i.test(url)) {
+        return setInitialScreenName("anime");
+      }
+    });
+
+    setInitialScreenName("tabs");
+  }; 
 
   useEffect(() => {
     getTheme();
@@ -232,8 +272,35 @@ export default App = () => {
                 options={{ animation: "none" }}
                 component={Anime_AllComments}
                 />
+
+                <Stack.Screen 
+                name="anime.select_translation" 
+                options={{ animation: "none" }}
+                component={Anime_SelectTranslation}
+                />
+
+                <Stack.Screen 
+                name="anime.select_episode" 
+                options={{ animation: "none" }}
+                component={Anime_SelectEpisode}
+                />
+
+                <Stack.Screen 
+                name="anime.videoplayer" 
+                options={{ animation: "none" }}
+                component={Anime_VideoPlayer}
+                />
               </Stack.Navigator>
-            ) : null
+            ) : (
+              <Stack.Navigator
+              screenOptions={{ headerShown: false }}
+              >
+                <Stack.Screen 
+                name="SPLASH_SCREEN" 
+                component={SplashScreen}
+                />
+              </Stack.Navigator>
+            )
           }
         </NavigationContainer>
       </UserContext.Provider>

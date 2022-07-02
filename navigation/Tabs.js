@@ -4,7 +4,7 @@ import { Text, View, TouchableNativeFeedback, Keyboard } from "react-native";
 import { EventRegister } from "react-native-event-listeners";
 
 import {
-    Bookmarks,
+    Lists,
     Home,
     Notices,
     Search,
@@ -174,7 +174,7 @@ export const Tabs = (props) => {
             </Tab.Screen>
 
             <Tab.Screen
-            name="bookmarks"
+            name="lists"
             options={{
                 label: "Списки",
                 iconFocus: {
@@ -190,7 +190,7 @@ export const Tabs = (props) => {
             }}
             >
                 {
-                    props => <Bookmarks {...props} />
+                    props => <Lists {...props} />
                 }
             </Tab.Screen>
 

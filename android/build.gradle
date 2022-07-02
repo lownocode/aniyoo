@@ -10,6 +10,7 @@ buildscript {
     }
     repositories {
         google()
+        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -23,6 +24,7 @@ buildscript {
 allprojects {
     repositories {
         google()
+        jcenter()
         mavenLocal()
         
         maven {
@@ -42,5 +44,16 @@ allprojects {
         }
         
         maven { url 'https://www.jitpack.io' }
+    }
+}
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            android {
+                compileSdkVersion 30        // version of compile sdk used for project
+                buildToolsVersion "30.0.2"   // version of build tool used for project
+            }
+        }
     }
 }

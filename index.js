@@ -10,4 +10,5 @@ LogBox.ignoreLogs([
 ]);
 
 axios.defaults.baseURL = REQUEST_DOMAIN;
+
 AppRegistry.registerComponent("aniyoo", () => App);

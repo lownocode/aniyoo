@@ -65,9 +65,10 @@ export const Anime = (props) => {
         // console.log(JSON.stringify(animeData, null, "\t"))
         setRefreshing(refreshing);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        const params = await storage.getItem("DEEPLINK_INITIAL_PARAMS");
 
         axios.post("/anime.get", {
-            animeId: id || route.params?.animeData?.id
+            animeId: id || route.params?.animeData?.id || params.id
         }, {
             headers: {
                 "Authorization": sign
@@ -290,10 +291,7 @@ export const Anime = (props) => {
                 title={item.name}
                 centered={false}
                 maxTitleLines={2}
-                onPress={() => {
-                    getAnimeData(item.id);
-                    scrollViewRef.current?.scrollTo({ y: 0, animated: true  });
-                }}
+                onPress={() => navigation.push("anime", { animeData: { id: item.id } })}
                 before={
                     <View 
                     style={{
@@ -1108,6 +1106,8 @@ export const Anime = (props) => {
                             />
                         }
                         size={45}
+                        disabled={!animeData?.id}
+                        onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
                         />
 
                         <View
