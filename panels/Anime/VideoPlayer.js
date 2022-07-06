@@ -6,7 +6,7 @@ import {
     View, 
     ActivityIndicator,
     Dimensions,
-    StyleSheet
+    StyleSheet,
 } from "react-native";
 import Video from "react-native-video";
 import { useRoute } from "@react-navigation/native";
@@ -19,14 +19,17 @@ import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import "dayjs/locale/ru";
 dayjs.extend(duration);
 
 import { Icon } from "../../components";
-import { ChangeVideoQuality, ChangeVideoRate } from "../../modals";
+import { 
+    AnimeWatchedBefore, 
+    ChangeVideoQuality, 
+    ChangeVideoRate 
+} from "../../modals";
 
 import ThemeContext from "../../config/ThemeContext";
-import { declOfNum, storage } from "../../functions";
+import { declOfNum, sleep, storage } from "../../functions";
 
 export const Anime_VideoPlayer = (props) => {
     const theme = useContext(ThemeContext);
@@ -34,14 +37,14 @@ export const Anime_VideoPlayer = (props) => {
     const {
         navigation: {
             goBack
-        }
+        },
     } = props;
 
     const route = useRoute();
 
     const [ controlsOpen, setControlsOpen ] = useState(false);
     const [ paused, setPaused ] = useState(false);
-    const [ progress, setProgress ] = useState({});
+    const [ progress, setProgress ] = useState({ currentTime: 0, seekableDuration: 0 });
     const [ seek, setSeek ] = useState(0);
     const [ lockedControls, setLockedControls ] = useState(false);
     const [ rate, setRate ] = useState(1);
@@ -50,13 +53,68 @@ export const Anime_VideoPlayer = (props) => {
     const [ quality, setQuality ] = useState(Object.keys(route.params?.videos || {})[Object.keys(route.params?.videos || {}).length - 1]);
     const [ loading, setLoading ] = useState(true);
     const [ modalContent, setModalContent ] = useState(null);
+    const [ lastProgressCurrent, setLastProgressCurrent ] = useState(0);
 
     const modalRef = useRef();
+
+    const saveAnimeViewData = async () => {
+        if(progress.currentTime % 3 !== 2) return;
+
+        const animeAllViewed = await storage.getItem(`ANIME_VIEW__ID=${route.params?.animeId || 0}`);
+
+        if(animeAllViewed === null) {
+            return storage.setItem(`ANIME_VIEW__ID=${route.params?.animeId || 0}`, [
+                {
+                    id: route.params?.animeId,
+                    viewed_up_to: progress.currentTime || 0,
+                    duration: progress.seekableDuration || 0,
+                    translationId: route.params?.translationId,
+                    episode: animeData.playedEpisode
+                }
+            ]);
+        }
+
+        const newAnimeViewData = animeAllViewed.map((item) => {
+            if(item.episode === animeData.playedEpisode && item.translationId === route.params?.translationId) {
+                return {
+                    id: route.params?.animeId,
+                    viewed_up_to: progress.currentTime || 0,
+                    duration: progress.seekableDuration || 0,
+                    translationId: route.params?.translationId,
+                    episode: animeData.playedEpisode
+                }
+            } 
+
+            return item;
+        });
+
+        if(!newAnimeViewData.find(x => x.episode === animeData.playedEpisode && x.translationId === route.params?.translationId)) {
+            newAnimeViewData.push({
+                id: route.params?.animeId,
+                viewed_up_to: progress.currentTime || 0,
+                duration: progress.seekableDuration || 0,
+                translationId: route.params?.translationId,
+                episode: animeData.playedEpisode
+            });
+        }
+
+        storage.setItem(`ANIME_VIEW__ID=${route.params?.animeId || 0}`, newAnimeViewData);
+    };
+
+    useEffect(() => {
+        saveAnimeViewData();
+    }, [progress, seek]);
 
     useEffect(() => {
         hideNavigationBar();
         Orientation.lockToLandscape();
         StatusBar.setHidden(true, "fade");
+
+        Orientation.addOrientationListener(() => {
+            getWatchedBefore()
+        });
+        Orientation.removeOrientationListener(() => null);
+        // sleep(1).then(() => );
     }, []);
 
     const onTouch = () => {
@@ -65,30 +123,61 @@ export const Anime_VideoPlayer = (props) => {
         setControlsOpen(!controlsOpen);
     };
 
+    const getWatchedBefore = async () => {
+        const animeAllViewed = await storage.getItem(`ANIME_VIEW__ID=${route.params?.animeId || 0}`);
+
+        if(animeAllViewed?.find(x => x.episode === animeData.playedEpisode && x.translationId === route.params?.translationId)) {
+            const data = animeAllViewed?.find(x => x.episode === animeData.playedEpisode && x.translationId === route.params?.translationId);
+
+            setModalContent(
+                <AnimeWatchedBefore 
+                data={data}
+                animeContinue={(time) => {
+                    setPaused(false);
+                    setSeek(time);
+                    modalRef.current?.close();
+                }}
+                startOver={() => {
+                    setPaused(false);
+                    modalRef.current?.close();
+                }}
+                onClose={() => modalRef.current?.close()}
+                />
+            );
+
+            setPaused(true);
+            modalRef.current?.open();
+        }
+    }; 
+
     const prevEpisode = async () => {
         setLoading(true);
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.getVideoLink", {
             animeId: route.params?.animeId,
             translationId: route.params?.translationId,
-            episode: animeData.playedEpisode - 1
+            episode: Number(animeData.playedEpisode) - 1,
+            source: route.params?.source
         }, {
             headers: {
                 "Authorization": sign
             }
         })
         .then(({ data }) => {
-            setVideoUrls(data);
-            setPaused(false);
+            setPaused(true);
+            setVideoUrls(data.links);
+            setSeek(0);
+            setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
             setAnimeData({
                 ...animeData,
-                playedEpisode: animeData.playedEpisode - 1,
+                playedEpisode: Number(animeData.playedEpisode) - 1,
+                opening: data.opening,
+                ending: data.ending
             });
-            setLoading(false);
+            setPaused(false);
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -96,31 +185,34 @@ export const Anime_VideoPlayer = (props) => {
     };
 
     const nextEpisode = async () => {
-        if(animeData.playedEpisode === animeData.episodesCount) return goBack();
-
-        setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
         setLoading(true);
+        if(animeData.playedEpisode === animeData.episodesCount) return goBack();
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.getVideoLink", {
             animeId: route.params?.animeId,
             translationId: route.params?.translationId,
-            episode: animeData.playedEpisode + 1
+            episode: Number(animeData.playedEpisode) + 1,
+            source: route.params?.source
         }, {
             headers: {
                 "Authorization": sign
             }
         })
         .then(({ data }) => {
-            setVideoUrls(data);
-            setPaused(false);
+            setPaused(true);
+            setVideoUrls(data.links);
+            setSeek(0);
+            setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
             setAnimeData({
                 ...animeData,
-                playedEpisode: animeData.playedEpisode + 1,
+                playedEpisode: Number(animeData.playedEpisode) + 1,
+                opening: data.opening,
+                ending: data.ending
             });
-            setLoading(false);
+            setPaused(false);
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -129,7 +221,7 @@ export const Anime_VideoPlayer = (props) => {
     const video = useRef();
 
     const changeQuality = async (quality) => {
-        setPaused(true);
+        // setPaused(true);
         setQuality(quality);
     };
 
@@ -162,28 +254,18 @@ export const Anime_VideoPlayer = (props) => {
             onTouchMove={(e) => console.log(e.nativeEvent.locationX)}
             onTouchEnd={onTouch}
             onEnd={() => nextEpisode()}
-            onBuffer={(isBuffer) =>{
-                console.log(isBuffer.isBuffering)
-            }}
             paused={paused}
-            onLoad={(e) => {
-                setLoading(true);
-                
-                setSeek(progress.currentTime); 
-
-                setPaused(false);
-                setLoading(false);
-            }}
             onProgress={e => {
-                if(e.currentTime >= e.playableDuration) {
+                if(e.currentTime === lastProgressCurrent) {
                     return setLoading(true);
-                }
+                } 
 
                 setLoading(false);
                 setProgress({
                     ...e,
-                    currentTime: Number(e.currentTime.toFixed(0))
+                    currentTime: Number(e.currentTime.toFixed(0)),
                 });
+                setLastProgressCurrent(e.currentTime)
             }}
             progressUpdateInterval={100}
             seek={seek}
@@ -195,6 +277,7 @@ export const Anime_VideoPlayer = (props) => {
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
             modalStyle={styles.modalContainer}
             adjustToContentHeight
+            onClosed={() => setPaused(false)}
             >
                 {modalContent}
             </Modalize>
@@ -218,14 +301,17 @@ export const Anime_VideoPlayer = (props) => {
                             style={{
                                 justifyContent: "space-between",
                                 alignItems: "center",
-                                marginTop: 10,
+                                marginTop: 25,
                                 flexDirection: "row",
                                 marginHorizontal: 10, 
-                                marginRight: 50
+                                marginRight: 50,
                             }}
                             >
                                 <TouchableNativeFeedback
-                                onPress={() => goBack()}
+                                onPress={() => {
+                                    saveAnimeViewData();
+                                    goBack();
+                                }}
                                 background={TouchableNativeFeedback.Ripple("rgba(0, 0, 0, .1)", true)}
                                 >
                                     <View>
@@ -359,6 +445,56 @@ export const Anime_VideoPlayer = (props) => {
                                 }
                             </View>
 
+                            {
+                                animeData?.opening?.start && (progress.currentTime > animeData?.opening?.start && progress.currentTime < animeData?.opening?.end) ? (
+                                    <View
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "flex-end",
+                                        marginBottom: 10,
+                                        marginRight: 25,
+                                        backgroundColor: theme.accent,
+                                        borderRadius: 100,
+                                        position: "absolute",
+                                        bottom: 70,
+                                        right: 15
+                                    }}
+                                    >
+                                        <TouchableNativeFeedback
+                                        onPress={() => setSeek(animeData?.opening?.end)}
+                                        background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                                        >
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                paddingVertical: 7,
+                                                paddingHorizontal: 9,
+                                            }}
+                                            >
+                                                <Icon
+                                                type="Feather"
+                                                name="chevrons-right"
+                                                size={15}
+                                                color="#fff"
+                                                />
+
+                                                <Text
+                                                style={{
+                                                    marginLeft: 5,
+                                                    fontWeight: "700",
+                                                    fontSize: 13
+                                                }}
+                                                >
+                                                    Пропустить опенинг
+                                                </Text>
+                                            </View>
+                                        </TouchableNativeFeedback>
+                                    </View>
+                                ) : null
+                            }
+
                             <View
                             style={{
                                 marginBottom: 5,
@@ -384,11 +520,8 @@ export const Anime_VideoPlayer = (props) => {
                                     step={1}
                                     maximumTrackTintColor="#fff"
                                     onSlidingComplete={(value) => {
-                                        if(!paused) {
-                                            setLoading(true);
-                                        }
                                         setSeek(value);
-                                        setLoading(false);
+                                        setProgress({ ...progress, currentTime: value });
                                     }}
                                     onValueChange={(value) => {
                                         setProgress({ ...progress, currentTime: value });
@@ -644,7 +777,7 @@ export const Anime_VideoPlayer = (props) => {
                     style={{
                         position: "absolute",
                         width: "100%",
-                        marginTop: 15,
+                        marginTop: 20,
                         flexDirection: "row",
                         justifyContent: "flex-end",
                     }}

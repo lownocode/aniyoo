@@ -151,14 +151,6 @@ export const Lists = props => {
         )
     });
 
-    useEffect(() => {
-        scrollX.addListener((e) => {
-            containerRef.current?.scrollTo({
-                x: e.value < width ? 0 : e.value 
-            });
-        });
-    }, [])
-
     const Indicator = ({ measures }) => {
         const inputRange = tabs.map((_, i) => i * width);
 
@@ -263,7 +255,13 @@ export const Lists = props => {
                 [{ nativeEvent: { contentOffset: { x: scrollX } } }],
                 { useNativeDriver: false } 
             )}
+            onScrollEndDrag={(e) => {
+                containerRef.current?.scrollTo({
+                    x: e.nativeEvent.contentOffset.x < width ? 0 : e.nativeEvent.contentOffset.x
+                });
+            }}
             renderItem={({ item }) => {
+                console.log(JSON.stringify(item, null, "\t"))
                 return (
                     <View 
                     style={{

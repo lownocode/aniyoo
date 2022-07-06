@@ -1,5 +1,13 @@
 import React, { useContext, useState } from "react";
-import { View, Image, Text, ScrollView, TouchableNativeFeedback, FlatList } from "react-native";
+import { 
+    View, 
+    Image, 
+    Text, 
+    ScrollView, 
+    TouchableNativeFeedback, 
+    FlatList,
+    Vibration
+} from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 import ThemeContext from "../config/ThemeContext";
@@ -667,14 +675,6 @@ export const MyAnimeList = (props) => {
             centered={false}
             maxTitleLines={2}
             before={
-                <View
-                style={{
-                    backgroundColor: theme.divider_color,
-                    borderRadius: 7,
-                    position: "relative",
-                    overflow: "hidden",
-                }}
-                >
                     <Image
                     resizeMethod="resize"
                     source={{
@@ -686,41 +686,10 @@ export const MyAnimeList = (props) => {
                         resizeMode: "cover",
                         borderRadius: 7,
                         borderColor: theme.divider_color,
-                        borderWidth: 0.5
+                        borderWidth: 0.5,
+                        backgroundColor: theme.divider_color,
                     }}
                     />
-
-                    {
-                        item.inList !== "none" && (
-                            <View>
-                                <Text
-                                numberOfLines={1}
-                                style={{
-                                    backgroundColor: theme.anime[item.inList],
-                                    opacity: 0.85,
-                                    position: "absolute",
-                                    bottom: 0,
-                                    width: "100%",
-                                    textAlign: "center",
-                                    color: "#fff",
-                                    fontSize: 12,
-                                    paddingVertical: 1,
-                                    paddingHorizontal: 3,
-                                    fontWeight: "500"
-                                }}
-                                >
-                                    {
-                                        item.inList === "watching" ? "Смотрю" :
-                                        item.inList === "completed" ? "Просмотрено" :
-                                        item.inList === "planned" ? "В планах" :
-                                        item.inList === "postponed" ? "Отложено" :
-                                        item.inList === "dropped" ? "Брошено" : "Неизвестно"
-                                    }
-                                </Text>
-                            </View>
-                        )
-                    }
-                </View>
             }
             subtitle={
                 <View>
@@ -730,31 +699,6 @@ export const MyAnimeList = (props) => {
                         flexWrap: "wrap",
                     }}
                     >
-                        {
-                            item.type === "anime-serial" && item.season ? (
-                                <View>
-                                    <Text
-                                    style={{
-                                        color: theme.text_color,
-                                        fontSize: 12,
-                                        borderColor: theme.divider_color,
-                                        backgroundColor: theme.divider_color + "98",
-                                        borderWidth: 1,
-                                        paddingHorizontal: 5,
-                                        paddingVertical: 1,
-                                        borderRadius: 5,
-                                        marginTop: 5,
-                                        marginRight: 10
-                                    }}
-                                    >
-                                        {
-                                            `${item.season || "?"} сезон`
-                                        }
-                                    </Text>
-                                </View>
-                            )  : null
-                        }
-
                         {
                             item.type === "anime-serial" && (
                                 <View>
@@ -780,37 +724,41 @@ export const MyAnimeList = (props) => {
                             )
                         }
 
-                        <View>
-                            <Text
-                            style={{
-                                color: theme.text_color,
-                                fontSize: 12,
-                                borderColor: theme.divider_color,
-                                backgroundColor: theme.divider_color + "98",
-                                borderWidth: 1,
-                                paddingHorizontal: 5,
-                                paddingVertical: 1,
-                                borderRadius: 5,
-                                marginRight: 10,
-                                marginTop: 5,
-                            }}
-                            >
-                                {/* {
-                                    item.other.kind === "tv" ? "Сериал" :
-                                    item.other.kind === "ona" ? "ONA" :
-                                    item.other.kind === "ova" ? "OVA" :
-                                    item.other.kind === "special" ? "Спешл" :
-                                    item.other.kind === "movie" ? "Фильм" : "Неизвестно"
-                                }, { 
-                                    item.status === "released" ? "вышел" :
-                                    item.status === "ongoing" ? "выходит" : 
-                                    item.status === "anons" ? "анонсирован" : "неизвестно"
-                                } */}
-                            </Text>
-                        </View>
+                        {
+                            item?.other?.kind && (
+                                <View>
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontSize: 12,
+                                        borderColor: theme.divider_color,
+                                        backgroundColor: theme.divider_color + "98",
+                                        borderWidth: 1,
+                                        paddingHorizontal: 5,
+                                        paddingVertical: 1,
+                                        borderRadius: 5,
+                                        marginRight: 10,
+                                        marginTop: 5,
+                                    }}
+                                    >
+                                        {
+                                            item.other.kind === "tv" ? "Сериал" :
+                                            item.other.kind === "ona" ? "ONA" :
+                                            item.other.kind === "ova" ? "OVA" :
+                                            item.other.kind === "special" ? "Спешл" :
+                                            item.other.kind === "movie" ? "Фильм" : "Неизвестно"
+                                        }, { 
+                                            item.status === "released" ? "вышел" :
+                                            item.status === "ongoing" ? "выходит" : 
+                                            item.status === "anons" ? "анонсирован" : "неизвестно"
+                                        }
+                                    </Text>
+                                </View>
+                            )
+                        }
 
-                        {/*
-                            item.other.year && (
+                        {
+                            item?.other?.year && (
                                 <View>
                                     <Text
                                     style={{
@@ -830,7 +778,7 @@ export const MyAnimeList = (props) => {
                                     </Text>
                                 </View>
                             )
-                        */}
+                        }
                     </View>
 
                     <Text
@@ -846,7 +794,8 @@ export const MyAnimeList = (props) => {
                     </Text>
                 </View>
             }
-            onPress={() => navigation.navigate("anime", { animeData: item })}
+            onPress={() => navigation.navigate("anime", { animeData: { ...item, id: item.animeId } })}
+            onLongPress={() => Vibration.vibrate(100)}
             />
         )
     };

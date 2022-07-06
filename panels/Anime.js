@@ -34,7 +34,10 @@ import {
     ContentHeader,
     Avatar,
     PressIcon,
-    Placeholder
+    Placeholder,
+    Progress,
+    DonutChart,
+    Rating
 } from "../components";
 import { AnimeSetList, CommentActions } from "../modals";
 import { FLAGS } from "../variables";
@@ -250,6 +253,8 @@ export const Anime = (props) => {
     };
 
     const renderFrames = (image, index) => {
+        if(typeof image !== "string") return;
+
         return (
             <View
             key={"image_frame-" + index}
@@ -308,7 +313,7 @@ export const Anime = (props) => {
                             height: 80,
                         }}
                         source={{
-                            uri: item.poster
+                            uri: item?.poster
                         }}
                         />
                         
@@ -784,6 +789,30 @@ export const Anime = (props) => {
                 </View>
             </View>
         )
+    };
+
+    const markAnime = async (v) => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/anime.mark", {
+            animeId: 77,
+            mark: 1
+        }, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            setAnimeData({
+                ...animeData,
+                userMark: v === animeData.userMark ? null : v,
+                marks: data.marks
+            })
+            console.log(data);
+        })
+        .catch(({ reponse: { data } }) => {
+            console.log(data);
+        });
     };
 
     const styles = StyleSheet.create({
@@ -1283,17 +1312,49 @@ export const Anime = (props) => {
                             containerStyle={{ marginBottom: 10 }}
                             />
 
-                            <Text
-                            selectable
-                            numberOfLines={hideDescription ? 5 : 10000}
-                            onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
-                            style={{
-                                fontStyle: animeData?.description ? "normal" : "italic",
-                                color: theme.text_color,
-                            }}
-                            >
-                                {animeData?.description ? animeData.description : "Описание не указано"}
-                            </Text>
+                            {
+                                animeData?.description ? (
+                                    <Text
+                                    selectable
+                                    numberOfLines={hideDescription ? 5 : 10000}
+                                    onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
+                                    style={{
+                                        fontStyle: animeData?.description ? "normal" : "italic",
+                                        color: theme.text_color,
+                                    }}
+                                    >
+                                        {animeData?.description ? animeData.description : "Описание не указано"}
+                                    </Text>
+                                ) : (
+                                    <View
+                                    style={{
+                                        borderColor: theme.divider_color,
+                                        borderWidth: 1,
+                                        borderRadius: 10,
+                                        padding: 15,
+                                        flexDirection: "row",
+                                        alignItems: "center"
+                                    }}
+                                    >
+                                        <Icon
+                                        type="Feather"
+                                        name="info"
+                                        size={25}
+                                        color={theme.text_secondary_color}
+                                        />
+                                        <Text
+                                        style={{
+                                            marginLeft: 15,
+                                            fontSize: 16,
+                                            fontWeight: "500",
+                                            color: theme.text_secondary_color
+                                        }}
+                                        >
+                                            Описание не указано
+                                        </Text>
+                                    </View>
+                                )
+                            }
 
                             {
                                 animeData?.description && descriptionLinesCount >= 6 ? (
@@ -1406,17 +1467,176 @@ export const Anime = (props) => {
                                                 size={109}
                                                 />
                                             ) : (
-                                                <PieChart 
-                                                data={statisticsChartData}
-                                                innerRadius={22}
-                                                style={{ height: 120, width: 109 }}
-                                                />
+                                                <View
+                                                style={{
+                                                    width: 120,
+                                                    height: 120
+                                                }}
+                                                >
+                                                    <PieChart 
+                                                    data={statisticsChartData}
+                                                    innerRadius={32}
+                                                    animate={true}
+                                                    style={{ height: 119, width: 119 }}
+                                                    />
+
+                                                    <View
+                                                    style={[
+                                                        StyleSheet.absoluteFill,
+                                                        {
+                                                            backgroundColor: theme.anime[animeData?.inList],
+                                                            width: "100%",
+                                                            height: "100%",
+                                                            borderRadius: 100,
+                                                            transform: [{
+                                                                scale: 0.2
+                                                            }]
+                                                        }
+                                                    ]}
+                                                    />
+                                                </View>
                                             )
                                         }
                                     </View>
                                 )
                             }
                         </View>
+
+                        {
+                            animeData?.marks && (
+                                <View
+                                style={{
+                                    marginTop: 15,
+                                }}
+                                >
+                                    <ContentHeader
+                                    text="Оценка"
+                                    containerStyle={{ marginBottom: 10, marginLeft: 15  }}
+                                    />
+
+                                    {
+                                        animeData?.marks?.avg ? (
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                marginHorizontal: 15,
+                                            }}
+                                            >
+                                                <View style={{ marginRight: 25 }}>
+                                                    <DonutChart
+                                                    radius={55}
+                                                    percentage={animeData?.marks?.avg || 0}
+                                                    strokeWidth={8}
+                                                    max={5}
+                                                    centerContent={
+                                                        <View>
+                                                            <Text
+                                                            style={{
+                                                                fontSize: 45,
+                                                                fontWeight: "700",
+                                                                color: theme.text_color,
+                                                                textAlign: "center"
+                                                            }}
+                                                            >
+                                                                {animeData?.marks?.avg}
+                                                            </Text>
+
+                                                            <Text
+                                                            style={{
+                                                                textAlign: "center",
+                                                                color: theme.text_secondary_color,
+                                                                fontSize: 12,
+                                                                marginTop: -7,
+                                                                paddingHorizontal: 15
+                                                            }}
+                                                            numberOfLines={1}
+                                                            >
+                                                                {animeData?.marks?.total} {declOfNum(animeData?.marks?.total, ["голос", "голоса", "голосов"])}
+                                                            </Text>
+                                                        </View>
+                                                    }
+                                                    />
+                                                </View>
+
+                                                <View
+                                                style={{
+                                                    flex: 1
+                                                }}
+                                                >
+                                                    {
+                                                        [5, 4, 3, 2, 1].map((mark, index) => {
+                                                            if(typeof animeData?.marks?.[mark] !== "number") return;
+
+                                                            const step = () => {
+                                                                return animeData?.marks?.[mark]
+                                                            };
+
+                                                            return (
+                                                                <View
+                                                                key={"mark-" + index}
+                                                                style={{
+                                                                    flexDirection: "row",
+                                                                    alignItems: "center",
+                                                                    marginBottom: 2
+                                                                }}
+                                                                >
+                                                                    <Text
+                                                                    style={{
+                                                                        marginRight: 10,
+                                                                        fontSize: 12
+                                                                    }}
+                                                                    >
+                                                                        {mark}
+                                                                    </Text>
+
+                                                                    <Progress
+                                                                    step={step() || 0}
+                                                                    steps={animeData?.marks?.total || 0}
+                                                                    />
+                                                                </View>
+                                                            )
+                                                        })
+                                                    }
+                                                </View>
+                                            </View>
+                                        ) : (
+                                            <Cell
+                                            disabled
+                                            before={
+                                                <Icon
+                                                name="star"
+                                                type="FontAwesome"
+                                                size={25}
+                                                color={theme.icon_color}
+                                                />
+                                            }
+                                            title="Нет оценок"
+                                            subtitle="Это аниме ещё никто не оценил, будь первым!"
+                                            />
+                                        )
+                                    }
+
+                                    <Divider/>
+
+                                    <View
+                                    style={{
+                                        marginHorizontal: 15,
+                                        marginTop: 10,
+                                        flexDirection: "row",
+                                    }}
+                                    >
+                                        <Rating
+                                        length={5}
+                                        select={animeData?.userMark}
+                                        onPress={(v) => markAnime(v)}
+                                        cancelPress={() => markAnime(animeData?.userMark)}
+                                        />
+                                    </View>
+                                </View>
+                            ) 
+                        }
 
                         {
                             linkedAnimes.length >= 1 && (

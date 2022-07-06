@@ -23,7 +23,8 @@ export const Cell = (props) => {
         contentStyle,
         additionalContentTop = null,
         additionalContentBottom = null,
-        centeredAfter = true
+        centeredAfter = true,
+        onLongPress
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -72,6 +73,7 @@ export const Cell = (props) => {
         onPress={onPress}
         background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
         disabled={disabled}
+        onLongPress={onLongPress}
         >
             <View>
                 {additionalContentTop}

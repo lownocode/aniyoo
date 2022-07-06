@@ -8,3 +8,4 @@ export * from "./DeleteComment";
 export * from "./ChangeVideoQuality";
 export * from "./ChangeVideoRate";
 export * from "./SelectVideoSource";
+export * from "./AnimeWatchedBefore";

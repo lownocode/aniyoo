@@ -72,6 +72,12 @@ const theme = {
             thumb: palette.accent,
             thumb_light: "#f0f0f0"
         },
+        donut_chart: {
+            color: palette.accent
+        },
+        progress: {
+            background: palette.accent
+        },
 
         //panels
 
@@ -86,7 +92,7 @@ const theme = {
             postponed: "#ff9500",
             dropped: "#ff453a",
             none: "#2A2A2A"
-        }
+        },
     },
 
     DARK: {
@@ -157,6 +163,12 @@ const theme = {
             track_on: "gray",
             thumb: "#ffffff",
             thumb_light: "#ffffff"
+        },
+        donut_chart: {
+            color: "#ffffff"
+        },
+        progress: {
+            background: "#ffffff"
         },
 
         //panels

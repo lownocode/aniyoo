@@ -13,3 +13,5 @@ export * from "./Snackbar";
 export * from "./AnimeLists";
 export * from "./AssemblyOfWeekCarousel";
 export * from "./WriteBar";
+export * from "./Progress";
+export * from "./DonutChart";

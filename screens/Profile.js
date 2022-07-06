@@ -1,5 +1,17 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
-import { View, RefreshControl, ScrollView, Text, FlatList, Linking, TouchableNativeFeedback, StyleSheet, Dimensions } from "react-native";
+import { 
+    View, 
+    RefreshControl, 
+    ScrollView, 
+    Text, 
+    FlatList, 
+    Linking, 
+    TouchableNativeFeedback, 
+    StyleSheet, 
+    Dimensions, 
+    ToastAndroid,
+    Image
+} from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
@@ -17,6 +29,7 @@ import {
     Avatar,
     Button,
     Cell,
+    ContentHeader,
     Divider,
     Header,
     Icon,
@@ -65,18 +78,19 @@ export const Profile = props => {
         
         axios.post("/user.signIn", null, {
             headers: {
+                "head": "test",
                 "Authorization": sign,
             }
         })
         .then(({ data }) => {
             setUserData(data);
-            storage.setItem("USER_DATA", { id: data.id });
             if(data?.friendsCount >= 1) {
                 getFriends();
             }
         })
         .catch(({ response: { data } }) => {
-            console.log(data);
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            navigate("authorization");
         })
         .finally(() => {
             setRefreshing(false);
@@ -85,7 +99,6 @@ export const Profile = props => {
 
     const getFriends = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        console.log(sign)
         
         axios.post("/friends.get", null, {
             headers: {
@@ -326,8 +339,8 @@ export const Profile = props => {
                         />
                         <Text style={{color: "gray", fontSize: 12}}>
                             {
-                                Number(userData?.online) < Number(Date.now() + (1 * 1000 * 60)) ? "Онлайн" : 
-                                `Был(-а) ${dayjs().to(Number(userData?.online) || 0)}`
+                                +new Date(userData?.online?.time) < Number(Date.now() + (1 * 1000 * 60)) ? "Онлайн" : 
+                                `Был(-а) ${dayjs().to(Number(userData?.online?.time) || 0)}`
                             } 
                         </Text>
                     </View>
@@ -365,40 +378,36 @@ export const Profile = props => {
                             marginTop: 5,
                         }}
                         >
-                            <TouchableNativeFeedback
-                            background={TouchableNativeFeedback.Ripple(item.color, false)}
+                            <View
+                            style={{
+                                paddingVertical: 2,
+                                paddingHorizontal: 10,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                flexDirection: "row",
+                            }}
                             >
-                                <View
+                                <Icon
+                                name={item?.icon?.name}
+                                type={item?.icon?.type}
+                                color={item?.icon?.color || item?.color || theme.accent}
                                 style={{
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 10,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    flexDirection: "row",
+                                    marginRight: 5
+                                }}
+                                size={item?.icon?.size || 9}
+                                />
+
+                                <Text
+                                style={{
+                                    fontWeight: "500",
+                                    color: item.color || theme.accent
                                 }}
                                 >
-                                    <Icon
-                                    name={item?.icon?.name}
-                                    type={item?.icon?.type}
-                                    color={item?.icon?.color || item?.color || theme.accent}
-                                    style={{
-                                        marginRight: 5
-                                    }}
-                                    size={item?.icon?.size || 9}
-                                    />
-
-                                    <Text
-                                    style={{
-                                        fontWeight: "500",
-                                        color: item.color || theme.accent
-                                    }}
-                                    >
-                                        {
-                                            item.text
-                                        }
-                                    </Text>
-                                </View>
-                            </TouchableNativeFeedback>
+                                    {
+                                        item.text
+                                    }
+                                </Text>
+                            </View>
                         </View>
                     ))
                 }
@@ -657,7 +666,8 @@ export const Profile = props => {
                 ) : (
                     <PieChart 
                     data={statisticsChartData}
-                    innerRadius={22}
+                    innerRadius={25}
+                    animate={true}
                     style={{ height: 120, width: 109 }}
                     />
                 )
@@ -844,8 +854,124 @@ export const Profile = props => {
                 />
             }
             >
-                {userInfoRender()}
-                {statisticsRender()}      
+                {userInfoRender()}  
+                {
+                    userData?.online?.payload?.anime && (
+                        <>
+                            <ContentHeader
+                            text={`${userData?.nickname} сейчас смотрит`}
+                            indents
+                            />
+                            <View
+                            style={{
+                                marginBottom: 10,
+                                marginHorizontal: 10,
+                                height: 120,
+                                justifyContent: "center"
+                            }}
+                            >
+                                <Image
+                                source={{
+                                    uri: userData?.online?.payload?.anime?.poster
+                                }}
+                                style={{
+                                    width: "100%",
+                                    height: 120,
+                                    // opacity: 0.3,
+                                    borderRadius: 15,
+                                }}
+                                resizeMethod="resize"
+                                resizeMode="cover"
+                                blurRadius={15}
+                                />
+
+                                <View
+                                style={{
+                                    position: "absolute",
+                                    width: "100%",
+                                    borderRadius: 15,
+                                    overflow: "hidden"
+                                }}
+                                >
+                                    <Cell
+                                    title={userData?.online?.payload?.anime?.title}
+                                    centered={false}
+                                    before={
+                                        <Image
+                                        resizeMethod="resize"
+                                        source={{
+                                            uri: userData?.online?.payload?.anime?.poster
+                                        }}
+                                        style={{
+                                            width: 60,
+                                            height: 100,
+                                            resizeMode: "cover",
+                                            borderRadius: 10,
+                                        }}
+                                        />
+                                    }
+                                    titleStyle={{
+                                        color: "#fff",
+                                        textShadowColor: "#000",
+                                        textShadowRadius: 5
+                                    }}
+                                    subtitle={
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            flexWrap: "wrap"
+                                        }}
+                                        >
+                                            <View>
+                                                <Text
+                                                style={{
+                                                    color: "#fff",
+                                                    textShadowColor: "#000",
+                                                    textShadowRadius: 5,
+                                                    fontSize: 12,
+                                                    backgroundColor: theme.divider_color + "98",
+                                                    paddingHorizontal: 5,
+                                                    paddingVertical: 1,
+                                                    borderRadius: 5,
+                                                    marginTop: 5,
+                                                    marginRight: 10,
+                                                }}
+                                                >
+                                                    {userData?.online?.payload?.episode} серия
+                                                </Text>
+                                            </View>
+
+                                            <View>
+                                                <Text
+                                                style={{
+                                                    color: "#fff",
+                                                    textShadowColor: "#000",
+                                                    textShadowRadius: 5,
+                                                    fontSize: 12,
+                                                    backgroundColor: theme.divider_color + "98",
+                                                    paddingHorizontal: 5,
+                                                    paddingVertical: 1,
+                                                    borderRadius: 5,
+                                                    marginTop: 5,
+                                                    marginRight: 10,
+                                                }}
+                                                >
+                                                    {userData?.online?.payload?.translation?.title}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    }
+                                    />
+                                </View>
+                            </View> 
+                        </>
+                    )
+                } 
+                {statisticsRender()}
+
+                <View
+                style={{marginBottom: 100}}
+                />  
             </ScrollView>
 
             <View style={{ marginBottom: 60 }}/>
