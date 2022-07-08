@@ -94,14 +94,17 @@ export const EditSocialNetworks = (props) => {
 
     const setNetworkByRoute = () => {
         const networks = route.params?.networks;
-        const mappedNetworks = networks?.map((item) => {
-            return {
-                ...values,
-                [item.network]: item.link
-            }
-        });
 
-        setValues(mappedNetworks[0]);
+        if(Object.keys(networks).length > 0) {
+            const mappedNetworks = networks?.map((item) => {
+                return {
+                    ...values,
+                    [item.network]: item.link
+                }
+            });
+    
+            setValues(mappedNetworks[0]);
+        }
     };
 
     useEffect(() => {
@@ -167,13 +170,14 @@ export const EditSocialNetworks = (props) => {
                             <View>
                                 <Button
                                 title={
-                                    saves[item.network] && values[item.network].length > 0 ? "Сохранить" : "Удалить"
+                                    "Удалить"
+                                    // saves[item.network] && values[item.network].length > 0 ? "Сохранить" : "Удалить"
                                 }
-                                disabled={!(saves[item.network] && values[item.network].length > 0)}
+                                // disabled={!(saves[item.network] && values[item.network].length > 0)}
                                 onPress={() => save(!(saves[item.network] && values[item.network].length > 0), item.network)}
                                 containerStyle={{
                                     marginRight: 0,
-                                    opacity: !(saves[item.network] && values[item.network].length > 0) ? 0.5 : 1
+                                    // opacity: !(saves[item.network] && values[item.network].length > 0) ? 0.5 : 1
                                 }}
                                 size={32}
                                 type="outline"

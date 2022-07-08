@@ -13,9 +13,9 @@ export const DonutChart = (props) => {
         percentage = 50,
         radius = 40,
         strokeWidth = 10,
-        duration = 1500,
+        duration = 1000,
         color = theme.donut_chart.color,
-        delay = 500,
+        delay = 0,
         centerContent,
         max = 100
     } = props;

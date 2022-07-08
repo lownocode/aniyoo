@@ -41,9 +41,12 @@ import {
     storage,
     declOfNum,
 } from "../functions";
+import UserContext from "../config/UserContext";
 
 export const UserProfile = (props) => {
     const theme = useContext(ThemeContext);
+    const user = useContext(UserContext);
+
     const route = useRoute();
 
     const { 
@@ -219,7 +222,13 @@ export const UserProfile = (props) => {
             >
                 <TouchableNativeFeedback
                 background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                onPress={() => navigation.push("user_profile", { userId: item.id })}
+                onPress={() => {
+                    if(item.id === user.id) {
+                        return ToastAndroid.show("Это Вы", ToastAndroid.CENTER);
+                    }
+
+                    navigation.push("user_profile", { userId: item.id })
+                }}
                 >
                     <View
                     style={{
@@ -233,6 +242,7 @@ export const UserProfile = (props) => {
                         <Avatar
                         size={55}
                         url={item.photo}
+                        online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
 
                         <Text
@@ -370,8 +380,8 @@ export const UserProfile = (props) => {
                         />
                         <Text style={{color: "gray", fontSize: 12}}>
                             {
-                                +new Date(userData?.online?.time) < Number(Date.now() + (1 * 1000 * 60)) ? "Онлайн" : 
-                                `Был(-а) ${dayjs().to(Number(userData?.online?.time) || 0)}`
+                                (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
+                                `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
                             } 
                         </Text>
                     </View>

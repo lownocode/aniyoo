@@ -1,238 +1,146 @@
-import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
+import { TouchableNativeFeedback, View, Text } from "react-native";
+
 import { 
-    ScrollView, 
-    View,
-    StatusBar,
-    Text,
-    Keyboard,
-    ActivityIndicator,
-    BackHandler
-} from "react-native";
-
-import { EventRegister } from "react-native-event-listeners";
-
-import {
-    Input,
     Icon,
-    PressIcon,
-    FoundedAnimeList,
-    Placeholder
+    Header
 } from "../components";
-
-import {
-    storage,
-} from "../functions";
 
 import ThemeContext from "../config/ThemeContext";
 
 export const Search = (props) => {
     const theme = useContext(ThemeContext);
 
-    const { navigation } = props;
-
-    const [ searchTitle, setSearchTitle ] = useState("");
-    const [ searchMode, setSearchMode ] = useState(false);
-    const [ sign, setSign ] = useState("");
-    const [ foundedAnimes, setFoundedAnimes ] = useState([]);
-    const [ loadingSearchAnimes, setLoadingSearchAnimes ] = useState(false);
-
-    const keyboardListeners = () => {
-        Keyboard.addListener("keyboardDidShow", () => {
-            EventRegister.emit("changeTabbar", { type: "hide" });
-            setSearchMode(true);
-        });
-    };
-
-    useEffect(() => {
-        const willFocusSubscription = navigation.addListener('focus', () => {
-            if(searchMode) {
-                return EventRegister.emit("changeTabbar", { type: "hide" });
-            }
-        });
-
-        keyboardListeners();
-
-        return willFocusSubscription;
-    }, []);
-
-    useEffect(() => {
-        (async () => {
-            const sign = await storage.getItem("AUTHORIZATION_SIGN");
-
-            setSign(sign);
-        })();
-    }, []);
-
-    const searchAnime = (title) => {
-        if(title.length === 0) {
-            setFoundedAnimes([]);
-            return setSearchTitle("");
+    const { 
+        navigation: {
+            navigate
         }
-
-        setLoadingSearchAnimes(true);
-        setSearchTitle(title);
-
-        axios.post("/anime.search", {
-            title: title,
-            order: {
-                season: 0
-            }
-        }, {
-            headers: {
-                "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            setFoundedAnimes(data);
-        })
-        .catch(({ response }) => {
-            console.log(JSON.stringify(response, null, "\t"))
-        })
-        .finally(() => setLoadingSearchAnimes(false));
-    };
-
-    const loadMoreAnimes = () => {
-        axios.post("/anime.search", {
-            title: searchTitle,
-            order: {
-                season: 0
-            },
-            offset: foundedAnimes.length,
-            limit: 15
-        }, {
-            headers: {
-                "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            setFoundedAnimes(foundedAnimes.concat(data));
-        });
-    };
+    } = props;
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <View
-            style={{
-                backgroundColor: theme.header_background,
-                paddingTop: StatusBar.currentHeight + 20,
-                paddingHorizontal: 15,
-                paddingBottom: 8,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center"
-            }}
-            >
-                {
-                    searchMode && (
-                        <PressIcon 
-                        icon={
-                            <Icon
-                            type="AntDesign"
-                            name="arrowleft"
-                            color="gray"
-                            size={22}
-                            />
-                        }
-                        onPress={() => {
-                            Keyboard.dismiss();
-                            setFoundedAnimes([]);
-                            setSearchMode(false);
-                            EventRegister.emit("changeTabbar", { type: "show" });
-                        }}
-                        containerStyle={{
-                            marginRight: 15,
-                        }}
-                        />
-                    )
-                }
+            <Header
+            title="Поиск"
+            height={30}
+            />
+
+            <View>
                 <View
-                style={{flex: 1}}
+                style={{
+                    backgroundColor: "#565ee320",
+                    overflow: "hidden",
+                    borderRadius: 14,
+                    margin: 15
+                }}
                 >
-                    <Input
-                    placeholder="Что ищем, семпай?"
-                    before={
-                        <Icon
-                        type="Ionicons"
-                        name="search"
-                        color={theme.icon_color}
-                        size={17}
-                        />
-                    }
-                    returnKeyType="search"
-                    after={
-                        searchTitle.trim().length >= 1 &&
-                        <PressIcon
-                        onPress={() => searchAnime("")}
-                        icon={
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple("#565ee3", false)}
+                    onPress={() => navigate("search_anime")}
+                    >
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            paddingVertical: 15,
+                            paddingLeft: 10
+                        }}
+                        >
+                            <View
+                            style={{
+                                marginRight: 25,
+                                marginLeft: 10
+                            }}
+                            >
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: 18,
+                                    fontWeight: "500"
+                                }}
+                                >
+                                    Поиск аниме
+                                </Text>
+
+                                <Text
+                                style={{
+                                    color: theme.text_secondary_color
+                                }}
+                                >
+                                    Ищешь что посмотреть? У нас найдется все!
+                                </Text>
+                            </View>
+
                             <Icon
-                            type="Ionicons"
-                            name="backspace-outline"
-                            color={theme.icon_color}
-                            size={20}
+                            name="search"
+                            type="Feather"
+                            color="#565ee3"
+                            size={25}
+                            style={{
+                                marginRight: 15
+                            }}
                             />
-                        }
-                        />
-                    }
-                    value={searchTitle}
-                    onChangeText={(value) => searchAnime(value)}
-                    onSubmitEditing={() => searchAnime(searchTitle)}
-                    />
+                        </View>
+                    </TouchableNativeFeedback>
+                </View>
+
+                <View
+                style={{
+                    backgroundColor: "#c956e320",
+                    overflow: "hidden",
+                    borderRadius: 14,
+                    marginHorizontal: 15
+                }}
+                >
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple("#c956e3", false)}
+                    onPress={() => navigate("search_users")}
+                    >
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            paddingVertical: 15,
+                            paddingLeft: 10
+                        }}
+                        >
+                            <View
+                            style={{
+                                marginRight: 25,
+                                marginLeft: 10
+                            }}
+                            >
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: 18,
+                                    fontWeight: "500"
+                                }}
+                                >
+                                    Поиск пользователей
+                                </Text>
+
+                                <Text
+                                style={{
+                                    color: theme.text_secondary_color
+                                }}
+                                >
+                                    Найди друга, если он зарегистрирован
+                                </Text>
+                            </View>
+
+                            <Icon
+                            name="account-search-outline"
+                            type="MaterialCommunityIcons"
+                            color="#c956e3"
+                            size={25}
+                            style={{
+                                marginRight: 15
+                            }}
+                            />
+                        </View>
+                    </TouchableNativeFeedback>
                 </View>
             </View>
-
-            {
-                searchMode && (
-                    foundedAnimes.length === 0 ? (
-                        foundedAnimes.length === 0 && searchTitle.length === 0 ? (
-                            <Placeholder
-                            icon={
-                                <Icon
-                                name="search"
-                                type="Ionicons"
-                                color={theme.icon_color}
-                                size={45}
-                                />
-                            }
-                            title="Начните вводить название"
-                            subtitle="Здесь будут отображены подходящие по названию аниме-сериалы и фильмы"
-                            />
-                        ) : (
-                            loadingSearchAnimes ? (
-                                <Placeholder
-                                icon={
-                                    <ActivityIndicator
-                                    color={theme.activity_indicator_color}
-                                    size={40}
-                                    />
-                                }
-                                title="Выполняется поиск"
-                                subtitle="Подождите немного"
-                                />
-                            ) : (
-                                <Placeholder
-                                icon={
-                                    <Icon
-                                    name="ios-sad-outline"
-                                    type="Ionicons"
-                                    color={theme.icon_color}
-                                    size={45}
-                                    />
-                                }
-                                title="Аниме не найдено"
-                                subtitle="К сожалению, аниме с таким названием не найдено. Попробуйте использовать оригинальное название или настроить фильтры"
-                                />
-                            )
-                        ) 
-                    ) : (
-                        <FoundedAnimeList
-                        animes={foundedAnimes}
-                        loadMoreAnimes={loadMoreAnimes}
-                        navigation={navigation}
-                        />
-                    )
-                )
-            }
         </View>
     )
 };

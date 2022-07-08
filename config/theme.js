@@ -1,5 +1,5 @@
 const palette = {
-    accent: "#4f90ff"
+    accent: "#0071ff"
 };
 
 const theme = {

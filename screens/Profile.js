@@ -288,8 +288,8 @@ export const Profile = props => {
                         />
                         <Text style={{color: "gray", fontSize: 12}}>
                             {
-                                +new Date(userData?.online?.time) < Number(Date.now() + (1 * 1000 * 60)) ? "Онлайн" : 
-                                `Был(-а) ${dayjs().to(Number(userData?.online?.time) || 0)}`
+                                (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
+                                `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
                             } 
                         </Text>
                     </View>
@@ -689,6 +689,7 @@ export const Profile = props => {
                         <Avatar
                         size={55}
                         url={item.photo}
+                        online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
 
                         <Text

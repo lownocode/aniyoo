@@ -39,7 +39,9 @@ import {
   Anime_SelectTranslation,
   Anime_SelectEpisode,
   Anime_VideoPlayer,
-  UserProfile
+  UserProfile,
+  SearchAnime,
+  SearchUsers
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -187,7 +189,7 @@ export default App = () => {
 
                 <Stack.Screen 
                 name="settings" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Settings}
                 />
 
@@ -198,104 +200,116 @@ export default App = () => {
 
                 <Stack.Screen 
                 name="edit_profile" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditProfile}
                 />
 
                 <Stack.Screen 
                 name="network_error" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={NetworkError}
                 />
 
                 <Stack.Screen 
                 name="edit_profile.profile" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditProfile_Profile}
                 />
 
                 <Stack.Screen 
                 name="edit_profile.privacy" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditProfile_Privacy}
                 />
 
                 <Stack.Screen 
                 name="edit_profile.security" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditProfile_Security}
                 />
 
                 <Stack.Screen 
                 name="edit_profile.change_nickname" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditProfile_ChangeNickname}
                 />
 
                 <Stack.Screen 
                 name="settings.application" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Settings_Application}
                 />
 
                 <Stack.Screen 
                 name="settings.another" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Settings_Another}
                 />
 
                 <Stack.Screen 
                 name="edit_social_networks" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={EditSocialNetworks}
                 />
 
                 <Stack.Screen 
                 name="anime" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime}
                 />
 
                 <Stack.Screen 
                 name="linked_anime" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={LinkedAnime}
                 />
 
                 <Stack.Screen 
                 name="anime.reply_comments" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime_ReplyComments}
                 />
 
                 <Stack.Screen 
                 name="anime.all_comments" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime_AllComments}
                 />
 
                 <Stack.Screen 
                 name="anime.select_translation" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime_SelectTranslation}
                 />
 
                 <Stack.Screen 
                 name="anime.select_episode" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime_SelectEpisode}
                 />
 
                 <Stack.Screen 
                 name="anime.videoplayer" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={Anime_VideoPlayer}
                 />
 
                 <Stack.Screen 
                 name="user_profile" 
-                options={{ animation: "none" }}
+                options={{ animation: "slide_from_left" }}
                 component={UserProfile}
+                />
+
+                <Stack.Screen 
+                name="search_anime" 
+                options={{ animation: "slide_from_left" }}
+                component={SearchAnime}
+                />
+
+                <Stack.Screen 
+                name="search_users" 
+                options={{ animation: "slide_from_left" }}
+                component={SearchUsers}
                 />
               </Stack.Navigator>
             ) : (

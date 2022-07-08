@@ -24,7 +24,7 @@ export const Input = props => {
         textAlign,
         type = "default",
         onSubmitEditing,
-        returnKeyType="done"
+        returnKeyType = "done",
     } = props;
 
     const localStyles = StyleSheet.create({

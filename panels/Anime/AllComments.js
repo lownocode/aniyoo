@@ -67,8 +67,8 @@ export const Anime_AllComments = (props) => {
         getComments();
     }, []);
 
-    const getComments = async () => {
-        setLoadingComments(true);
+    const getComments = async (loading = true) => {
+        setLoadingComments(loading);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/comment.getList", {
@@ -213,7 +213,7 @@ export const Anime_AllComments = (props) => {
                     onClose={() => modalRef.current?.close()} 
                     comment={item} 
                     successEditing={() => {
-                        getComments();
+                        getComments(false);
                     }}
                     />
                 );
@@ -233,7 +233,7 @@ export const Anime_AllComments = (props) => {
                         }}
                         >
                             {
-                                item.createdAt === item.updatedAt ? dayjs().to(item.createdAt) : dayjs().to(item.updatedAt)
+                                dayjs().to(item.editedAt || item.createdAt)
                             }
                         </Text>
 
@@ -290,10 +290,13 @@ export const Anime_AllComments = (props) => {
                                 selectable
                                 style={{
                                     marginTop: 3,
-                                    color: theme.text_color
+                                    color: item.text ? theme.text_color : theme.text_secondary_color,
+                                    fontStyle: item.text ? "normal" : "italic"
                                 }}
                                 >
-                                    {item.text}
+                                    {
+                                        item.text ? item.text : "Комментарий удалён."
+                                    }
                                 </Text>
 
                                 {
@@ -412,42 +415,82 @@ export const Anime_AllComments = (props) => {
                         alignItems: "center"
                     }}
                     >
-                        <PressIcon
-                        icon={
-                            <Icon
-                            name="chevron-down-outline"
-                            type="Ionicons"
-                            color={item.mark === "down" ? "#f54242" : theme.icon_color}
-                            size={18}
-                            />
-                        }
-                        onPress={() => markComment(item.id, "down")}
-                        />
+                        <View
+                        style={{
+                            borderRadius: 100,
+                            overflow: "hidden",
+                            borderColor: theme.divider_color,
+                            borderWidth: item.mark === "down" ? 0 : 1,
+                            backgroundColor: item.mark === "down" ? "#f54242" : "transparent"
+                        }}
+                        >
+                            <TouchableNativeFeedback
+                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                            onPress={() => markComment(item.id, "down")}
+                            >
+                                <View
+                                style={{
+                                    paddingVertical: 2,
+                                    paddingHorizontal: 15,
+                                }}
+                                >
+                                    <Icon
+                                    name="chevron-down-outline"
+                                    type="Ionicons"
+                                    color={item.mark === "down" ? "#fff" : theme.icon_color}
+                                    size={15}
+                                    />
+                                </View>
+                            </TouchableNativeFeedback>
+                        </View>
 
                         <Text
                         style={{
-                            marginHorizontal: 7,
-                            color: item.mark === "up" ? "#42f554" : item.mark === "down" ? "#f54242" : theme.text_secondary_color
+                            marginHorizontal: 10,
+                            fontWeight: "500",
+                            color: item.mark === "up" ? theme.accent : item.mark === "down" ? "#f54242" : theme.text_secondary_color
                         }}
                         >
                             {item.rating}
                         </Text>
 
-                        <PressIcon
-                        icon={
-                            <Icon
-                            name="chevron-up-outline"
-                            type="Ionicons"
-                            size={18}
-                            color={item.mark === "up" ? "#42f554" : theme.icon_color}
-                            />
-                        }
-                        onPress={() => markComment(item.id, "up")}
-                        />
+                        <View
+                        style={{
+                            borderRadius: 100,
+                            overflow: "hidden",
+                            borderColor: theme.divider_color,
+                            borderWidth: item.mark === "up" ? 0 : 1,
+                            backgroundColor: item.mark === "up" ? theme.accent : "transparent"
+                        }}
+                        >
+                            <TouchableNativeFeedback
+                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                            onPress={() => markComment(item.id, "up")}
+                            >
+                                <View
+                                style={{
+                                    paddingVertical: 2,
+                                    paddingHorizontal: 15,
+                                }}
+                                >
+                                    <Icon
+                                    name="chevron-up-outline"
+                                    type="Ionicons"
+                                    color={item.mark === "up" ? "#fff" : theme.icon_color}
+                                    size={15}
+                                    />
+                                </View>
+                            </TouchableNativeFeedback>
+                        </View>
                     </View>
                 </View>
             }
-            before={<Avatar url={item.user.photo}/>}
+            before={
+                <Avatar 
+                url={item.user.photo}
+                online={(+new Date() - +new Date(item?.user?.online?.time)) < 1 * 60 * 1000}
+                />
+            }
             />
         )
     };
@@ -494,6 +537,8 @@ export const Anime_AllComments = (props) => {
                     <FlatList
                     keyboardShouldPersistTaps="always"
                     data={comments}
+                    showsVerticalScrollIndicator={false}
+                    overScrollMode="never"
                     keyboardDismissMode="on-drag"
                     renderItem={renderComments}
                     keyExtractor={(item, index) => index.toString()}
@@ -508,6 +553,7 @@ export const Anime_AllComments = (props) => {
                         />
                     }
                     ref={flatListRef}
+                    ListFooterComponent={<View style={{ marginBottom: 30 }} />}
                     />
                 )
             }
