@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, ScrollView, Text } from "react-native";
-
+import { View, Vibration, Text, TextInput, TouchableWithoutFeedback, ToastAndroid } from "react-native";
 import axios from "axios";
+import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useRoute } from "@react-navigation/native";
 
 import { 
     Header,
     Button,
-    Input,
-    PressIcon,
     Icon
 } from "../components";
 
@@ -16,6 +16,7 @@ import { storage } from "../functions";
 
 export const EditSocialNetworks = (props) => {
     const theme = useContext(ThemeContext);
+    const route = useRoute();
 
     const {
         navigation: {
@@ -23,60 +24,239 @@ export const EditSocialNetworks = (props) => {
         }
     } = props;
 
-    const [ telegram, setTelegram ] = useState("");
-    const [ instagram, setInstagram ] = useState("");
-    const [ vk, setVk ] = useState("");
-    const [ loadng, setLoading ] = useState(false);
+    const [ loading, setLoading ] = useState(false);
+    const [ networks, setNetworks ] = useState([
+        {
+            name: "ВКонтакте",
+            network: "vk",
+            icon: {
+                name: "vk",
+                type: "Entypo",
+            },
+            domain: "https://vk.com/",
+            background: "#0062ff"
+        },
+        {
+            name: "Telegram",
+            network: "telegram",
+            icon: {
+                name: "telegram",
+                type: "FontAwesome",
+            },
+            domain: "https://t.me/",
+            background: "#00a6ff"
+        },
+        {
+            name: "Instagram",
+            network: "instagram",
+            icon: {
+                name: "instagram",
+                type: "AntDesign",
+            },
+            domain: "https://instagram.com/",
+            background: "#ff005d"
+        },
+        {
+            name: "TikTok",
+            network: "tiktok",
+            icon: {
+                name: "tiktok",
+                type: "FontAwesome5Brands",
+            },
+            domain: "https://tiktok.com/@",
+            background: "#000"
+        },
+        {
+            name: "Discord",
+            network: "discord",
+            icon: {
+                name: "discord",
+                type: "FontAwesome5Brands",
+            },
+            domain: "nickname#tag",
+            background: "#5865F2"
+        }
+    ]);
+    const [ saves, setSaves ] = useState({
+        vk: false,
+        telegram: false,
+        tiktok: false,
+        instagram: false,
+        discord: false,
+    });
+    const [ values, setValues ] = useState({
+        vk: "",
+        telegram: "",
+        tiktok: "",
+        instagram: "",
+        discord: "",
+    });
 
-    const getUserSocialNetworks = async () => {
+    const setNetworkByRoute = () => {
+        const networks = route.params?.networks;
+        const mappedNetworks = networks?.map((item) => {
+            return {
+                ...values,
+                [item.network]: item.link
+            }
+        });
+
+        setValues(mappedNetworks[0]);
+    };
+
+    useEffect(() => {
+        setNetworkByRoute();
+    }, []);
+
+    const renderNetwork = ({ item, index, drag, isActive }) => {
+        return (
+            <ScaleDecorator>
+                <TouchableWithoutFeedback
+                onLongPress={() => {
+                    drag();
+                    Vibration.vibrate(50);
+                }}
+                disabled={isActive}
+                >
+                    <View
+                    key={"network-" + index}
+                    style={{
+                        backgroundColor: theme.divider_color,
+                        margin: 15,
+                        borderRadius: 10,
+                        overflow: "hidden"
+                    }}
+                    >
+                        <View
+                        style={{
+                            backgroundColor: item.background,
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingHorizontal: 15,
+                            borderRadius: 3
+                        }}
+                        >
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                            >
+                                <Icon
+                                name={item.icon.name}
+                                type={item.icon.type}
+                                size={25}
+                                color="#fff"
+                                />
+
+                                <Text
+                                style={{
+                                    color: "#fff",
+                                    fontSize: 20,
+                                    fontWeight: "500",
+                                    marginLeft: 8
+                                }}
+                                >
+                                    {item.name}
+                                </Text>
+                            </View>
+
+                            <View>
+                                <Button
+                                title={
+                                    saves[item.network] && values[item.network].length > 0 ? "Сохранить" : "Удалить"
+                                }
+                                disabled={!(saves[item.network] && values[item.network].length > 0)}
+                                onPress={() => save(!(saves[item.network] && values[item.network].length > 0), item.network)}
+                                containerStyle={{
+                                    marginRight: 0,
+                                    opacity: !(saves[item.network] && values[item.network].length > 0) ? 0.5 : 1
+                                }}
+                                size={32}
+                                type="outline"
+                                backgroundColor="#fff"
+                                textColor="#fff"
+                                />
+                            </View>
+                        </View>
+
+                        <View
+                        style={{
+                            padding: 10,
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <View
+                            style={{
+                                backgroundColor: item.background,
+                                paddingHorizontal: 13,
+                                paddingVertical: 5,
+                                borderRadius: 6
+                            }}
+                            >
+                                <Text
+                                style={{
+                                    color: "#fff",
+                                    fontWeight: "500"
+                                }}
+                                >
+                                    {
+                                        item.domain
+                                    }
+                                </Text>
+                            </View>
+
+                            <TextInput
+                            style={{
+                                flex: 1,
+                                textAlign: "center"
+                            }}
+                            value={values[item.network].replace(item.domain, "")}
+                            onChangeText={text => {
+                                setValues({ ...values, [item.network]: text });
+                                setSaves({ ...saves, [item.network]: true });
+                            }}
+                            placeholder={item.name === "Discord" ? "aniyoo#0000" : "aniyoo"}
+                            />
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </ScaleDecorator>
+        )
+    };
+
+    const save = async (isDelete, network) => {
+        setLoading(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/user.signIn", null, {
+        if(isDelete) {
+            setValues({ ...values, [network]: "" });
+        }
+
+        axios.post("/settings.saveSocialNetworks", {
+            ...values,
+        }, {
             headers: {
                 "Authorization": sign
             }
         })
         .then(({ data }) => {
-            data.social_networks.map((item) => {
-                if(item.network === "telegram") {
-                    setTelegram(item.link)
-                }
-                if(item.network === "instagram") {
-                    setInstagram(item.link)
-                }
-                if(item.network === "vk") {
-                    setVk(item.link)
-                }
-            });
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
         })
         .catch(({ response: { data } }) => {
-            console.log(data)
-        })
-    };
-
-    useEffect(() => {
-        getUserSocialNetworks();
-    }, []);
-
-    const save = async () => {
-        setLoading(true);
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-
-        axios.post("/settings.saveSocialNetworks", {
-            telegram: telegram,
-            instagram: instagram,
-            vk: vk,
-        }, {
-            headers: {
-                "Authorization": sign
-            }
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
         });
 
         setLoading(false);
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <GestureHandlerRootView style={{ backgroundColor: theme.background_content }}>
             <Header
             title="Редактировать социальные сети"
             height={30}
@@ -84,184 +264,63 @@ export const EditSocialNetworks = (props) => {
             backButtonOnPress={() => goBack()}
             />
 
-            <ScrollView>
+            <DraggableFlatList
+            data={networks}
+            renderItem={renderNetwork}
+            keyExtractor={(_, index) => index.toString()}
+            onDragEnd={({ data }) => setNetworks(data)}
+            overScrollMode="never"
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="always"
+            ListHeaderComponent={
                 <View
                 style={{
-                    margin: 10
+                    marginHorizontal: 15,
+                    marginVertical: 15,
+                    padding: 10,
+                    borderRadius: 10,
+                    borderColor: theme.divider_color,
+                    borderWidth: 1
                 }}
                 >
                     <View
                     style={{
                         flexDirection: "row",
-                        alignItems: "center"
+                        alignItems: "center",
+                        marginBottom: 3
                     }}
                     >
                         <Icon
-                        name="sc-telegram"
-                        type="EvilIcons"
-                        color="#00a6ff"
-                        size={20}
+                        name="info"
+                        type="Feather"
+                        style={{
+                            marginRight: 5
+                        }}
+                        size={16}
+                        color={theme.text_color}
                         />
                         <Text
                         style={{
-                            color: "#00a6ff",
-                            marginLeft: 5,
-                            fontWeight: "500"
+                            fontSize: 16,
+                            fontWeight: "500",
+                            color: theme.text_color
                         }}
                         >
-                            Telegram
+                            Подсказка
                         </Text>
                     </View>
-                    <Input
-                    placeholder="Введите никнейм"
-                    height={40}
-                    inputStyle={{
-                        backgroundColor: "transparent",
-                        borderColor: theme.divider_color,
-                    }}
-                    containerStyle={{
-                        marginTop: 7,
-                    }}
-                    value={telegram}
-                    onChangeText={text => setTelegram(text)}
-                    after={
-                        telegram.length > 0 && (
-                            <PressIcon
-                            onPress={() => setTelegram("")}
-                            icon={
-                                <Icon
-                                size={17}
-                                name="close"
-                                type="AntDesign"
-                                />
-                            }
-                            />
-                        )
-                    }
-                    />
-                </View>
 
-                <View
-                style={{
-                    margin: 10
-                }}
-                >
-                    <View
+                    <Text
                     style={{
-                        flexDirection: "row",
-                        alignItems: "center"
+                        color: theme.text_secondary_color
                     }}
                     >
-                        <Icon
-                        name="instagram"
-                        type="AntDesign"
-                        color="#ff005d"
-                        size={17}
-                        />
-                        <Text
-                        style={{
-                            color: "#ff005d",
-                            marginLeft: 5,
-                            fontWeight: "500"
-                        }}
-                        >
-                            Instagram
-                        </Text>
-                    </View>
-                    <Input
-                    placeholder="Введите никнейм"
-                    height={40}
-                    inputStyle={{
-                        backgroundColor: "transparent",
-                        borderColor: theme.divider_color
-                    }}
-                    containerStyle={{
-                        marginTop: 7
-                    }}
-                    value={instagram}
-                    onChangeText={text => setInstagram(text)}
-                    after={
-                        instagram.length > 0 && (
-                            <PressIcon
-                            onPress={() => setInstagram("")}
-                            icon={
-                                <Icon
-                                color={theme.icon_color}
-                                size={17}
-                                name="close"
-                                type="AntDesign"
-                                />
-                            }
-                            />
-                        )
-                    }
-                    />
+                        Если нажать и удерживать карточку сети, то можно указать какой по счёту будет кнопка выбранной сети :)
+                    </Text>
                 </View>
-
-                <View
-                style={{
-                    margin: 10
-                }}
-                >
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center"
-                    }}
-                    >
-                        <Icon
-                        name="vk"
-                        type="Entypo"
-                        color="#0062ff"
-                        size={20}
-                        />
-                        <Text
-                        style={{
-                            color: "#0062ff",
-                            marginLeft: 5,
-                            fontWeight: "500"
-                        }}
-                        >
-                            ВКонтакте
-                        </Text>
-                    </View>
-                    <Input
-                    placeholder="Введите никнейм или id"
-                    height={40}
-                    inputStyle={{
-                        backgroundColor: "transparent",
-                        borderColor: theme.divider_color
-                    }}
-                    containerStyle={{
-                        marginTop: 7
-                    }}
-                    value={vk}
-                    onChangeText={text => setVk(text)}
-                    after={
-                        vk.length > 0 && (
-                            <PressIcon
-                            onPress={() => setVk("")}
-                            icon={
-                                <Icon
-                                color={theme.icon_color}
-                                size={17}
-                                name="close"
-                                type="AntDesign"
-                                />
-                            }
-                            />
-                        )
-                    }
-                    />
-                </View>
-
-                <Button
-                title="Сохранить"
-                upperTitle={false}
-                loading={loadng}
-                onPress={() => save()}
-                />
-            </ScrollView>
-        </View>
+            }
+            ListFooterComponent={<View style={{ marginBottom: 200 }}/>}
+            />
+        </GestureHandlerRootView>
     )
 };

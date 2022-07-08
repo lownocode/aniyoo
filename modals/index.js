@@ -9,3 +9,5 @@ export * from "./ChangeVideoQuality";
 export * from "./ChangeVideoRate";
 export * from "./SelectVideoSource";
 export * from "./AnimeWatchedBefore";
+export * from "./SocialNetworks";
+export * from "./FriendActions";

@@ -15,7 +15,7 @@ export const Rating = props => {
 
     const {
         length,
-        select,
+        select = 0,
         containerStyle,
         onPress = () => null,
         cancelPress = () => null
@@ -43,7 +43,6 @@ export const Rating = props => {
     });
 
     const convergenceIconsRender = (_, index) => {
-        console.log(index + 1)
         return (
             <View
             key={`icon-${index}`}

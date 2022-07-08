@@ -38,7 +38,8 @@ import {
   SplashScreen,
   Anime_SelectTranslation,
   Anime_SelectEpisode,
-  Anime_VideoPlayer
+  Anime_VideoPlayer,
+  UserProfile
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -289,6 +290,12 @@ export default App = () => {
                 name="anime.videoplayer" 
                 options={{ animation: "none" }}
                 component={Anime_VideoPlayer}
+                />
+
+                <Stack.Screen 
+                name="user_profile" 
+                options={{ animation: "none" }}
+                component={UserProfile}
                 />
               </Stack.Navigator>
             ) : (

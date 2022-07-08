@@ -18,7 +18,6 @@ export const Button = (props) => {
         loading = false, 
         disabled = false, 
         textColor, 
-        upperTitle = true,
         onLongPress = () => {},
         containerStyle,
         textStyle,
@@ -119,8 +118,6 @@ export const Button = (props) => {
                                         numberOfLines={1}
                                         >
                                             {
-                                                upperTitle ? 
-                                                String(title).toLocaleUpperCase() :
                                                 title
                                             }
                                         </Text>

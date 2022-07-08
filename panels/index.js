@@ -2,6 +2,7 @@ export * from "./SplashScreen";
 export * from "./Authorization";
 export * from "./NetworkError";
 export * from "./EditSocialNetworks";
+export * from "./UserProfile";
 
 export * from "./EditProfile";
 export * from "./EditProfile/Profile";

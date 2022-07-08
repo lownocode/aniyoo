@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Animated, View } from "react-native";
+import { Animated, View, Text } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -27,7 +27,7 @@ export const Progress = (props) => {
 
     useEffect(() => {
         reactive.setValue(-width + (width * step) / steps);
-    }, [step, width]);
+    }, [step, width, steps]);
 
     return (
         <View
@@ -36,7 +36,7 @@ export const Progress = (props) => {
             backgroundColor: theme.progress.background + "20",
             borderRadius: 100,
             overflow: "hidden",
-            flex: 1
+            flex: 1,
         }}
         onLayout={(e) => {
             const newWidth = e.nativeEvent.layout.width;

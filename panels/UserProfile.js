@@ -9,13 +9,12 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
-    Image
 } from "react-native";
-import { PieChart } from 'react-native-svg-charts';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
-import { EventRegister } from "react-native-event-listeners";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PieChart } from "react-native-svg-charts";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -28,42 +27,39 @@ import {
     Avatar,
     Button,
     Cell,
-    ContentHeader,
     Divider,
     Header,
     Icon,
     Placeholder,
-    PressIcon,
-    Snackbar
 } from "../components";
+import {
+    FriendActions,
+    SocialNetworks
+} from "../modals";
+
 import {
     storage,
     declOfNum,
-    sleep
 } from "../functions";
-import {
-    USER_SCHEMA
-} from "../variables";
-import { SetStatus, SocialNetworks } from "../modals";
 
-export const Profile = props => {
+export const UserProfile = (props) => {
     const theme = useContext(ThemeContext);
-    
+    const route = useRoute();
+
     const { 
         navigation: {
             navigate,
+            goBack
         },
         navigation
     } = props;
 
     const [ refreshing, setRefreshing ] = useState(false);
-    const [ userData, setUserData ] = useState(USER_SCHEMA);
+    const [ userData, setUserData ] = useState({});
     const [ modalContent, setModalContent ] = useState(null);
-    const [ snackbar, setSnackbar ] = useState(null);
     const [ friends, setFriends ] = useState([]);
 
     const modalRef = useRef();
-    const snackbarRef = useRef();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -73,9 +69,10 @@ export const Profile = props => {
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
-        axios.post("/user.signIn", null, {
+        axios.post("/user.get", {
+            userId: route.params?.userId
+        }, {
             headers: {
-                "head": "test",
                 "Authorization": sign,
             }
         })
@@ -97,7 +94,9 @@ export const Profile = props => {
     const getFriends = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
-        axios.post("/friends.get", null, {
+        axios.post("/friends.get", {
+            userId: route.params?.userId
+        }, {
             headers: {
                 "Authorization": sign,
             }
@@ -108,28 +107,7 @@ export const Profile = props => {
         .catch(({ response: { data } }) => {
             console.log(data);
         });
-    }; 
-
-    useEffect(() => {
-        const eventListener = EventRegister.addEventListener("profile", (event) => {
-            if(event.type === "show_snackbar") {
-                getUserData();
-
-                setSnackbar({ 
-                    text: event.data.text,
-                    before: event.data.before
-                });
-
-                snackbarRef?.current?.show();
-                
-                sleep(5).then(() => snackbarRef?.current?.hide());
-            }
-        });
-
-        return () => {
-            EventRegister.removeEventListener(eventListener);
-        };
-    }, []);
+    };
 
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
@@ -218,7 +196,7 @@ export const Profile = props => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 80,
+            bottom: 10,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -228,6 +206,124 @@ export const Profile = props => {
             zIndex: 1000
         },
     });
+
+    const friendsListRender = ({ item }) => {
+        return (
+            <View
+            key={"friend-" + item.id}
+            style={{
+                overflow: "hidden",
+                borderRadius: 8,
+                marginHorizontal: 3,
+            }}
+            >
+                <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                onPress={() => navigation.push("user_profile", { userId: item.id })}
+                >
+                    <View
+                    style={{
+                        paddingVertical: 7,
+                        paddingHorizontal: 5,
+                        width: 70,
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Avatar
+                        size={55}
+                        url={item.photo}
+                        />
+
+                        <Text
+                        numberOfLines={2}
+                        style={{
+                            color: theme.text_color,
+                            fontSize: 12,
+                            textAlign: "center"
+                        }}
+                        >
+                            {item.nickname}
+                        </Text>
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
+        )
+    };
+    
+    const friendsRender = () => (
+        <View
+        style={{
+            marginVertical: 20
+        }}
+        >
+            <Cell
+            centered
+            before={
+                <Icon
+                name="users"
+                type="FontAwesome5"
+                color={theme.text_color}
+                />
+            }
+            title={
+                <Text
+                style={{
+                    fontWeight: "500",
+                    color: theme.text_color
+                }}
+                >
+                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friendsCount}</Text>
+                </Text>
+            }
+            after={
+                <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: userData?.subscribers >= 1 ? theme.accent : theme.divider_color,
+                    borderRadius: 100,
+                    paddingVertical: 2,
+                    paddingHorizontal: 9,
+                }}
+                >
+                    <Text
+                    style={{
+                        color: "#fff",
+                        fontSize: 12,
+                        textAlignVertical: "center"
+                    }}
+                    >
+                        {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["подписчик","подписчика","подписчиков"])}
+                    </Text>
+
+                    <Icon
+                    name="chevron-forward"
+                    type="Ionicons"
+                    color="#fff"
+                    size={14}
+                    />
+                </View>
+            }
+            />
+
+            {
+                friends?.length >= 1 ? (
+                    <FlatList
+                    horizontal
+                    data={friends}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={friendsListRender}
+                    />
+                ) : (
+                    <Placeholder
+                    title="Пусто"
+                    subtitle={`Похоже, ${userData?.nickname} ещё не завел(-а) друзей :(`}
+                    />
+                )
+            }
+        </View>
+    );
 
     const userInfoRender = () => (
         <View
@@ -250,29 +346,15 @@ export const Profile = props => {
             }
             subtitle={
                 <View>
-                    <TouchableNativeFeedback 
-                    onPress={() => {
-                        setModalContent(
-                            <SetStatus 
-                            navigate={navigate} 
-                            onClose={() => {
-                                modalRef.current?.close();
-                            }}
-                            />
-                        );
-                        modalRef.current?.open();
+                    <Text 
+                    style={{
+                        color: theme.text_secondary_color,
+                        fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic"
                     }}
+                    numberOfLines={3}
                     >
-                        <Text 
-                        style={{
-                            color: theme.text_secondary_color,
-                            fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic"
-                        }}
-                        numberOfLines={3}
-                        >
-                            {userData?.status?.trim()?.length >= 1 ? userData?.status : "Статус не установлен"}
-                        </Text>
-                    </TouchableNativeFeedback>
+                        {userData?.status?.trim()?.length >= 1 ? userData?.status : "Статус не установлен"}
+                    </Text>
 
                     <View
                     style={{
@@ -391,6 +473,7 @@ export const Profile = props => {
                         <SocialNetworks 
                         networks={userData?.social_networks}
                         navigate={navigate} 
+                        from="another"
                         onClose={() => {
                             modalRef.current?.close();
                         }}
@@ -401,7 +484,14 @@ export const Profile = props => {
                 />
 
                 <Button
-                title="Редактировать"
+                title={
+                    {
+                        "nobody": "Добавить в друзья",
+                        "friends": "В друзьях",
+                        "sendSubscribe": "Ваш подписчик",
+                        "subscriber": "Вы подписаны"
+                    }[userData?.relation]
+                }
                 upperTitle={false}
                 size={37}
                 textStyle={{
@@ -409,8 +499,8 @@ export const Profile = props => {
                 }}
                 before={
                     <Icon
-                    type="MaterialCommunityIcons"
-                    name="account-edit-outline"
+                    type="Entypo"
+                    name="chevron-small-down"
                     color={theme.button.primary.text_color}
                     size={19}
                     />
@@ -418,7 +508,17 @@ export const Profile = props => {
                 containerStyle={{
                     marginBottom: 0
                 }}
-                onPress={() => navigate("edit_profile")}
+                onPress={() => {
+                    setModalContent(
+                        <FriendActions 
+                        relation={userData?.relation}
+                        onClose={() => {
+                            modalRef.current?.close();
+                        }}
+                        />
+                    );
+                    modalRef.current?.open();
+                }}
                 />
             </View>
 
@@ -559,7 +659,6 @@ export const Profile = props => {
         <View
         style={{
             marginHorizontal: 10,
-            marginTop: 20,
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "space-between",
@@ -663,151 +762,12 @@ export const Profile = props => {
         </View>
     );
 
-    const friendsListRender = ({ item }) => {
-        return (
-            <View
-            key={"friend-" + item.id}
-            style={{
-                overflow: "hidden",
-                borderRadius: 8,
-                marginHorizontal: 3,
-            }}
-            >
-                <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                onPress={() => navigate("user_profile", { userId: item.id })}
-                >
-                    <View
-                    style={{
-                        paddingVertical: 7,
-                        paddingHorizontal: 5,
-                        width: 70,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    >
-                        <Avatar
-                        size={55}
-                        url={item.photo}
-                        />
-
-                        <Text
-                        numberOfLines={2}
-                        style={{
-                            color: theme.text_color,
-                            fontSize: 12,
-                            textAlign: "center"
-                        }}
-                        >
-                            {item.nickname}
-                        </Text>
-                    </View>
-                </TouchableNativeFeedback>
-            </View>
-        )
-    };
-
-    const friendsRender = () => (
-        <View
-        style={{
-            marginVertical: 20
-        }}
-        >
-            <Cell
-            centered
-            before={
-                <Icon
-                name="users"
-                type="FontAwesome5"
-                color={theme.text_color}
-                />
-            }
-            title={
-                <Text
-                style={{
-                    fontWeight: "500",
-                    color: theme.text_color
-                }}
-                >
-                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friendsCount}</Text>
-                </Text>
-            }
-            after={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: userData?.subscribers >= 1 ? theme.accent : theme.divider_color,
-                    borderRadius: 100,
-                    paddingVertical: 2,
-                    paddingHorizontal: 9,
-                }}
-                >
-                    <Text
-                    style={{
-                        color: "#fff",
-                        fontSize: 12,
-                        textAlignVertical: "center"
-                    }}
-                    >
-                        {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["заявка","заявки","заявок"])}
-                    </Text>
-
-                    <Icon
-                    name="chevron-forward"
-                    type="Ionicons"
-                    color="#fff"
-                    size={14}
-                    />
-                </View>
-            }
-            />
-
-            {
-                friends?.length >= 1 ? (
-                    <FlatList
-                    horizontal
-                    data={friends}
-                    keyExtractor={(_, index) => index.toString()}
-                    renderItem={friendsListRender}
-                    />
-                ) : (
-                    <Placeholder
-                    title="Пусто"
-                    subtitle="Похоже, Вы ещё не завели друзей :("
-                    />
-                )
-            }
-        </View>
-    );
-
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
-            divider={false}
             title="Профиль"
-            afterComponent={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 7
-                }}
-                >
-                    <PressIcon 
-                    icon={<Icon name="dots-three-horizontal" type="Entypo" color={theme.icon_color} size={20}/>}
-                    onPress={() => navigate("settings")}
-                    containerStyle={{
-                        marginRight: 15
-                    }}
-                    />
-
-                    <PressIcon 
-                    icon={<Icon name="settings" type="Feather" color={theme.icon_color} size={20}/>}
-                    onPress={() => navigate("settings")}
-                    />
-                </View>
-            }
+            backButton
+            backButtonOnPress={() => goBack()}
             />
 
             <Modalize
@@ -815,20 +775,9 @@ export const Profile = props => {
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
             modalStyle={styles.modalContainer}
             adjustToContentHeight
-            onClose={() => {
-                getUserData();
-                EventRegister.emit("changeTabbar", { type: "show" });
-            }}
             >
                 {modalContent}
             </Modalize>
-
-            <Snackbar
-            ref={snackbarRef}
-            text={snackbar?.text}
-            before={snackbar?.before}
-            containerStyle={{ bottom: 80 }}
-            />
 
             <ScrollView
             showsHorizontalScrollIndicator={false}
@@ -843,127 +792,30 @@ export const Profile = props => {
                 />
             }
             >
-                {userInfoRender()}  
-                {
-                    userData?.online?.payload?.anime && (
-                        <>
-                            <ContentHeader
-                            text={`${userData?.nickname} сейчас смотрит`}
-                            indents
-                            />
-                            <View
-                            style={{
-                                marginBottom: 10,
-                                marginHorizontal: 10,
-                                height: 120,
-                                justifyContent: "center"
-                            }}
-                            >
-                                <Image
-                                source={{
-                                    uri: userData?.online?.payload?.anime?.poster
-                                }}
-                                style={{
-                                    width: "100%",
-                                    height: 120,
-                                    // opacity: 0.3,
-                                    borderRadius: 15,
-                                }}
-                                resizeMethod="resize"
-                                resizeMode="cover"
-                                blurRadius={15}
-                                />
+                {userInfoRender()}
 
-                                <View
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    borderRadius: 15,
-                                    overflow: "hidden"
-                                }}
-                                >
-                                    <Cell
-                                    title={userData?.online?.payload?.anime?.title}
-                                    centered={false}
-                                    before={
-                                        <Image
-                                        resizeMethod="resize"
-                                        source={{
-                                            uri: userData?.online?.payload?.anime?.poster
-                                        }}
-                                        style={{
-                                            width: 60,
-                                            height: 100,
-                                            resizeMode: "cover",
-                                            borderRadius: 10,
-                                        }}
-                                        />
-                                    }
-                                    titleStyle={{
-                                        color: "#fff",
-                                        textShadowColor: "#000",
-                                        textShadowRadius: 5
-                                    }}
-                                    subtitle={
-                                        <View
-                                        style={{
-                                            flexDirection: "row",
-                                            flexWrap: "wrap"
-                                        }}
-                                        >
-                                            <View>
-                                                <Text
-                                                style={{
-                                                    color: "#fff",
-                                                    textShadowColor: "#000",
-                                                    textShadowRadius: 5,
-                                                    fontSize: 12,
-                                                    backgroundColor: theme.divider_color + "98",
-                                                    paddingHorizontal: 5,
-                                                    paddingVertical: 1,
-                                                    borderRadius: 5,
-                                                    marginTop: 5,
-                                                    marginRight: 10,
-                                                }}
-                                                >
-                                                    {userData?.online?.payload?.episode} серия
-                                                </Text>
-                                            </View>
-
-                                            <View>
-                                                <Text
-                                                style={{
-                                                    color: "#fff",
-                                                    textShadowColor: "#000",
-                                                    textShadowRadius: 5,
-                                                    fontSize: 12,
-                                                    backgroundColor: theme.divider_color + "98",
-                                                    paddingHorizontal: 5,
-                                                    paddingVertical: 1,
-                                                    borderRadius: 5,
-                                                    marginTop: 5,
-                                                    marginRight: 10,
-                                                }}
-                                                >
-                                                    {userData?.online?.payload?.translation?.title}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    }
-                                    />
-                                </View>
-                            </View> 
-                        </>
-                    )
-                } 
+                <Cell
+                title="Списки"
+                subtitle="Нажмите, чтобы открыть"
+                before={
+                    <Icon
+                    name="list"
+                    type="Entypo"
+                    color={theme.icon_color}
+                    size={17}
+                    />
+                }
+                after={
+                    <Icon
+                    name="chevron-thin-right"
+                    type="Entypo"
+                    color={theme.icon_color}
+                    size={17}
+                    />
+                }
+                />
                 {statisticsRender()}
-
-                <View
-                style={{marginBottom: 100}}
-                />  
             </ScrollView>
-
-            <View style={{ marginBottom: 60 }}/>
         </GestureHandlerRootView>
     )
 };

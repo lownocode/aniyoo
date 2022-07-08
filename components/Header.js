@@ -1,5 +1,5 @@
 import React, { Fragment, useContext } from 'react';
-import { View, Text, StyleSheet, StatusBar, } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Dimensions, } from 'react-native';
 import { Icon, PressIcon, Divider } from '.';
 
 import ThemeContext from "../config/ThemeContext";
@@ -108,9 +108,13 @@ export const Header = (props) => {
                         {renderTitle()}
                     </View>
 
-                    <View style={styles.after}>
-                        {afterComponent}
-                    </View>
+                    {
+                        afterComponent && (
+                            <View style={styles.after}>
+                                {afterComponent}
+                            </View>
+                        )
+                    }
                 </View>
 
                 {

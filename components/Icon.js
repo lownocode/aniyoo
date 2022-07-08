@@ -15,24 +15,28 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Octicons from "react-native-vector-icons/Octicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import Zocial from "react-native-vector-icons/Zocial";
+import FontAwesome5IconVariants from "react-native-vector-icons/FontAwesome5";
 
-export const Icon = ({ type, color, name, size, style }) => {
+export const Icon = (props) => {
+    const { type } = props;
+    
     return (
-        type === "Feather" ? <Feather style={style} name={name} size={size} color={color}/> 
-        : type === "Entypo" ? <Entypo style={style} name={name} size={size} color={color}/>
-        : type === "EvilIcons" ? <EvilIcons style={style} name={name} size={size} color={color}/> 
-        : type === "FontAwesome" ? <FontAwesome style={style} name={name} size={size} color={color}/>
-        : type === "FontAwesome5" ? <FontAwesome5 style={style} name={name} size={size} color={color}/>
-        : type === "FontAwesome5Pro" ? <FontAwesome5Pro style={style} name={name} size={size} color={color}/>
-        : type === "Fontisto" ? <Fontisto style={style} name={name} size={size} color={color}/>
-        : type === "Foundation" ? <Foundation style={style} name={name} size={size} color={color}/>
-        : type === "Ionicons" ? <Ionicons style={style} name={name} size={size} color={color}/>
-        : type === "MaterialCommunityIcons" ? <MaterialCommunityIcons style={style} name={name} size={size} color={color}/>
-        : type === "MaterialIcons" ? <MaterialIcons style={style} name={name} size={size} color={color}/>
-        : type === "Octicons" ? <Octicons style={style} name={name} size={size} color={color}/>
-        : type === "SimpleLineIcons" ? <SimpleLineIcons style={style} name={name} size={size} color={color}/>
-        : type === "Zocial" ? <Zocial style={style} name={name} size={size} color={color}/>
-        : type === "AntDesign" ? <AntDesign style={style} name={name} size={size} color={color}/>
+        type === "Feather" ? <Feather {...props} /> 
+        : type === "Entypo" ? <Entypo {...props}/>
+        : type === "EvilIcons" ? <EvilIcons {...props}/> 
+        : type === "FontAwesome" ? <FontAwesome {...props}/>
+        : type === "FontAwesome5" ? <FontAwesome5 {...props}/>
+        : type === "FontAwesome5Pro" ? <FontAwesome5Pro {...props}/>
+        : type === "Fontisto" ? <Fontisto {...props}/>
+        : type === "Foundation" ? <Foundation {...props}/>
+        : type === "Ionicons" ? <Ionicons {...props}/>
+        : type === "MaterialCommunityIcons" ? <MaterialCommunityIcons {...props}/>
+        : type === "MaterialIcons" ? <MaterialIcons {...props}/>
+        : type === "Octicons" ? <Octicons {...props}/>
+        : type === "SimpleLineIcons" ? <SimpleLineIcons {...props}/>
+        : type === "Zocial" ? <Zocial {...props}/>
+        : type === "AntDesign" ? <AntDesign {...props}/>
+        : type === "FontAwesome5Brands" ? <FontAwesome5IconVariants brand {...props}/>
         : null
     )
 };

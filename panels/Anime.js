@@ -795,8 +795,8 @@ export const Anime = (props) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/anime.mark", {
-            animeId: 77,
-            mark: 1
+            animeId: animeData?.id,
+            mark: v
         }, {
             headers: {
                 "Authorization": sign
@@ -807,8 +807,7 @@ export const Anime = (props) => {
                 ...animeData,
                 userMark: v === animeData.userMark ? null : v,
                 marks: data.marks
-            })
-            console.log(data);
+            });
         })
         .catch(({ reponse: { data } }) => {
             console.log(data);
@@ -1529,6 +1528,7 @@ export const Anime = (props) => {
                                                     radius={55}
                                                     percentage={animeData?.marks?.avg || 0}
                                                     strokeWidth={8}
+                                                    color={theme.anime_mark[Math.round(animeData?.marks?.avg - 0.1 || 1)]}
                                                     max={5}
                                                     centerContent={
                                                         <View>
@@ -1569,10 +1569,6 @@ export const Anime = (props) => {
                                                         [5, 4, 3, 2, 1].map((mark, index) => {
                                                             if(typeof animeData?.marks?.[mark] !== "number") return;
 
-                                                            const step = () => {
-                                                                return animeData?.marks?.[mark]
-                                                            };
-
                                                             return (
                                                                 <View
                                                                 key={"mark-" + index}
@@ -1592,7 +1588,7 @@ export const Anime = (props) => {
                                                                     </Text>
 
                                                                     <Progress
-                                                                    step={step() || 0}
+                                                                    step={animeData?.marks?.[mark] || 0}
                                                                     steps={animeData?.marks?.total || 0}
                                                                     />
                                                                 </View>
@@ -1618,11 +1614,14 @@ export const Anime = (props) => {
                                         )
                                     }
 
-                                    <Divider/>
+                                    <Divider
+                                    dividerStyle={{
+                                        marginTop: 15
+                                    }}
+                                    />
 
                                     <View
                                     style={{
-                                        marginHorizontal: 15,
                                         marginTop: 10,
                                         flexDirection: "row",
                                     }}
