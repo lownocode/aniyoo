@@ -29,7 +29,7 @@ export const EditComment = (props) => {
         setLoading(true)
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.edit", {
+        axios.post("/comments.edit", {
             commentId: comment?.id,
             text: text,
             isSpoiler: spoiler

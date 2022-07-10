@@ -67,7 +67,7 @@ export const Anime_ReplyComments = (props) => {
         // const userId = (await storage.getItem("USER_DATA")).id;
         // setUserId(userId);
 
-        axios.post("/comment.get", {
+        axios.post("/comments.get", {
             commentId: route.params?.commentId,
             order: {
                 createdAt: 0,
@@ -115,7 +115,7 @@ export const Anime_ReplyComments = (props) => {
         setLoadingMoreComments(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.get", {
+        axios.post("/comments.get", {
             commentId: route.params?.commentId,
             order: {
                 createdAt: 0,
@@ -145,7 +145,7 @@ export const Anime_ReplyComments = (props) => {
     const markComment = async (commentId, mark) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.mark", {
+        axios.post("/comments.mark", {
             commentId: commentId,
             mark: mark
         }, {
@@ -470,7 +470,7 @@ export const Anime_ReplyComments = (props) => {
         setSendLoading(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.create", {
+        axios.post("/comments.create", {
             animeId: route.params?.animeId,
             isSpoiler: newCommentIsSpoiler,
             text: newCommentText,

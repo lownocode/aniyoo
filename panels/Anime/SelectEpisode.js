@@ -50,7 +50,7 @@ export const Anime_SelectEpisode = (props) => {
     const getVideoLink = async (episode) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.getVideoLink", {
+        axios.post("/animes.getVideoLink", {
             animeId: route.params?.animeId,
             translationId: route.params?.translationId,
             episode: episode.serie,

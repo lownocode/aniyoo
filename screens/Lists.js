@@ -87,7 +87,7 @@ export const Lists = props => {
     const getUserLists = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("anime.getList", {
+        axios.post("animes.getList", {
             status: tab
         }, {
             headers: {

@@ -33,7 +33,7 @@ export const Anime_SelectTranslation = (props) => {
     const getTranslations = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.getTranslation", {
+        axios.post("/animes.getTranslation", {
             animeId: route.params?.animeId
         }, {
             headers: {
@@ -56,7 +56,7 @@ export const Anime_SelectTranslation = (props) => {
         setLoading(translationId);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.getSources", {
+        axios.post("/animes.getSources", {
             animeId: route.params?.animeId,
             translationId: translationId,
             // order: {

@@ -15,3 +15,4 @@ export * from "./AssemblyOfWeekCarousel";
 export * from "./WriteBar";
 export * from "./Progress";
 export * from "./DonutChart";
+export * from "./SvgIcon/SvgIcon";

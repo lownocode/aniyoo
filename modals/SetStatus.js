@@ -22,7 +22,7 @@ export const SetStatus = (props) => {
     const getStatus = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/user.signIn", null, {
+        axios.post("/users.signIn", null, {
             headers: {
                 "Authorization": sign
             }

@@ -73,7 +73,7 @@ export const Profile = props => {
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
-        axios.post("/user.signIn", null, {
+        axios.post("/users.signIn", null, {
             headers: {
                 "head": "test",
                 "Authorization": sign,

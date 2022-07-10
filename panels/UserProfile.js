@@ -72,7 +72,7 @@ export const UserProfile = (props) => {
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
-        axios.post("/user.get", {
+        axios.post("/users.get", {
             userId: route.params?.userId
         }, {
             headers: {

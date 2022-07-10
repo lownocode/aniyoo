@@ -94,14 +94,18 @@ export default App = () => {
     //   }
     // });
 
-    axios.post("/user.signIn", {
+    axios.post("/users.signIn", {
       // notifySign: notifySign
     }, {
         headers: {
           "Authorization": sign,
         }
     })
-    .then(({ data }) => setUserData(data))
+    .then(({ data }) => {
+      setUserData(data);
+      handleDeeplink();
+      setInitialScreenName("tabs");
+    })
     .catch((error) => {
       if(error.toJSON().message === "Network Error") {
         return setInitialScreenName("network_error");
@@ -110,9 +114,6 @@ export default App = () => {
       storage.setItem("AUTHORIZATION_SIGN", null);
       return setInitialScreenName("authorization");
     });
-
-    handleDeeplink();
-    setInitialScreenName("tabs")
   };
 
   useEffect(() => {

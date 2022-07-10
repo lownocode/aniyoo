@@ -71,7 +71,7 @@ export const Anime_AllComments = (props) => {
         setLoadingComments(loading);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.getList", {
+        axios.post("/comments.getList", {
             animeId: route.params?.animeId,
             order: {
                 rating: 1
@@ -98,7 +98,7 @@ export const Anime_AllComments = (props) => {
         setLoadingMoreComments(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.getList", {
+        axios.post("/comments.getList", {
             animeId: route.params?.animeId,
             order: {
                 createdAt: 0,
@@ -128,7 +128,7 @@ export const Anime_AllComments = (props) => {
     const markComment = async (commentId, mark) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.mark", {
+        axios.post("/comments.mark", {
             commentId: commentId,
             mark: mark
         }, {
@@ -160,7 +160,7 @@ export const Anime_AllComments = (props) => {
         setSendLoading(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.create", {
+        axios.post("/comments.create", {
             animeId: route.params?.animeId,
             isSpoiler: newCommentIsSpoiler,
             text: newCommentText

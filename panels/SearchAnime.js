@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { 
     View,
     StatusBar,
     ActivityIndicator,
+    TextInput
 } from "react-native";
 import axios from "axios";
 
 import {
-    Input,
     Icon,
     PressIcon,
     FoundedAnimeList,
@@ -20,6 +20,71 @@ import {
 
 import ThemeContext from "../config/ThemeContext";
 
+const SearchInput = (props) => {
+    const theme = useContext(ThemeContext);
+
+    const {
+        value,
+        onChangeText
+    } = props;
+
+    return (
+        <View
+        style={{
+            backgroundColor: theme.divider_color,
+            marginHorizontal: 15,
+            borderRadius: 10,
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1
+        }}
+        >
+            <Icon
+            name="search"
+            type="Ionicons"
+            color={theme.text_secondary_color}
+            size={17}
+            style={{
+                marginLeft: 15,
+                marginRight: 10
+            }}
+            />
+
+            <TextInput
+            value={value}
+            placeholder="Поиск аниме-сериалов и фильмов"
+            style={{
+                height: 40,
+                flex: 1,
+            }}
+            placeholderTextColor={theme.text_secondary_color}
+            onChangeText={onChangeText}
+            returnKeyType="search"
+            selectionColor={theme.accent}
+            />
+
+            {
+                value.length > 0 && (
+                    <PressIcon
+                    icon={
+                        <Icon
+                        name="backspace-outline"
+                        type="Ionicons"
+                        color={theme.text_secondary_color}
+                        size={20}
+                        />
+                    }
+                    containerStyle={{
+                        marginHorizontal: 10
+                    }}
+                    onPress={() => onChangeText("")}
+                    />
+                )
+            }
+        </View>
+    )
+};
+
 export const SearchAnime = (props) => {
     const theme = useContext(ThemeContext);
 
@@ -30,30 +95,18 @@ export const SearchAnime = (props) => {
         navigation
     } = props;
 
-    const [ searchTitle, setSearchTitle ] = useState("");
-    const [ sign, setSign ] = useState("");
-    const [ foundedAnimes, setFoundedAnimes ] = useState([]);
-    const [ loadingSearchAnimes, setLoadingSearchAnimes ] = useState(false);
+    const [ text, setText ] = useState("");
+    const [ findedAnimes, setFindedAnimes ] = useState([]);
+    const [ loading, setLoading ] = useState(false);
 
-    useEffect(() => {
-        (async () => {
-            const sign = await storage.getItem("AUTHORIZATION_SIGN");
+    const search = async (text) => {
+        setText(text);
+        setLoading(true);
 
-            setSign(sign);
-        })();
-    }, []);
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-    const searchAnime = (title) => {
-        if(title.length === 0) {
-            setFoundedAnimes([]);
-            return setSearchTitle("");
-        }
-
-        setLoadingSearchAnimes(true);
-        setSearchTitle(title);
-
-        axios.post("/anime.search", {
-            title: title,
+        axios.post("/animes.search", {
+            title: text,
             order: {
                 season: 0
             }
@@ -63,21 +116,23 @@ export const SearchAnime = (props) => {
             }
         })
         .then(({ data }) => {
-            setFoundedAnimes(data);
+            setFindedAnimes(data);
         })
         .catch(({ response }) => {
             console.log(JSON.stringify(response, null, "\t"))
         })
-        .finally(() => setLoadingSearchAnimes(false));
+        .finally(() => setLoading(false));
     };
 
-    const loadMoreAnimes = () => {
-        axios.post("/anime.search", {
-            title: searchTitle,
+    const loadMoreAnimes = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/animes.search", {
+            title: text,
             order: {
                 season: 0
             },
-            offset: foundedAnimes.length,
+            offset: findedAnimes.length,
             limit: 15
         }, {
             headers: {
@@ -85,7 +140,7 @@ export const SearchAnime = (props) => {
             }
         })
         .then(({ data }) => {
-            setFoundedAnimes(foundedAnimes.concat(data));
+            setFindedAnimes(findedAnimes.concat(data));
         });
     };
 
@@ -93,113 +148,74 @@ export const SearchAnime = (props) => {
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <View
             style={{
-                backgroundColor: theme.header_background,
                 paddingTop: StatusBar.currentHeight + 20,
-                paddingHorizontal: 15,
-                paddingBottom: 8,
                 flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center"
+                alignItems: "center",
+                paddingBottom: 5
             }}
             >
-                
-                <PressIcon 
+                <PressIcon
                 icon={
                     <Icon
-                    type="AntDesign"
                     name="close"
-                    color="gray"
-                    size={22}
+                    type="AntDesign"
+                    color={theme.text_secondary_color}
+                    size={20}
                     />
                 }
-                onPress={() => goBack()}
                 containerStyle={{
-                    marginRight: 15,
+                    marginLeft: 15
                 }}
+                onPress={() => goBack()}
                 />
 
-                <View
-                style={{ flex: 1 }}
-                >
-                    <Input
-                    placeholder="Что ищем, семпай?"
-                    before={
-                        <Icon
-                        type="Ionicons"
-                        name="search"
-                        color={theme.icon_color}
-                        size={17}
-                        />
-                    }
-                    returnKeyType="search"
-                    after={
-                        searchTitle.trim().length >= 1 &&
-                        <PressIcon
-                        onPress={() => {
-                            searchAnime("");
-                        }}
-                        icon={
-                            <Icon
-                            type="Ionicons"
-                            name="backspace-outline"
-                            color={theme.icon_color}
-                            size={20}
-                            />
-                        }
-                        />
-                    }
-                    value={searchTitle}
-                    onChangeText={(value) => searchAnime(value)}
-                    onSubmitEditing={() => searchAnime(searchTitle)}
-                    />
-                </View>
+                <SearchInput 
+                onChangeText={search} 
+                value={text} 
+                />
             </View>
 
             {
-                foundedAnimes.length === 0 ? (
-                    foundedAnimes.length === 0 && searchTitle.length === 0 ? (
-                        <Placeholder
-                        icon={
-                            <Icon
-                            name="search"
-                            type="Ionicons"
-                            color={theme.icon_color}
-                            size={45}
-                            />
-                        }
-                        title="Начните вводить название"
-                        subtitle="Здесь будут отображены подходящие по названию аниме-сериалы и фильмы"
+                (findedAnimes.length === 0 && text.length === 0) ? (
+                    <Placeholder
+                    icon={
+                        <Icon
+                        name="feather"
+                        type="Entypo"
+                        color={theme.icon_color}
+                        size={40}
                         />
-                    ) : (
-                        loadingSearchAnimes ? (
-                            <Placeholder
-                            icon={
-                                <ActivityIndicator
-                                color={theme.activity_indicator_color}
-                                size={40}
-                                />
-                            }
-                            title="Выполняется поиск"
-                            subtitle="Подождите немного"
-                            />
-                        ) : (
-                            <Placeholder
-                            icon={
-                                <Icon
-                                name="ios-sad-outline"
-                                type="Ionicons"
-                                color={theme.icon_color}
-                                size={45}
-                                />
-                            }
-                            title="Аниме не найдено"
-                            subtitle="К сожалению, аниме с таким названием не найдено. Попробуйте использовать оригинальное название или настроить фильтры"
-                            />
-                        )
-                    ) 
+                    }
+                    title="Начните вводить название"
+                    subtitle="Здесь будут отображены подходящие по названию аниме-сериалы и фильмы"
+                    />
+                ) : loading ? (
+                    <Placeholder
+                    icon={
+                        <ActivityIndicator
+                        color={theme.activity_indicator_color}
+                        size={40}
+                        />
+                    }
+                    title="Выполняется поиск"
+                    subtitle="Нужно немного подождать..."
+                    />
+                ) : (text.length > 0 && findedAnimes.length === 0 || text.length === 0 && findedAnimes.length > 0) ? (
+                    <Placeholder
+                    icon={
+                        <Icon
+                        name="ios-sad-outline"
+                        type="Ionicons"
+                        color={theme.icon_color}
+                        size={40}
+                        />
+                    }
+                    title="Аниме не найдено"
+                    subtitle="К сожалению, аниме с таким названием не найдено. Попробуйте использовать оригинальное название или настроить фильтры"
+                    />
                 ) : (
                     <FoundedAnimeList
-                    animes={foundedAnimes}
+                    animes={findedAnimes}
                     loadMoreAnimes={loadMoreAnimes}
                     navigation={navigation}
                     />

@@ -11,53 +11,6 @@ import {
 
 import ThemeContext from "../config/ThemeContext";
 
-// const socialNetworksButtonsRender = (item) => {
-//     let icon;
-//     let textColor;
-//     let title;
-//     let pressLink;
-
-//     if(item.network === "telegram") {
-//         icon = {type: "EvilIcons", name: "sc-telegram", size: 25};
-//         title = "Telegram";
-//         textColor = "#00a6ff";
-//         pressLink = "https://t.me/" + item.link;
-//     }
-//     if(item.network === "instagram") {
-//         icon = {type: "AntDesign", name: "instagram", size: 20};
-//         title = "Instagram";
-//         textColor = "#ff005d";
-//         pressLink = "https://instagram.com/" + item.link;
-//     }
-//     if(item.network === "vk") {
-//         icon = {type: "Entypo", name: "vk", size: 20};
-//         title = "ВКонтакте";
-//         textColor = "#0062ff";
-//         pressLink = "https://vk.com/" + item.link;
-//     }
-
-//     return (
-//         <Button
-//         key={item.network}
-//         title={title}
-//         onPress={() => Linking.openURL(pressLink)}
-//         before={
-//             <Icon
-//             {...icon}
-//             color={textColor}
-//             />
-//         }
-//         upperTitle={false}
-//         textColor={textColor}
-//         backgroundColor={textColor + "10"}
-//         containerStyle={{
-//             marginHorizontal: 5,
-//             marginBottom: 0
-//         }}
-//         />
-//     )
-// };
-
 export const SocialNetworks = (props) => {
     const theme = useContext(ThemeContext);
 
@@ -99,12 +52,13 @@ export const SocialNetworks = (props) => {
             }
         }[item.network];
 
-        const pressNetwork = async (link) => {
-            const validUrl = await Linking.canOpenURL(link);
-            
+        const pressNetwork = (domain, username) => {
+            const validUrl = Linking.canOpenURL(domain + username);
             if(!validUrl) {
                 return ToastAndroid.show("Невозможно открыть эту социальную сеть", ToastAndroid.CENTER);
             }
+
+            return Linking.openURL(domain + username);
         };
     
         return (
@@ -113,7 +67,7 @@ export const SocialNetworks = (props) => {
             >
                 <Cell
                 title={network.name}
-                subtitle={`@` + item.link.replace(network.domain, "")}
+                subtitle={`@` + item.username}
                 before={
                     <Icon
                     name={network.icon.name}
@@ -132,7 +86,7 @@ export const SocialNetworks = (props) => {
                 containerStyle={{
                     paddingVertical: 15
                 }}
-                onPress={() => pressNetwork(item.link)}
+                onPress={() => pressNetwork(network.domain, item.username)}
                 />
 
                 {

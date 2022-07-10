@@ -70,7 +70,7 @@ export const Anime = (props) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         const params = await storage.getItem("DEEPLINK_INITIAL_PARAMS");
 
-        axios.post("/anime.get", {
+        axios.post("/animes.get", {
             animeId: id || route.params?.animeData?.id || params.id
         }, {
             headers: {
@@ -108,7 +108,7 @@ export const Anime = (props) => {
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.setStatus", {
+        axios.post("/animes.setStatus", {
             animeId: animeData?.id,
             status: animeData?.isFavorite ? "noFavorite" : "favorite"
         }, {
@@ -433,7 +433,7 @@ export const Anime = (props) => {
         const markComment = async (commentId, mark) => {
             const sign = await storage.getItem("AUTHORIZATION_SIGN");
     
-            axios.post("/comment.mark", {
+            axios.post("/comments.mark", {
                 commentId: commentId,
                 mark: mark
             }, {
@@ -837,7 +837,7 @@ export const Anime = (props) => {
     const markAnime = async (v) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.mark", {
+        axios.post("/animes.mark", {
             animeId: animeData?.id,
             mark: v
         }, {

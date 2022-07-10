@@ -18,7 +18,7 @@ export const DeleteComment = (props) => {
         setLoading(true)
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/comment.delete", {
+        axios.post("/comments.delete", {
             commentId: comment?.id,
         }, {
             headers: {

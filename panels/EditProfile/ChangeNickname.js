@@ -47,7 +47,7 @@ export const EditProfile_ChangeNickname = (props) => {
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/user.signIn", {
+        axios.post("/users.signIn", {
             nickname: newNickname
         }, {
             headers: {

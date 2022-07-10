@@ -67,7 +67,7 @@ export const Input = props => {
     });
 
     return (
-        <View style={{marginBottom: badText ? 10 : -10}}>
+        <View style={{ overflow: "hidden", borderRadius: 10}}>
             <View style={localStyles.container}>
                 <View style={localStyles.before}>
                     {before}

@@ -29,7 +29,7 @@ export const AnimeSetList = (props) => {
         
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.setStatus", {
+        axios.post("/animes.setStatus", {
             status: list,
             animeId: animeId
         }, {

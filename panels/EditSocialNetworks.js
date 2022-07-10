@@ -95,16 +95,25 @@ export const EditSocialNetworks = (props) => {
     const setNetworkByRoute = () => {
         const networks = route.params?.networks;
 
-        if(Object.keys(networks).length > 0) {
-            const mappedNetworks = networks?.map((item) => {
-                return {
-                    ...values,
-                    [item.network]: item.link
-                }
-            });
+        console.log(networks)
+
+        // const mappedNetworks = networks.map((item) => {
+        //     return {
+        //         network: item.network
+        //     }
+        // });
+
+        // if(Object.keys(networks).length > 0) {
+        //     const mappedNetworks = networks?.map((item) => {
+        //         return {
+        //             ...values,
+        //             [item.network]: item.username
+        //         }
+        //     });
+        //     console.log(mappedNetworks)
     
-            setValues(mappedNetworks[0]);
-        }
+        //     setValues(mappedNetworks);
+        // }
     };
 
     useEffect(() => {
@@ -169,20 +178,16 @@ export const EditSocialNetworks = (props) => {
 
                             <View>
                                 <Button
-                                title={
-                                    "Удалить"
-                                    // saves[item.network] && values[item.network].length > 0 ? "Сохранить" : "Удалить"
-                                }
-                                // disabled={!(saves[item.network] && values[item.network].length > 0)}
-                                onPress={() => save(!(saves[item.network] && values[item.network].length > 0), item.network)}
+                                title="Сохранить"
+                                onPress={() => save()}
                                 containerStyle={{
                                     marginRight: 0,
-                                    // opacity: !(saves[item.network] && values[item.network].length > 0) ? 0.5 : 1
                                 }}
                                 size={32}
                                 type="outline"
                                 backgroundColor="#fff"
                                 textColor="#fff"
+                                loading={loading}
                                 />
                             </View>
                         </View>
@@ -220,7 +225,7 @@ export const EditSocialNetworks = (props) => {
                                 flex: 1,
                                 textAlign: "center"
                             }}
-                            value={values[item.network].replace(item.domain, "")}
+                            value={values[item.network]}
                             onChangeText={text => {
                                 setValues({ ...values, [item.network]: text });
                                 setSaves({ ...saves, [item.network]: true });
@@ -234,23 +239,26 @@ export const EditSocialNetworks = (props) => {
         )
     };
 
-    const save = async (isDelete, network) => {
+    const save = async (toast = true) => {
         setLoading(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        if(isDelete) {
-            setValues({ ...values, [network]: "" });
-        }
+        const combinedNetworks = networks.map(item => {
+            return {
+                network: item.network,
+                username: values[item.network]
+            }
+        });
 
-        axios.post("/settings.saveSocialNetworks", {
-            ...values,
-        }, {
+        axios.post("/settings.saveSocialNetworks", combinedNetworks, {
             headers: {
                 "Authorization": sign
             }
         })
         .then(({ data }) => {
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            if(toast) {
+                ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            }
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
@@ -272,7 +280,11 @@ export const EditSocialNetworks = (props) => {
             data={networks}
             renderItem={renderNetwork}
             keyExtractor={(_, index) => index.toString()}
-            onDragEnd={({ data }) => setNetworks(data)}
+            onDragEnd={({ data }) => {
+                setNetworks(data);
+                save(false);
+                ToastAndroid.show("Последовательность социальных сетей сохранена", ToastAndroid.CENTER);
+            }}
             overScrollMode="never"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="always"
