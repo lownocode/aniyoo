@@ -1,7 +1,7 @@
 import { AppRegistry, LogBox } from "react-native";
 import axios from "axios";
 
-import App from "./App";
+import App from "./src/App";
 import { REQUEST_DOMAIN } from "./variables";
 
 LogBox.ignoreLogs([

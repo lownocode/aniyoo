@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.reactnativecommunity.clipboard.ClipboardPackage;
 import com.imagepicker.ImagePickerPackage;
