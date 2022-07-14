@@ -9,7 +9,8 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
-    Image
+    Image,
+    StatusBar
 } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
@@ -17,6 +18,7 @@ import { Modalize } from "react-native-modalize";
 import { EventRegister } from "react-native-event-listeners";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
+import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -35,7 +37,7 @@ import {
     Icon,
     Placeholder,
     PressIcon,
-    Snackbar
+    SvgIcon
 } from "../components";
 import {
     storage,
@@ -46,6 +48,8 @@ import {
     USER_SCHEMA
 } from "../../variables";
 import { SetStatus, SocialNetworks } from "../modals";
+
+const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Profile = props => {
     const theme = useContext(ThemeContext);
@@ -61,11 +65,10 @@ export const Profile = props => {
     const [ refreshing, setRefreshing ] = useState(false);
     const [ userData, setUserData ] = useState(route.params?.userData || USER_SCHEMA);
     const [ modalContent, setModalContent ] = useState(null);
-    const [ snackbar, setSnackbar ] = useState(null);
     const [ friends, setFriends ] = useState([]);
+    const [ popupVisible, setPopupVisible ] = useState(false);
 
     const modalRef = useRef();
-    const snackbarRef = useRef();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -111,27 +114,6 @@ export const Profile = props => {
             console.log(data);
         });
     }; 
-
-    useEffect(() => {
-        const eventListener = EventRegister.addEventListener("profile", (event) => {
-            if(event.type === "show_snackbar") {
-                getUserData();
-
-                setSnackbar({ 
-                    text: event.data.text,
-                    before: event.data.before
-                });
-
-                snackbarRef?.current?.show();
-                
-                sleep(5).then(() => snackbarRef?.current?.hide());
-            }
-        });
-
-        return () => {
-            EventRegister.removeEventListener(eventListener);
-        };
-    }, []);
 
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
@@ -220,7 +202,7 @@ export const Profile = props => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 80,
+            bottom: 70 + bottomNavigationHeight,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -795,16 +777,57 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    padding: 7
+                    padding: 7,
                 }}
                 >
-                    <PressIcon 
-                    icon={<Icon name="dots-three-horizontal" type="Entypo" color={theme.icon_color} size={20}/>}
-                    onPress={() => navigate("settings")}
-                    containerStyle={{
-                        marginRight: 15
+                    <Popup
+                    visible={popupVisible}
+                    onRequestClose={() => setPopupVisible(false)}
+                    animationDuration={100}
+                    style={{
+                        backgroundColor: theme.popup_background,
+                        borderRadius: 10,
+                        overflow: "hidden",
                     }}
-                    />
+                    anchor={
+                        <PressIcon 
+                        icon={<Icon name="dots-three-horizontal" type="Entypo" color={theme.icon_color} size={20}/>}
+                        onPress={() => setPopupVisible(true)}
+                        containerStyle={{
+                            marginRight: 15
+                        }}
+                        />
+                    }
+                    >
+                        <Cell
+                        title="Скопировать ссылку"
+                        before={
+                            <Icon
+                            name="link"
+                            type="Fontisto"
+                            color={theme.icon_color}
+                            />
+                        }
+                        containerStyle={{
+                            paddingVertical: 15
+                        }}
+                        />
+
+                        <Divider />
+
+                        <Cell
+                        title="Поделиться"
+                        before={
+                            <SvgIcon
+                            color={theme.icon_color}
+                            name="share"
+                            />
+                        }
+                        containerStyle={{
+                            paddingVertical: 15
+                        }}
+                        />
+                    </Popup>
 
                     <PressIcon 
                     icon={<Icon name="settings" type="Feather" color={theme.icon_color} size={20}/>}
@@ -826,13 +849,6 @@ export const Profile = props => {
             >
                 {modalContent}
             </Modalize>
-
-            <Snackbar
-            ref={snackbarRef}
-            text={snackbar?.text}
-            before={snackbar?.before}
-            containerStyle={{ bottom: 80 }}
-            />
 
             <ScrollView
             showsHorizontalScrollIndicator={false}

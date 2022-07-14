@@ -1,9 +1,11 @@
 const palette = {
-    accent: "#0071ff"
+    accent: "#3562bf"
 };
 
 const theme = {
     LIGHT: {
+        name: "light",
+
         background_content: "#ffffff",
         divider_color: "#d9d9d9",
         activity_indicator_color: "#000000",
@@ -20,6 +22,7 @@ const theme = {
         header_background: "#ffffff",
         profile_header_background: "#f0f6ff",
         icon_color: "#757575",
+        popup_background: "#ffffff",
         cell: {
             title_color: "#000000",
             subtitle_color: "gray",
@@ -91,11 +94,17 @@ const theme = {
             planned: "#af52de",
             postponed: "#ff9500",
             dropped: "#ff453a",
-            none: "#2A2A2A"
+            none: "#2A2A2A",
+            play_button_background: "#2fa844",
+            play_button_foreground: "#fff",
+            continue_view_button_background: "#3562bf",
+            continue_view_button_foreground: "#fff"
         },
     },
 
     DARK: {
+        name: "dark",
+        
         background_content: "#141414",
         divider_color: "#2A2A2A",
         activity_indicator_color: "#ffffff",
@@ -112,6 +121,7 @@ const theme = {
         header_background: "#141414",
         profile_header_background: "#1a1a1a",
         icon_color: "#969696",
+        popup_background: "#1e1e1e",
         cell: {
             title_color: "#ffffff",
             subtitle_color: "gray",
@@ -183,7 +193,11 @@ const theme = {
             planned: "#af52de",
             postponed: "#ff9500",
             dropped: "#ff453a",
-            none: "#323232"
+            none: "#323232",
+            play_button_background: "#63c955",
+            play_button_foreground: "#fff",
+            continue_view_button_background: "#4380ff",
+            continue_view_button_foreground: "#fff"
         },
         anime_mark: {
             "1": "#f52105",

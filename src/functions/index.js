@@ -4,3 +4,7 @@ export * from "./declOfNum";
 export * from "./sleep";
 export * from "./eventEmit";
 export * from "./formatViews";
+export * from "./invertColor";
+export * from "./detectColorLuma";
+export * from "./lightenDarkenColor";
+export * from "./getAnimeAccentColor";

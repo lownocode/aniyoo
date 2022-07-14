@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     Dimensions,
     StyleSheet,
+    PanResponder
 } from "react-native";
 import Video from "react-native-video";
 import { useRoute } from "@react-navigation/native";
@@ -21,7 +22,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Icon } from "../../components";
+import { Icon, SvgIcon } from "../../components";
 import { 
     AnimeWatchedBefore, 
     ChangeVideoQuality, 
@@ -45,7 +46,6 @@ export const AnimeVideoPlayer = (props) => {
     const [ controlsOpen, setControlsOpen ] = useState(false);
     const [ paused, setPaused ] = useState(false);
     const [ progress, setProgress ] = useState({ currentTime: 0, seekableDuration: 0 });
-    const [ seek, setSeek ] = useState(0);
     const [ lockedControls, setLockedControls ] = useState(false);
     const [ rate, setRate ] = useState(1);
     const [ videoUrls, setVideoUrls ] = useState(route.params?.videos || {});
@@ -54,8 +54,38 @@ export const AnimeVideoPlayer = (props) => {
     const [ loading, setLoading ] = useState(true);
     const [ modalContent, setModalContent ] = useState(null);
     const [ lastProgressCurrent, setLastProgressCurrent ] = useState(0);
+    const [ swipeBefore, setSwipeBefore ] = useState(0);
+    const [ swipeStartPoint, setSwipeStartPoint ] = useState(null);
+    const [ swipeMode, setSwipeMode ] = useState(false);
+    const [ swipeOffset, setSwipeOffset ] = useState(0);
 
     const modalRef = useRef();
+    const videoRef = useRef();
+
+    const panResponder = PanResponder.create({
+        onPanResponderTerminate: () => {
+            console.log("ad12")
+        },
+        // onMoveShouldSetPanResponder: (evt, gestureState) => true,
+        onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+        // onPanResponderTerminationRequest: (evt, gestureState) => true,
+        // onShouldBlockNativeResponder: (evt, gestureState) => true,
+
+        onPanResponderRelease: (evt, gestureState) => {
+            console.log("ad12")
+        },
+        onPanResponderMove: (e) => {
+            if(!paused) setPaused(true);
+            if(!swipeMode) setSwipeMode(true);
+            if(controlsOpen) setControlsOpen(false);
+
+            setSwipeBefore(e.nativeEvent.locationX);
+            swipeHandler(e.nativeEvent.locationX);
+            
+            if(swipeStartPoint !== null) return;
+            setSwipeStartPoint(e.nativeEvent.locationX);
+        },
+    })
 
     const saveAnimeViewData = async () => {
         if(progress.currentTime % 3 !== 2) return;
@@ -69,7 +99,8 @@ export const AnimeVideoPlayer = (props) => {
                     viewed_up_to: progress.currentTime || 0,
                     duration: progress.seekableDuration || 0,
                     translationId: route.params?.translationId,
-                    episode: animeData.playedEpisode
+                    episode: animeData.playedEpisode,
+                    translation: animeData.translation
                 }
             ]);
         }
@@ -81,7 +112,8 @@ export const AnimeVideoPlayer = (props) => {
                     viewed_up_to: progress.currentTime || 0,
                     duration: progress.seekableDuration || 0,
                     translationId: route.params?.translationId,
-                    episode: animeData.playedEpisode
+                    episode: animeData.playedEpisode,
+                    translation: animeData.translation
                 }
             } 
 
@@ -103,21 +135,39 @@ export const AnimeVideoPlayer = (props) => {
 
     useEffect(() => {
         saveAnimeViewData();
-    }, [progress, seek]);
+    }, [progress]);
 
-    useEffect(() => {
+    const settingVideoSpace = () => {
         hideNavigationBar();
         StatusBar.setHidden(true, "fade");
+        Orientation.lockToLandscape();
 
-        Orientation.addOrientationListener(() => {
-            getWatchedBefore()
+        const orientation = new Promise((resolve) => {
+            setTimeout(() => {
+                Orientation.getOrientation((_, orientation) => resolve(orientation));
+            }, 500);
         });
-        Orientation.removeOrientationListener(() => null);
+
+        orientation.then((orientation) => {
+            if(orientation === "LANDSCAPE") {
+                return getWatchedBefore();
+            }
+        });
+    };
+
+    useEffect(() => {
+        settingVideoSpace();
     }, []);
 
     const onTouch = () => {
-        // setTimeout(() => { setControlsOpen(false) }, 5 * 1000);
-        
+        if(swipeMode) {
+            setSwipeStartPoint(null);
+            setSwipeBefore(0);
+            setSwipeMode(false);
+            videoRef.current?.seek(progress.currentTime + swipeOffset);
+            return setPaused(false);
+        }
+
         setControlsOpen(!controlsOpen);
     };
 
@@ -132,7 +182,7 @@ export const AnimeVideoPlayer = (props) => {
                 data={data}
                 animeContinue={(time) => {
                     setPaused(false);
-                    setSeek(time);
+                    videoRef.current?.seek(time);
                     modalRef.current?.close();
                 }}
                 startOver={() => {
@@ -153,7 +203,7 @@ export const AnimeVideoPlayer = (props) => {
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.getVideoLink", {
+        axios.post("/animes.getVideoLink", {
             animeId: route.params?.animeId,
             translationId: route.params?.translationId,
             episode: Number(animeData.playedEpisode) - 1,
@@ -166,7 +216,7 @@ export const AnimeVideoPlayer = (props) => {
         .then(({ data }) => {
             setPaused(true);
             setVideoUrls(data.links);
-            setSeek(0);
+            videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
             setAnimeData({
@@ -188,7 +238,7 @@ export const AnimeVideoPlayer = (props) => {
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/anime.getVideoLink", {
+        axios.post("/animes.getVideoLink", {
             animeId: route.params?.animeId,
             translationId: route.params?.translationId,
             episode: Number(animeData.playedEpisode) + 1,
@@ -201,7 +251,7 @@ export const AnimeVideoPlayer = (props) => {
         .then(({ data }) => {
             setPaused(true);
             setVideoUrls(data.links);
-            setSeek(0);
+            videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
             setAnimeData({
@@ -216,11 +266,20 @@ export const AnimeVideoPlayer = (props) => {
             console.log(data)
         });
     };
-    const video = useRef();
 
     const changeQuality = async (quality) => {
         // setPaused(true);
         setQuality(quality);
+    };
+    
+    const swipeHandler = (x) => {
+        if(swipeBefore > x) {//swipe to left
+            const swipeLeftDistance = (swipeStartPoint - x) / 10;
+            return setSwipeOffset(-swipeLeftDistance);
+        }
+
+        const swipeRightDistance = (x - swipeStartPoint) / 10;
+        setSwipeOffset(swipeRightDistance);
     };
 
     const styles = StyleSheet.create({
@@ -248,8 +307,19 @@ export const AnimeVideoPlayer = (props) => {
             }}
             resizeMode="contain"
             controls={false}
-            ref={video}
-            onTouchMove={(e) => console.log(e.nativeEvent.locationX)}
+            ref={videoRef}
+            onTouchMove={(e) => {
+                if(lockedControls) return;
+                
+                if(!paused) { setPaused(true) };
+                if(!swipeMode) { setSwipeMode(true) };
+
+                setSwipeBefore(e.nativeEvent.locationX);
+                swipeHandler(e.nativeEvent.locationX);
+
+                if(swipeStartPoint !== null) return;
+                setSwipeStartPoint(e.nativeEvent.locationX);
+            }}
             onTouchEnd={onTouch}
             onEnd={() => nextEpisode()}
             paused={paused}
@@ -263,10 +333,9 @@ export const AnimeVideoPlayer = (props) => {
                     ...e,
                     currentTime: Number(e.currentTime.toFixed(0)),
                 });
-                setLastProgressCurrent(e.currentTime)
+                setLastProgressCurrent(e.currentTime);
             }}
-            progressUpdateInterval={100}
-            seek={seek}
+            progressUpdateInterval={1000}
             rate={rate}
             />
 
@@ -284,7 +353,7 @@ export const AnimeVideoPlayer = (props) => {
                 controlsOpen && !lockedControls ? (
                     <TouchableNativeFeedback
                     onPress={() => setControlsOpen(false)}
-                    background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", false)}
+                    background={TouchableNativeFeedback.Ripple("transparent")}
                     >
                         <View
                         style={{
@@ -313,11 +382,10 @@ export const AnimeVideoPlayer = (props) => {
                                 background={TouchableNativeFeedback.Ripple("rgba(0, 0, 0, .1)", true)}
                                 >
                                     <View>
-                                        <Icon
-                                        type="AntDesign"
-                                        name="arrowleft"
-                                        size={30}
+                                        <SvgIcon
+                                        name="arrow-back"
                                         color="#fff"
+                                        size={22}
                                         />
                                     </View>
                                 </TouchableNativeFeedback>
@@ -381,6 +449,10 @@ export const AnimeVideoPlayer = (props) => {
                                         <ActivityIndicator
                                         color="#fff"
                                         size={55}
+                                        style={{
+                                            backgroundColor: "rgba(255, 255, 255, .2)",
+                                            borderRadius: 100
+                                        }}
                                         />
                                     ) : (
                                         <>
@@ -459,7 +531,7 @@ export const AnimeVideoPlayer = (props) => {
                                     }}
                                     >
                                         <TouchableNativeFeedback
-                                        onPress={() => setSeek(animeData?.opening?.end)}
+                                        onPress={() => videoRef.current?.seek(animeData?.opening?.end)}
                                         background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
                                         >
                                             <View
@@ -512,14 +584,16 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View style={{ width: "85%" }}>
                                     <Slider
-                                    value={progress.currentTime}
+                                    value={lastProgressCurrent}
+                                    minimumValue={0}
                                     maximumValue={progress.seekableDuration}
                                     thumbTintColor={theme.accent}
                                     step={1}
                                     maximumTrackTintColor="#fff"
                                     onSlidingComplete={(value) => {
-                                        setSeek(value);
+                                        setLastProgressCurrent(value);
                                         setProgress({ ...progress, currentTime: value });
+                                        videoRef.current?.seek(value);
                                     }}
                                     onValueChange={(value) => {
                                         setProgress({ ...progress, currentTime: value });
@@ -736,7 +810,7 @@ export const AnimeVideoPlayer = (props) => {
                                 }}
                                 >
                                     <TouchableNativeFeedback
-                                    onPress={() => setSeek(progress.currentTime + 85)}
+                                    onPress={() => videoRef.current?.seek(progress.currentTime + 85)}
                                     background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
                                     >
                                         <View
@@ -770,7 +844,7 @@ export const AnimeVideoPlayer = (props) => {
                             </View>
                         </View>
                     </TouchableNativeFeedback>
-                ) : controlsOpen && (
+                ) : controlsOpen ? (
                     <View
                     style={{
                         position: "absolute",
@@ -804,6 +878,87 @@ export const AnimeVideoPlayer = (props) => {
                                 />
                             </View>
                         </TouchableNativeFeedback>
+                        </View>
+                    </View>
+                ) : !controlsOpen && loading ? (
+                        <View
+                        style={{
+                            position: "absolute",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            top: 0, 
+                            left: 0, 
+                            right: 0, 
+                            bottom: 0,
+                        }}
+                        >
+                            <ActivityIndicator
+                            color="#fff"
+                            size={55}
+                            style={{
+                                backgroundColor: "rgba(0, 0, 0, .2)",
+                                borderRadius: 100
+                            }}
+                            />
+                        </View>
+                ) : swipeMode && (
+                    <View
+                    style={{
+                        position: "absolute",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        alignItems: "center",
+                        top: 0, 
+                        left: 0, 
+                        right: 0, 
+                        bottom: 0,
+                    }}
+                    >
+                        <View>
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "center"
+                            }}
+                            >
+                                <Text
+                                style={{
+                                    backgroundColor: "rgba(0, 0, 0, .3)",
+                                    fontWeight: "500",
+                                    fontSize: 32,
+                                    color: "#fff",
+                                    paddingHorizontal: 15,
+                                    paddingVertical: 2,
+                                    borderRadius: 10
+                                }}
+                                >
+                                    {swipeOffset > 0 ? "+ " : "- "} 
+                                    {dayjs.duration(Math.abs(swipeOffset) * 1000).format('mm:ss')}
+                                </Text>
+                            </View>
+
+                            <Text
+                            style={{
+                                backgroundColor: "rgba(0, 0, 0, .3)",
+                                fontWeight: "500",
+                                fontSize: 18,
+                                color: "#fff",
+                                paddingHorizontal: 15,
+                                paddingVertical: 2,
+                                borderRadius: 8,
+                                marginTop: 10
+                            }}
+                            >
+                                {
+                                    progress.currentTime + swipeOffset > 3600 ?
+                                    dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('HH:mm:ss') :
+                                    dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('mm:ss')
+                                } из {
+                                    progress.seekableDuration > 3600 ?
+                                    dayjs.duration(progress.seekableDuration * 1000).format('HH:mm:ss') :
+                                    dayjs.duration(progress.seekableDuration * 1000).format('mm:ss')
+                                }
+                            </Text>
                         </View>
                     </View>
                 )

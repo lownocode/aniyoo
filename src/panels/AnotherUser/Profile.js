@@ -9,6 +9,7 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
+    StatusBar
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
@@ -42,6 +43,8 @@ import {
     declOfNum,
 } from "../../functions";
 import UserContext from "../../config/UserContext";
+
+const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const AnotherUserProfile = (props) => {
     const theme = useContext(ThemeContext);
@@ -199,7 +202,7 @@ export const AnotherUserProfile = (props) => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 10,
+            bottom: 10 + bottomNavigationHeight,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,

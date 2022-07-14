@@ -9,7 +9,6 @@ export * from "./Cell";
 export * from "./Avatar";
 export * from "./Rating";
 export * from "./Input";
-export * from "./Snackbar";
 export * from "./AnimeLists";
 export * from "./AssemblyOfWeekCarousel";
 export * from "./WriteBar";

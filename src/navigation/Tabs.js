@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, TouchableNativeFeedback } from "react-native";
+import { Text, View, TouchableNativeFeedback, Dimensions, StatusBar } from "react-native";
 import { EventRegister } from "react-native-event-listeners";
 import { useRoute } from "@react-navigation/native";
 
@@ -15,6 +15,8 @@ import { Icon } from "../components";
 import ThemeContext from "../config/ThemeContext";
 
 const Tab = createBottomTabNavigator();
+
+const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Tabs = (props) => {
     const route = useRoute();
@@ -51,7 +53,7 @@ export const Tabs = (props) => {
                 borderWidth: 1,
                 borderColor: theme.bottom_tabbar.border_color,
                 position: "absolute",
-                bottom: 13,
+                bottom: bottomNavigationHeight,
                 right: 13,
                 left: 13,
                 borderRadius: 12,

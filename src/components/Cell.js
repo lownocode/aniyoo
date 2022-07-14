@@ -33,10 +33,13 @@ export const Cell = (props) => {
             flexDirection: "row",
             paddingVertical: 10,
             paddingHorizontal: 15,
+            width: "100%",
+            justifyContent: "center",
             ...containerStyle
         },
         content: {
             flex: 1,
+            width: "100%",
             justifyContent: centered ? "center" : "flex-start",
             ...contentStyle
         },

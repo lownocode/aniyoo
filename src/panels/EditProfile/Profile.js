@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
-import { ScrollView, View, ActivityIndicator, StyleSheet, Dimensions } from "react-native";
+import React, { useState, useRef, useContext } from "react";
+import { ScrollView, View, StyleSheet, Dimensions, ToastAndroid } from "react-native";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
-import { EventRegister } from "react-native-event-listeners";
 
 import ThemeContext from "../../config/ThemeContext";
 
@@ -12,13 +11,12 @@ import {
     Header,
     Cell,
     Icon,
-    Snackbar
 } from "../../components";
 import {
     SetStatus
 } from "../../modals";
 
-import { storage, sleep } from "../../functions";
+import { storage } from "../../functions";
 
 export const EditProfileProfile = (props) => {
     const theme = useContext(ThemeContext);
@@ -26,34 +24,13 @@ export const EditProfileProfile = (props) => {
     const { 
         navigation: {
             goBack,
-            reset,
             navigate
         },
     } = props;
 
     const [ modalContent, setModalContent ] = useState(null);
-    const [ snackbar, setSnackbar ] = useState(null);
 
     const modalRef = useRef();
-    const snackbarRef = useRef();
-
-    useEffect(() => {
-        const eventListener = EventRegister.addEventListener("edit_profile.profile", (event) => {
-            if(event.type === "show_snackbar") {
-                setSnackbar({ 
-                    text: event.data.text,
-                    before: event.data.before
-                });
-
-                snackbarRef?.current?.show();
-                sleep(5).then(() => snackbarRef?.current?.hide());
-            }
-        });
-
-        return () => {
-            EventRegister.removeEventListener(eventListener);
-        };
-    }, []);
 
     const changePhoto = async () => {
         launchImageLibrary({
@@ -69,13 +46,7 @@ export const EditProfileProfile = (props) => {
                 name: image.assets[0].fileName
             });
 
-            setSnackbar({ 
-                text: "Загрузка картинки на сервер, подождите немного...",
-                before: (
-                    <ActivityIndicator size={17} color="#fff"/>
-                )
-            });
-            snackbarRef?.current?.show();
+            ToastAndroid.show("Загрузка картинки на сервер, подождите немного...", ToastAndroid.LONG);
 
             axios({
                 method: "post",
@@ -88,36 +59,10 @@ export const EditProfileProfile = (props) => {
                 },
             })
             .then(() => {
-                setSnackbar({ 
-                    text: "Аватарка успешно загружена",
-                    before: (
-                        <Icon
-                        name="checkmark-done"
-                        type="Ionicons"
-                        color="#fff"
-                        size={17}
-                        />
-                    )
-                });
-
-                snackbarRef?.current?.show();
-                sleep(5).then(() => snackbarRef?.current?.close());
+                ToastAndroid.show("Аватарка успешно загружена", ToastAndroid.CENTER);
             })
             .catch(({ response: { data } }) => {
-                setSnackbar({ 
-                    text: data?.message,
-                    before: (
-                        <Icon
-                        name="error-outline"
-                        type="MaterialIcons"
-                        color="#fff"
-                        size={17}
-                        />
-                    )
-                });
-
-                snackbarRef?.current?.show();
-                sleep(5).then(() => snackbarRef?.current?.close());
+                ToastAndroid.show(data?.message, ToastAndroid.CENTER);
             });
         });
     };
@@ -154,12 +99,6 @@ export const EditProfileProfile = (props) => {
             >
                 {modalContent}
             </Modalize>
-
-            <Snackbar
-            ref={snackbarRef}
-            text={snackbar?.text}
-            before={snackbar?.before}
-            />
 
             <ScrollView
             showsVerticalScrollIndicator={false}

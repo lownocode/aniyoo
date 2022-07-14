@@ -1,23 +1,25 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { ScrollView, Text, View, Keyboard } from "react-native";
+import { Text, View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { EventRegister } from "react-native-event-listeners";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ru";
+dayjs.extend(relativeTime).locale("ru");
 
 import {
     Header,
     Avatar,
-    Divider,
     ContentHeader,
     Button,
-    Input,
-    Placeholder,
     Icon,
-    Snackbar
+    PressIcon,
+    SvgIcon,
+    Cell,
 } from "../../components";
 
 import {
     storage,
-    sleep
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -29,27 +31,23 @@ export const EditProfileChangeNickname = (props) => {
     const { 
         navigation: {
             goBack,
-            state
         },
-        navigation
     } = props;
 
     const [ userData, setUserData ] = useState({
         nickname: "Загрузка...",
         photo: ""
     });
+    const [ history, setHistory ] = useState([]);
     const [ newNickname, setNewNickname ] = useState("");
-    const [ snackbar, setSnackbar ] = useState(null);
     const [ loading, setLoading ] = useState(false);
 
-    const snackbarRef = useRef();
+    const inputRef = useRef();
 
     const getUserData = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/users.signIn", {
-            nickname: newNickname
-        }, {
+        axios.post("/users.signIn", null, {
             headers: {
                 'Authorization': sign
             }
@@ -58,13 +56,31 @@ export const EditProfileChangeNickname = (props) => {
             setUserData({
                 nickname: data.nickname,
                 photo: data.photo
-            })
+            });
         })
         .catch(({ response: { data }}) => {
             console.log(data);
         });
     };
+
+    const getHistory = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/users.getNicknameHistory", null, {
+            headers: {
+                'Authorization': sign
+            }
+        })
+        .then(({ data }) => {
+            setHistory(data);
+        })
+        .catch(({ response: { data }}) => {
+            console.log(data);
+        });
+    };
+
     useEffect(() => {
+        getHistory();
         getUserData();
     }, []);
 
@@ -82,39 +98,110 @@ export const EditProfileChangeNickname = (props) => {
         .then(({ data }) => {
             const newUserData = Object.defineProperty(userData, "nickname", { value: newNickname });
             setUserData(newUserData);
+            console.log(data)
             setNewNickname("");
+            setHistory([data.newNickname, ...history]);
 
-            setSnackbar({
-                text: data?.message,
-                before: <Icon
-                name="check"
-                type="Feather"
-                color="#00cc00"
-                size={20}
-                />
-            });
-
-            snackbarRef.current.show();
-            sleep(5).then(() => snackbarRef?.current?.hide());
+            ToastAndroid.show(data?.message, ToastAndroid.CENTER);
         })
         .catch(({ response: { data }}) => {
-            setSnackbar({
-                text: data?.message,
-                before: <Icon
-                name="error-outline"
-                type="MaterialIcons"
-                color="orangered"
-                size={20}
-                />
-            });
-
-            snackbarRef.current.show();
-            sleep(5).then(() => snackbarRef?.current?.hide());
+            ToastAndroid.show(data?.message, ToastAndroid.CENTER);
         })
         .finally(() => {
             setLoading(false);
             Keyboard.dismiss();
         });
+    };
+
+    const renderInput = () => {
+        return (
+            <View
+            style={{
+                backgroundColor: theme.divider_color,
+                borderRadius: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                flex: 1
+            }}
+            >
+                <View
+                style={{
+                    marginLeft: 15,
+                    marginRight: 10
+                }}
+                >
+                    <SvgIcon
+                    name="pencil-write"
+                    color={theme.text_secondary_color}
+                    />
+                </View>
+
+                <TextInput
+                value={newNickname}
+                placeholder="Введите новый никнейм"
+                style={{
+                    height: 45,
+                    flex: 1,
+                    color: theme.text_color
+                }}
+                placeholderTextColor={theme.text_secondary_color}
+                onChangeText={setNewNickname}
+                returnKeyType="done"
+                autoComplete="username"
+                selectionColor={theme.accent}
+                ref={inputRef}
+                />
+
+                {
+                    newNickname.length > 0 && (
+                        <PressIcon
+                        icon={
+                            <Icon
+                            name="backspace-outline"
+                            type="Ionicons"
+                            color={theme.text_secondary_color}
+                            size={20}
+                            />
+                        }
+                        containerStyle={{
+                            marginHorizontal: 10
+                        }}
+                        onPress={() => {
+                            inputRef.current?.focus();
+                            setNewNickname("");
+                        }}
+                        />
+                    )
+                }
+            </View>
+        )
+    };
+
+    const renderHistory = ({ item }) => {
+        return (
+            <Cell
+            onPress={() => setNewNickname(item.nickname)}
+            title={item.nickname}
+            subtitle={item.date ? dayjs().to(dayjs(item.date)) : "Указан при регистрации"}
+            before={
+                <View
+                style={{
+                    width: 45,
+                    height: 45,
+                    borderRadius: 10,
+                    backgroundColor: theme.accent + "20",
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}
+                >
+                    <SvgIcon
+                    name="pencil-write"
+                    color={theme.accent}
+                    />
+                </View>
+            }
+            />
+        )
     };
     
     return (
@@ -126,113 +213,56 @@ export const EditProfileChangeNickname = (props) => {
             backButton
             />
 
-            <Snackbar
-            ref={snackbarRef}
-            text={snackbar?.text}
-            before={snackbar?.before}
-            />
-
-            <ScrollView>
-                <View
-                style={{
-                    marginVertical: 30
-                }}
-                >
+            <FlatList
+            data={history}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderHistory}
+            showsVerticalScrollIndicator={false}
+            overScrollMode="never"
+            keyboardShouldPersistTaps="always"
+            ListHeaderComponent={(
+                <View>
                     <View
                     style={{
-                        justifyContent: "center",
-                        alignItems: "center"
+                        marginVertical: 30
                     }}
                     >
-                        <Avatar
-                        url={userData?.photo}
-                        size={80}
-                        />
-                    </View>
-
-                    <Text
-                    style={{
-                        textAlign: "center",
-                        color: theme.text_color,
-                        fontSize: 24,
-                        fontWeight: "700",
-                        marginHorizontal: 15
-                    }}
-                    >
-                        {
-                            userData?.nickname || "Загрузка..."
-                        }
-                    </Text>
-
-                    <Text
-                    style={{
-                        fontSize: 13,
-                        color: theme.text_secondary_color,
-                        textAlign: "center"
-                    }}
-                    >
-                        Ваш текущий никнейм
-                    </Text>
-                </View>
-
-                <Divider />
-
-                <View>
-                    {/* <View
-                    style={{
-                        backgroundColor: theme.divider_color + "70",
-                        padding: 10,
-                        margin: 15,
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderColor: theme.divider_color
-                    }}
-                    >
-                        <Text
-                        style={{
-                            fontWeight: "600",
-                            fontSize: 19,
-                            color: theme.text_color
-                        }}
-                        >
-                            Обратите внимание!
-                        </Text>
-
-                        <Text
-                        style={{
-                            color: theme.text_secondary_color
-                        }}
-                        >
-                            Пользователи с Premium могут менять свой никнейм раз в день, а пользователи без подписки - раз в неделю.
-                        </Text>
-
                         <View
                         style={{
-                            flexDirection: "row",
-                            marginTop: 10
+                            justifyContent: "center",
+                            alignItems: "center"
                         }}
                         >
-                            <Button
-                            title="Premium"
-                            upperTitle={false}
-                            containerStyle={{
-                                marginBottom: 0,
-                                marginLeft: 0,
-                                marginRight: 0
-                            }}
-                            />
-
-                            <Button
-                            title="Скрыть"
-                            upperTitle={false}
-                            type="overlay"
-                            containerStyle={{
-                                marginBottom: 0,
-                                marginRight: 0
-                            }}
+                            <Avatar
+                            url={userData?.photo}
+                            size={80}
                             />
                         </View>
-                    </View> */}
+
+                        <Text
+                        style={{
+                            textAlign: "center",
+                            color: theme.text_color,
+                            fontSize: 24,
+                            fontWeight: "700",
+                            marginHorizontal: 15
+                        }}
+                        >
+                            {
+                                userData?.nickname || "Загрузка..."
+                            }
+                        </Text>
+
+                        <Text
+                        style={{
+                            fontSize: 13,
+                            color: theme.text_secondary_color,
+                            textAlign: "center"
+                        }}
+                        >
+                            Ваш текущий никнейм
+                        </Text>
+                    </View>
 
                     <View
                     style={{
@@ -240,19 +270,7 @@ export const EditProfileChangeNickname = (props) => {
                         marginTop: 0
                     }}
                     >
-                        <Input
-                        placeholder="Новый никнейм"
-                        before={
-                            <Icon
-                            type="EvilIcons"
-                            name="pencil"
-                            size={25}
-                            color={theme.icon_color}
-                            />
-                        }
-                        value={newNickname}
-                        onChangeText={(value) => setNewNickname(value)}
-                        />
+                        {renderInput()}
 
                         <Button
                         title="Сменить никнейм"
@@ -265,27 +283,13 @@ export const EditProfileChangeNickname = (props) => {
                         />
                     </View>
 
-                    <View>
-                        <ContentHeader
-                        text="История изменений"
-                        indents
-                        />
-
-                        <Placeholder
-                        icon={
-                            <Icon
-                            type="Ionicons"
-                            name="ios-document-text-outline"
-                            color={theme.icon_color}
-                            size={40}
-                            />
-                        }
-                        title="Здесь ничего нет"
-                        subtitle="С момента регистрации Вы ещё ни разу не изменили свой никнейм."
-                        />
-                    </View>
+                    <ContentHeader
+                    indents
+                    text="История изменений"
+                    />
                 </View>
-            </ScrollView>
+            )}
+            />
         </GestureHandlerRootView>
     )
 };

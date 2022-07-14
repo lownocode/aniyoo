@@ -17,6 +17,7 @@ import axios from "axios";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 import LinearGradient from "react-native-linear-gradient";
+import ImageColors from "react-native-image-colors";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -24,7 +25,13 @@ import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
 import ThemeContext from "../../config/ThemeContext";
-import { declOfNum, storage } from "../../functions";
+import { 
+    declOfNum, 
+    storage, 
+    detectColorIsDark, 
+    getAnimeAccentColor,
+    invertColor
+} from "../../functions";
 
 import { 
     Icon,
@@ -33,14 +40,16 @@ import {
     Cell,
     ContentHeader,
     Avatar,
-    PressIcon,
     Placeholder,
     Progress,
     DonutChart,
-    Rating
+    Rating,
+    SvgIcon
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS } from "../../../variables";
+
+const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
@@ -63,15 +72,18 @@ export const Anime = (props) => {
     const [ modalContent, setModalContent ] = useState(null);
     const [ linkedAnimes, setLinkedAnimes ] = useState([]);
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
+    const [ posterColors, setPosterColors ] = useState({});
+    const [ animeStatus, setAnimeStatus ] = useState({ status: "NO_WATCHED" });
+
+    const accent = getAnimeAccentColor(posterColors?.dominant || theme.text_color, theme.name);
 
     const getAnimeData = async (id, refreshing = false) => {
-        // console.log(JSON.stringify(animeData, null, "\t"))
         setRefreshing(refreshing);
+
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        const params = await storage.getItem("DEEPLINK_INITIAL_PARAMS");
 
         axios.post("/animes.get", {
-            animeId: id || route.params?.animeData?.id || params.id
+            animeId: id || route.params?.animeData?.id
         }, {
             headers: {
                 "Authorization": sign
@@ -80,13 +92,35 @@ export const Anime = (props) => {
         .then(({ data }) => {
             setAnimeData(data);
             setLinkedAnimes(data?.linked?.sort(sortLinkedAnimes)?.slice(0, 3));
-            // console.log(JSON.stringify(data, null, "\t"))
+            getPosterColors(data?.poster);
+            getAnimeStatusInLocalStorage();
 
             setRefreshing(false);
         })
         .catch(({ response: { data}  }) => {
             console.log("err\n", data);
         });
+    };
+
+    const getAnimeStatusInLocalStorage = async () => {
+        const view = await storage.getItem(`ANIME_VIEW__ID=${animeData?.id || 0}`);
+
+        if(view === null) return;
+
+        setAnimeStatus({
+            status: "WATCHED_BEFORE",
+            data: view[view.length - 1]
+        })
+    };
+
+    const getPosterColors = async (url) => {
+        const colors = await ImageColors.getColors(url, {
+            fallback: theme.text_color,
+            cache: false,
+            quality: "high"
+        });
+        
+        setPosterColors(colors);
     };
 
     const addAnimeToList = (list) => {
@@ -108,7 +142,7 @@ export const Anime = (props) => {
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/animes.setStatus", {
+        axios.post("/lists.add", {
             animeId: animeData?.id,
             status: animeData?.isFavorite ? "noFavorite" : "favorite"
         }, {
@@ -160,7 +194,7 @@ export const Anime = (props) => {
             <View
             style={{
                 borderWidth: 0.5,
-                borderColor: theme.accent,
+                borderColor: accent,
                 paddingHorizontal: 10,
                 paddingVertical: 2,
                 borderRadius: 100,
@@ -171,7 +205,7 @@ export const Anime = (props) => {
             >
                 <Text
                 style={{
-                    color: theme.accent
+                    color: accent
                 }}
                 >
                     {genre}
@@ -357,7 +391,7 @@ export const Anime = (props) => {
                         <Icon
                         name="chevrons-left"
                         type="Feather"
-                        color={theme.accent}
+                        color={accent}
                         size={20}
                         />
                     )
@@ -861,7 +895,7 @@ export const Anime = (props) => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 10,
+            bottom: 10 + bottomNavigationHeight,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -878,15 +912,15 @@ export const Anime = (props) => {
                 position: "absolute",
                 top: StatusBar.currentHeight + 20,
                 left: 20,
-                backgroundColor: theme.anime.back_button_background,
-                borderRadius: 20,
+                backgroundColor: theme.background_content,
+                borderRadius: 100,
                 width: 45,
                 height: 45,
                 justifyContent: "center",
                 alignItems: "center",
-                borderWidth: 1,
-                borderColor: theme.divider_color,
                 zIndex: 100,
+                borderWidth: 0.5,
+                borderColor: theme.divider_color
             }}
             >
                 <TouchableNativeFeedback
@@ -895,14 +929,44 @@ export const Anime = (props) => {
                 >
                     <View
                     style={{
-                        padding: 6
+                        padding: 9
                     }}
                     >
-                        <Icon
-                        type="AntDesign"
-                        name="arrowleft"
-                        color={theme.icon_color}
-                        size={22}
+                        <SvgIcon
+                        name="arrow-back"
+                        color={theme.text_color}
+                        />
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
+
+            <View
+            style={{
+                position: "absolute",
+                top: StatusBar.currentHeight + 20,
+                right: 20,
+                backgroundColor: theme.background_content,
+                borderRadius: 100,
+                width: 45,
+                height: 45,
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 100,
+                borderWidth: 0.5,
+                borderColor: theme.divider_color
+            }}
+            >
+                <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
+                >
+                    <View
+                    style={{
+                        padding: 9
+                    }}
+                    >
+                        <SvgIcon
+                        name="four-dots"
+                        color={theme.text_color}
                         />
                     </View>
                 </TouchableNativeFeedback>
@@ -925,7 +989,7 @@ export const Anime = (props) => {
                 refreshControl={
                     <RefreshControl
                     progressBackgroundColor={theme.refresh_control_background}
-                    colors={[theme.accent]}
+                    colors={[accent]}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     />
@@ -985,15 +1049,26 @@ export const Anime = (props) => {
                         justifyContent: "center",
                         alignItems: "center"
                     }}
+                    />
+
+                    <View
+                    style={{
+                        marginTop: -270,
+                        zIndex: 5,
+                    }}
                     >
-                        <View>
+                        <View
+                        style={{
+                            marginBottom: 10
+                        }}
+                        >
                             <Text
                             selectable
                             numberOfLines={2}
                             style={{
                                 fontSize: 20,
                                 fontWeight: "500",
-                                marginHorizontal: 25,
+                                marginHorizontal: 15,
                                 textAlign: "center",
                                 color: theme.text_color
                             }}
@@ -1007,8 +1082,7 @@ export const Anime = (props) => {
                             selectable
                             numberOfLines={2}
                             style={{
-                                fontWeight: "500",
-                                marginHorizontal: 25,
+                                marginHorizontal: 15,
                                 textAlign: "center",
                                 color: theme.text_secondary_color,
                                 marginTop: 5
@@ -1019,14 +1093,7 @@ export const Anime = (props) => {
                                 }
                             </Text>
                         </View>
-                    </LinearGradient>
 
-                    <View
-                    style={{
-                        marginTop: -200,
-                        zIndex: 5,
-                    }}
-                    >
                         <View
                         style={{
                             flexDirection: "row",
@@ -1117,22 +1184,20 @@ export const Anime = (props) => {
                                 <Button
                                 title={animeData?.stats?.favorite || "0"}
                                 upperTitle={false}
+                                loading={refreshing}
                                 type={animeData?.isFavorite ? "primary" : "outline"}
-                                backgroundColor={animeData?.isFavorite ? "#e2b22799" : theme.icon_color}
+                                backgroundColor={animeData?.isFavorite ? "#c78b16" : theme.icon_color}
                                 size={35}
                                 textColor={animeData?.isFavorite ? "#ffffff" : theme.icon_color}
                                 before={
                                     animeData?.isFavorite ? (
-                                        <Icon
-                                        name="ios-bookmarks"
-                                        type="Ionicons"
+                                        <SvgIcon
+                                        name="bookmark"
                                         size={17}
-                                        color="#ffffff"
                                         />
                                     ) : (
-                                        <Icon
-                                        name="ios-bookmarks-outline"
-                                        type="Ionicons"
+                                        <SvgIcon
+                                        name="bookmark-outline"
                                         size={17}
                                         color={theme.icon_color}
                                         />
@@ -1144,42 +1209,74 @@ export const Anime = (props) => {
                                 onPress={() => setIsFavorite()}
                                 />
                             </View>
-
-                            <View>
-                                <Button
-                                title=""
-                                type="outline"
-                                backgroundColor={theme.icon_color}
-                                size={35}
-                                before={
-                                    <Icon
-                                    name="dots-horizontal"
-                                    type="MaterialCommunityIcons"
-                                    size={17}
-                                    color={theme.icon_color}
-                                    />
-                                }
-                                />
-                            </View>
                         </View>
 
                         <Button
-                        title="Начать просмотр"
+                        title={
+                            {
+                                "NO_WATCHED": "Начать просмотр",
+                                "WATCHED_BEFORE": "Продолжить просмотр"
+                            }[animeStatus.status]
+                        }
                         upperTitle={false}
-                        backgroundColor={theme.anime.button_start_watch_background}
-                        textColor={theme.anime.button_start_watch_text_color}
+                        backgroundColor={accent}
+                        textColor={invertColor(accent, true)}
                         before={
-                            <Icon
-                            name="play-outline"
-                            type="Ionicons"
-                            size={17}
-                            color={theme.anime.button_start_watch_text_color}
-                            />
+                            {
+                                "NO_WATCHED": (
+                                    <Icon
+                                    name="play-outline"
+                                    type="Ionicons"
+                                    size={17}
+                                    color={invertColor(accent, true)}
+                                    />
+                                ),
+                                "WATCHED_BEFORE": (
+                                    <Icon
+                                    name="pause"
+                                    type="MaterialCommunityIcons"
+                                    size={17}
+                                    color={invertColor(accent, true)}
+                                    />
+                                )
+                            }[animeStatus.status]
                         }
                         size={45}
-                        disabled={!animeData?.id}
+                        disabled={!animeData?.id || animeData?.status === "anons"}
                         onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
                         />
+
+                        {
+                            animeStatus?.status === "WATCHED_BEFORE" && (
+                                <View
+                                style={{
+                                    backgroundColor: theme.divider_color,
+                                    marginHorizontal: 10,
+                                    marginBottom: 10,
+                                    zIndex: 0,
+                                    borderRadius: 10,
+                                    overflow: "hidden"
+                                }}
+                                >
+                                    <Cell
+                                    title="Можно вернуться к просмотру"
+                                    before={
+                                        <Icon
+                                        color="orangered"
+                                        type="MaterialIcons"
+                                        name="local-fire-department"
+                                        size={20}
+                                        />
+                                    }
+                                    subtitle={`Остановлено на ${
+                                        animeStatus?.data?.viewed_up_to > 3600 ?
+                                        dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('HH:mm:ss') :
+                                        dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('mm:ss')
+                                    } в ${animeStatus?.data?.episode} серии в озвучке от ${animeStatus?.data?.translation}`}
+                                    />
+                                </View>
+                            )
+                        }
 
                         <View
                         style={{
@@ -1208,7 +1305,7 @@ export const Anime = (props) => {
                                 animeData?.other?.kind === "special" ? "Спешл" :
                                 animeData?.other?.kind === "movie" ? "Фильм" : "Неизвестно"
                             }
-                            subtitle="Тип"
+                            subtitle="Формат"
                             icon={
                                 <Icon
                                 name="ev-plug-type1"
@@ -1275,11 +1372,7 @@ export const Anime = (props) => {
                             }
 
                             <WrapperAnimeInfo
-                            title={
-                                animeData?.status === "anons" ? new Date(animeData?.other?.airedAt) < Date.now() ? "Неизвестна" : 
-                                dayjs(animeData?.other?.airedAt).format('D MMM YYYY') : 
-                                dayjs(animeData?.other?.releasedAt).format('D MMM YYYY')
-                            }
+                            title={dayjs(animeData?.other?.airedAt).format('D MMM YYYY') || "Неизвестна"}
                             subtitle="Дата выхода"
                             icon={
                                 <Icon
@@ -1351,6 +1444,7 @@ export const Anime = (props) => {
                         >
                             <ContentHeader
                             text="Описание"
+                            textStyle={{ color: accent }}
                             containerStyle={{ marginBottom: 10 }}
                             />
 
@@ -1358,6 +1452,7 @@ export const Anime = (props) => {
                                 animeData?.description ? (
                                     <Text
                                     selectable
+                                    selectionColor={accent}
                                     numberOfLines={hideDescription ? 5 : 10000}
                                     onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
                                     style={{
@@ -1388,7 +1483,6 @@ export const Anime = (props) => {
                                         style={{
                                             marginLeft: 15,
                                             fontSize: 16,
-                                            fontWeight: "500",
                                             color: theme.text_secondary_color
                                         }}
                                         >
@@ -1437,6 +1531,7 @@ export const Anime = (props) => {
                                 >
                                     <ContentHeader
                                     text="Кадры из аниме"
+                                    textStyle={{ color: accent }}
                                     containerStyle={{ marginBottom: 10, marginLeft: 15 }}
                                     />
 
@@ -1459,6 +1554,7 @@ export const Anime = (props) => {
                         >
                             <ContentHeader
                             text="Статистика"
+                            textStyle={{ color: accent }}
                             containerStyle={{ marginBottom: 10, marginLeft: 15  }}
                             />
 
@@ -1545,7 +1641,7 @@ export const Anime = (props) => {
                         </View>
 
                         {
-                            animeData?.marks && (
+                            animeData?.marks?.total && animeData?.status !== "anons" ? (
                                 <View
                                 style={{
                                     marginTop: 15,
@@ -1553,11 +1649,12 @@ export const Anime = (props) => {
                                 >
                                     <ContentHeader
                                     text="Оценка"
+                                    textStyle={{ color: accent }}
                                     containerStyle={{ marginBottom: 10, marginLeft: 15  }}
                                     />
 
                                     {
-                                        animeData?.marks?.avg ? (
+                                        animeData?.marks?.total ? (
                                             <View
                                             style={{
                                                 flexDirection: "row",
@@ -1677,7 +1774,7 @@ export const Anime = (props) => {
                                         />
                                     </View>
                                 </View>
-                            ) 
+                            ) : null
                         }
 
                         {
@@ -1689,6 +1786,7 @@ export const Anime = (props) => {
                                 >
                                     <ContentHeader
                                     text="Связанные"
+                                    textStyle={{ color: accent }}
                                     containerStyle={{ marginBottom: 10, marginLeft: 15  }}
                                     />
 
@@ -1744,14 +1842,14 @@ export const Anime = (props) => {
                             flexDirection: "row",
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: theme.accent + "10",
+                            backgroundColor: accent + "10",
                             borderRadius: 100,
-                            paddingHorizontal: 8
+                            paddingHorizontal: 8,
                         }}
                         >
                             <Text
                             style={{
-                                color: theme.accent
+                                color: accent
                             }}
                             >
                                 {
@@ -1762,7 +1860,7 @@ export const Anime = (props) => {
                             <Icon
                             name="chevron-right"
                             type="Feather"
-                            color={theme.accent}
+                            color={accent}
                             />
                         </View>
                     }
