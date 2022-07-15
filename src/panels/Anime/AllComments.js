@@ -37,6 +37,7 @@ import {
 import { CommentActions } from "../../modals";
 
 import { declOfNum, storage } from "../../functions";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 export const AnimeAllComments = (props) => {
     const theme = useContext(ThemeContext);
@@ -122,6 +123,7 @@ export const AnimeAllComments = (props) => {
     };
 
     useEffect(() => {
+        changeNavigationBarColor(theme.input.background, false, true);
         getComments();
     }, []);
 
@@ -239,14 +241,16 @@ export const AnimeAllComments = (props) => {
 
                         {
                             item.editedAt && (
-                                <Icon
-                                name="pencil"
-                                type="EvilIcons"
-                                size={16}
+                                <View
                                 style={{
                                     marginLeft: 5
                                 }}
-                                />
+                                >
+                                    <Icon
+                                    name="pencil-write"
+                                    size={16}
+                                    />
+                                </View>
                             )
                         }
                     </View>
@@ -396,8 +400,7 @@ export const AnimeAllComments = (props) => {
                                     }}
                                     before={
                                         <Icon
-                                        name="reply-all"
-                                        type="Entypo"
+                                        name="reply"
                                         color={theme.text_secondary_color}
                                         size={13}
                                         />
@@ -435,8 +438,7 @@ export const AnimeAllComments = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-down-outline"
-                                    type="Ionicons"
+                                    name="chevron-down"
                                     color={item.mark === "down" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -474,8 +476,7 @@ export const AnimeAllComments = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-up-outline"
-                                    type="Ionicons"
+                                    name="chevron-up"
                                     color={item.mark === "up" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -619,7 +620,6 @@ export const AnimeAllComments = (props) => {
                                 ) : (
                                     <Icon
                                     name="send"
-                                    type="Ionicons"
                                     color={newCommentText.length >= 3 ? theme.accent : theme.icon_color}
                                     size={20}
                                     />

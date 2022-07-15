@@ -120,9 +120,8 @@ export const EditProfileProfile = (props) => {
                     }}
                     >
                         <Icon
-                        name="photo-library"
-                        type="MaterialIcons"
-                        size={20}
+                        name="gallery"
+                        size={17}
                         color={theme.accent}
                         />
                     </View>
@@ -147,8 +146,7 @@ export const EditProfileProfile = (props) => {
                     }}
                     >
                         <Icon
-                        name="user"
-                        type="Feather"
+                        name="user-profile"
                         size={20}
                         color={theme.accent}
                         />
@@ -174,9 +172,8 @@ export const EditProfileProfile = (props) => {
                     }}
                     >
                         <Icon
-                        name="pencil"
-                        type="EvilIcons"
-                        size={25}
+                        name="pencil-write"
+                        size={17}
                         color={theme.accent}
                         />
                     </View>

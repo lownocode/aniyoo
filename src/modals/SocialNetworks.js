@@ -5,9 +5,8 @@ import {
     Button,
     Cell,
     Divider,
-    Icon,
     Placeholder,
-    SvgIcon
+    Icon
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";
@@ -28,7 +27,6 @@ export const SocialNetworks = (props) => {
                 name: "ВКонтакте",
                 icon: {
                     name: "vk",
-                    type: "Entypo",
                     color: "#0062ff"
                 },
                 domain: "https://vk.com/"
@@ -37,7 +35,6 @@ export const SocialNetworks = (props) => {
                 name: "Telegram",
                 icon: {
                     name: "telegram",
-                    type: "FontAwesome",
                     color: "#00a6ff"
                 },
                 domain: "https://t.me/"
@@ -46,7 +43,6 @@ export const SocialNetworks = (props) => {
                 name: "Instagram",
                 icon: {
                     name: "instagram",
-                    type: "AntDesign",
                     color: "#ff005d"
                 },
                 domain: "https://instagram.com/"
@@ -55,7 +51,6 @@ export const SocialNetworks = (props) => {
                 name: "TikTok",
                 icon: {
                     name: "tiktok",
-                    type: "FontAwesome5Brands",
                     color: theme.text_color
                 },
                 domain: "https://tiktok.com/@"
@@ -63,8 +58,7 @@ export const SocialNetworks = (props) => {
             "discord": {
                 name: "Discord",
                 icon: {
-                    name: "discord-logo",
-                    type: "my-icons",
+                    name: "discord",
                 },
                 domain: "discord"
             }
@@ -87,24 +81,15 @@ export const SocialNetworks = (props) => {
                 title={network.name}
                 subtitle={network.domain === "discord" ? item.username : (`@` + item.username)}
                 before={
-                    network.icon.type === "my-icons" ? (
-                        <SvgIcon
-                        name={network.icon.name}
-                        size={20}
-                        />
-                    ) : (
-                        <Icon
-                        name={network.icon.name}
-                        type={network.icon.type}
-                        size={20}
-                        color={network.icon.color}
-                        />
-                    )
+                    <Icon
+                    name={network.icon.name}
+                    size={20}
+                    color={network.icon.color}
+                    />
                 }
                 after={
                     <Icon
-                    name="arrow-up-right"
-                    type="Feather"
+                    name="external-link"
                     color={theme.icon_color}
                     />
                 }
@@ -132,8 +117,7 @@ export const SocialNetworks = (props) => {
                     subtitle={from === "my" ? "Вы ещё не указали ни одной социальной сети" : "Пользователь не указал ни одной социальной сети"}
                     icon={
                         <Icon
-                        name="globe-outline"
-                        type="Ionicons"
+                        name="globe-online"
                         style={{
                             marginTop: 15
                         }}

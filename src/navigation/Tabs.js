@@ -11,12 +11,11 @@ import {
     Search,
     Profile
 } from "../screens";
-import { Icon } from "../components";
+import { Avatar, Icon } from "../components";
 import ThemeContext from "../config/ThemeContext";
+import UserContext from "../config/UserContext";
 
 const Tab = createBottomTabNavigator();
-
-const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Tabs = (props) => {
     const route = useRoute();
@@ -41,6 +40,7 @@ export const Tabs = (props) => {
 
     const MyTabBar = ({ state, descriptors, navigation }) => {
         const theme = useContext(ThemeContext);
+        const user = useContext(UserContext);
 
         return (
             <View 
@@ -53,7 +53,7 @@ export const Tabs = (props) => {
                 borderWidth: 1,
                 borderColor: theme.bottom_tabbar.border_color,
                 position: "absolute",
-                bottom: bottomNavigationHeight,
+                bottom: 10,
                 right: 13,
                 left: 13,
                 borderRadius: 12,
@@ -95,12 +95,24 @@ export const Tabs = (props) => {
                                     height: 59
                                 }}
                                 >
-                                    <Icon
-                                    name={isFocused ? options.iconFocus.name : options.iconUnfocus.name}
-                                    type={isFocused ? options.iconFocus.type : options.iconUnfocus.type}
-                                    size={isFocused ? options.iconFocus.size - 5 : options.iconUnfocus.size}
-                                    color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
-                                    />
+                                    {
+                                        route.name === "profile" ? (
+                                            <Avatar
+                                            url={user?.photo}
+                                            containerStyle={{
+                                                borderWidth: 0,
+                                                borderRadius: 100,
+                                            }}
+                                            size={isFocused ? 20 : 30}
+                                            />
+                                        ) : (
+                                            <Icon
+                                            name={options.icon}
+                                            size={isFocused ? 17 : 20}
+                                            color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
+                                            />
+                                        )
+                                    }
 
                                     {
                                         isFocused && (
@@ -141,16 +153,7 @@ export const Tabs = (props) => {
             name="home"
             options={{
                 label: "Главная",
-                iconFocus: {
-                    name: "home",
-                    type: "MaterialCommunityIcons",
-                    size: 27,
-                },
-                iconUnfocus: {
-                    name: "home-outline",
-                    type: "MaterialCommunityIcons",
-                    size: 27,
-                },
+                icon: "home",
             }}
             >
                 {
@@ -162,16 +165,7 @@ export const Tabs = (props) => {
             name="search"
             options={{
                 label: "Поиск",
-                iconFocus: {
-                    name: "search",
-                    type: "Ionicons",
-                    size: 24,
-                },
-                iconUnfocus: {
-                    name: "search",
-                    type: "Ionicons",
-                    size: 24,
-                }
+                icon: "search",
             }}
             >
                 {
@@ -183,16 +177,7 @@ export const Tabs = (props) => {
             name="lists"
             options={{
                 label: "Списки",
-                iconFocus: {
-                    name: "book-multiple",
-                    type: "MaterialCommunityIcons",
-                    size: 23,
-                },
-                iconUnfocus: {
-                    name: "book-multiple-outline",
-                    type: "MaterialCommunityIcons",
-                    size: 23,
-                }
+                icon:"text-bullet-list",
             }}
             >
                 {
@@ -204,16 +189,7 @@ export const Tabs = (props) => {
             name="notices"
             options={{
                 label: "Уведомления",
-                iconFocus: {
-                    name: "notifications",
-                    type: "MaterialIcons",
-                    size: 26,
-                },
-                iconUnfocus: {
-                    name: "notifications-none",
-                    type: "MaterialIcons",
-                    size: 26,
-                }
+                icon: "notifications",
             }}
             >
                 {
@@ -225,16 +201,6 @@ export const Tabs = (props) => {
             name="profile"
             options={{
                 label: "Профиль",
-                iconFocus: {
-                    name: "account-circle",
-                    type: "MaterialCommunityIcons",
-                    size: 25,
-                },
-                iconUnfocus: {
-                    name: "account-circle-outline",
-                    type: "MaterialCommunityIcons",
-                    size: 25,
-                }
             }}
             initialParams={{
                 userData: route.params?.userData

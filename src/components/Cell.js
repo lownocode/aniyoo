@@ -24,22 +24,21 @@ export const Cell = (props) => {
         additionalContentTop = null,
         additionalContentBottom = null,
         centeredAfter = true,
-        onLongPress
+        onLongPress,
     } = props;
 
     const localStyles = StyleSheet.create({
         container: {
-            flex: 1,
             flexDirection: "row",
             paddingVertical: 10,
             paddingHorizontal: 15,
+            flex: 1,
             width: "100%",
-            justifyContent: "center",
+            alignItems: centered ? "center" : "flex-start",
             ...containerStyle
         },
         content: {
             flex: 1,
-            width: "100%",
             justifyContent: centered ? "center" : "flex-start",
             ...contentStyle
         },

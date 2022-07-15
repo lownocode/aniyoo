@@ -27,7 +27,7 @@ export const WriteBar = (props) => {
         input: {
             backgroundColor: theme.input.background,
             paddingVertical: 10,
-            borderWidth: 1,
+            borderTopWidth: 1,
             borderColor: theme.input.border,
             paddingLeft: before ? 35 : 10,
             paddingRight: after ? 45 : 10,

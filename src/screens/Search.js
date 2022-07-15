@@ -70,15 +70,20 @@ export const Search = (props) => {
                                 </Text>
                             </View>
 
-                            <Icon
-                            name="search"
-                            type="Feather"
-                            color="#565ee3"
-                            size={25}
+                            <View
                             style={{
                                 marginRight: 15
                             }}
-                            />
+                            >
+                                <Icon
+                                name="search"
+                                color="#565ee3"
+                                size={25}
+                                style={{
+                                    marginRight: 15
+                                }}
+                                />
+                            </View>
                         </View>
                     </TouchableNativeFeedback>
                 </View>
@@ -128,15 +133,18 @@ export const Search = (props) => {
                                 </Text>
                             </View>
 
-                            <Icon
-                            name="account-search-outline"
-                            type="MaterialCommunityIcons"
-                            color="#c956e3"
-                            size={25}
+                            <View
                             style={{
                                 marginRight: 15
                             }}
-                            />
+                            >
+                                <Icon
+                                name="user-search-outline"
+                                type="MaterialCommunityIcons"
+                                color="#c956e3"
+                                size={25}
+                                />
+                            </View>
                         </View>
                     </TouchableNativeFeedback>
                 </View>

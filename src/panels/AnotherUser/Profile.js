@@ -9,7 +9,6 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
-    StatusBar
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
@@ -43,8 +42,6 @@ import {
     declOfNum,
 } from "../../functions";
 import UserContext from "../../config/UserContext";
-
-const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const AnotherUserProfile = (props) => {
     const theme = useContext(ThemeContext);
@@ -138,9 +135,8 @@ export const AnotherUserProfile = (props) => {
             icon: (
                 <Icon
                 name="eye"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={12}
                 />
             ),
         },
@@ -148,8 +144,7 @@ export const AnotherUserProfile = (props) => {
             name: "Просмотрено",
             icon: (
                 <Icon
-                name="check"
-                type="FontAwesome"
+                name="done-double"
                 color={theme.text_secondary_color}
                 size={12}
                 />
@@ -160,9 +155,8 @@ export const AnotherUserProfile = (props) => {
             icon: (
                 <Icon
                 name="calendar"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={10}
                 />
             )
         },
@@ -170,10 +164,9 @@ export const AnotherUserProfile = (props) => {
             name: "Отложено",
             icon: (
                 <Icon
-                name="pause-circle-outline"
-                type="MaterialIcons"
+                name="pause-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         },
@@ -181,10 +174,9 @@ export const AnotherUserProfile = (props) => {
             name: "Брошено",
             icon: (
                 <Icon
-                name="cancel"
-                type="MaterialIcons"
+                name="cancel-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         }
@@ -202,7 +194,7 @@ export const AnotherUserProfile = (props) => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 10 + bottomNavigationHeight,
+            bottom: 10,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -274,9 +266,9 @@ export const AnotherUserProfile = (props) => {
             centered
             before={
                 <Icon
-                name="users"
-                type="FontAwesome5"
+                name="users-outline"
                 color={theme.text_color}
+                size={17}
                 />
             }
             title={
@@ -311,8 +303,7 @@ export const AnotherUserProfile = (props) => {
                     </Text>
 
                     <Icon
-                    name="chevron-forward"
-                    type="Ionicons"
+                    name="chevron-right"
                     color="#fff"
                     size={14}
                     />
@@ -377,11 +368,9 @@ export const AnotherUserProfile = (props) => {
                     >
                         <Icon 
                         name="radio" 
-                        type="Feather" 
                         color="gray"
-                        style={{marginRight: 4}}
                         />
-                        <Text style={{color: "gray", fontSize: 12}}>
+                        <Text style={{ color: "gray", fontSize: 12, marginLeft: 4 }}>
                             {
                                 (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
                                 `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
@@ -433,18 +422,15 @@ export const AnotherUserProfile = (props) => {
                             >
                                 <Icon
                                 name={item?.icon?.name}
-                                type={item?.icon?.type}
                                 color={item?.icon?.color || item?.color || theme.accent}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 size={item?.icon?.size || 9}
                                 />
 
                                 <Text
                                 style={{
                                     fontWeight: "500",
-                                    color: item.color || theme.accent
+                                    color: item.color || theme.accent,
+                                    marginLeft: 5
                                 }}
                                 >
                                     {
@@ -471,10 +457,9 @@ export const AnotherUserProfile = (props) => {
                 }}
                 before={
                     <Icon
-                    type="Ionicons"
-                    name="globe-outline"
+                    name="globe-online"
                     color={theme.button.primary.text_color}
-                    size={17}
+                    size={30}
                     />
                 }
                 containerStyle={{
@@ -512,8 +497,7 @@ export const AnotherUserProfile = (props) => {
                 }}
                 before={
                     <Icon
-                    type="Entypo"
-                    name="chevron-small-down"
+                    name="chevron-down"
                     color={theme.button.primary.text_color}
                     size={19}
                     />
@@ -566,7 +550,7 @@ export const AnotherUserProfile = (props) => {
                             style={{
                                 fontSize: 20,
                                 color: theme.accent,
-                                fontWeight: "700"
+                                fontWeight: "700",
                             }}
                             >
                                 {userData?.comments}
@@ -580,19 +564,16 @@ export const AnotherUserProfile = (props) => {
                             }}
                             >
                                 <Icon
-                                name="comment-multiple-outline"
-                                type="MaterialCommunityIcons"
+                                name="comments"
                                 color={theme.accent}
                                 size={10}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 />
                                 <Text
                                 style={{
                                     color: theme.accent,
                                     fontSize: 12,
-                                    fontWeight: "500"
+                                    fontWeight: "500",
+                                    marginLeft: 5
                                 }}
                                 >
                                     {declOfNum(userData?.comments, ["комментарий","комментария","комментариев"])}
@@ -638,18 +619,15 @@ export const AnotherUserProfile = (props) => {
                             >
                                 <Icon
                                 name="layers"
-                                type="Ionicons"
                                 color={theme.accent}
                                 size={10}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 />
                                 <Text
                                 style={{
                                     color: theme.accent,
                                     fontSize: 12,
-                                    fontWeight: "500"
+                                    fontWeight: "500",
+                                    marginLeft: 5
                                 }}
                                 >
                                     {declOfNum(userData?.collections, ["коллекция","коллекции","коллекций"])}
@@ -691,15 +669,17 @@ export const AnotherUserProfile = (props) => {
                     >
                         <View
                         style={{
-                            paddingVertical: 2,
+                            paddingVertical: 3,
                             paddingLeft: 4,
-                            paddingRight: 5,
+                            paddingRight: 6,
                             borderRadius: 100,
                             borderWidth: 0.5,
                             borderColor: statisticsChartColors[index] + "90",
                             flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center"
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            height: 20,
+                            width: 40
                         }}
                         >
                             <View
@@ -812,16 +792,14 @@ export const AnotherUserProfile = (props) => {
                 subtitle="Нажмите, чтобы открыть"
                 before={
                     <Icon
-                    name="list"
-                    type="Entypo"
+                    name="text-bullet-list"
                     color={theme.icon_color}
                     size={17}
                     />
                 }
                 after={
                     <Icon
-                    name="chevron-thin-right"
-                    type="Entypo"
+                    name="chevron-right"
                     color={theme.icon_color}
                     size={17}
                     />

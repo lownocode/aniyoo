@@ -6,9 +6,8 @@ import {
     Avatar,
     Cell,
     Header,
-    Icon,
     Placeholder,
-    SvgIcon
+    Icon
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -57,7 +56,7 @@ export const UserFriends = (props) => {
                     title="Кажется, у Вас ещё нет друзей"
                     subtitle="Тут типо какойто текст я хз че придумать просто простите"
                     icon={
-                        <SvgIcon
+                        <Icon
                         color={theme.icon_color}
                         name="users-friends"
                         size={55}

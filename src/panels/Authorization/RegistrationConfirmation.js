@@ -5,7 +5,7 @@ import axios from "axios";
 
 import {
     Header, 
-    SvgIcon,
+    Icon,
     Button
 } from "../../components";
 
@@ -194,7 +194,7 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 flex: 1
             }}
             >
-                <SvgIcon
+                <Icon
                 name="authentication-lock"
                 size={105}
                 />

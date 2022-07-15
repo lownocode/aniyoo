@@ -22,7 +22,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Icon, SvgIcon } from "../../components";
+import { Icon } from "../../components";
 import { 
     AnimeWatchedBefore, 
     ChangeVideoQuality, 
@@ -382,7 +382,7 @@ export const AnimeVideoPlayer = (props) => {
                                 background={TouchableNativeFeedback.Ripple("rgba(0, 0, 0, .1)", true)}
                                 >
                                     <View>
-                                        <SvgIcon
+                                        <Icon
                                         name="arrow-back"
                                         color="#fff"
                                         size={22}

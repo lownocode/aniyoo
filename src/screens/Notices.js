@@ -25,8 +25,7 @@ export const Notices = () => {
             subtitle="Вы ещё не получили ни одного уведомления от системы"
             icon={
                 <Icon
-                name="md-notifications-off-outline"
-                type="Ionicons"
+                name="notifications-disable"
                 color={theme.accent}
                 size={50}
                 />

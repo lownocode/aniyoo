@@ -58,7 +58,7 @@ export const SettingsApplication = (props) => {
                 title="Тёмная тема"
                 before={
                     <Icon 
-                    name="moon" 
+                    name="moon-outline" 
                     size={23} 
                     type="Feather" 
                     color={theme.icon_color} 

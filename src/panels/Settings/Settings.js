@@ -83,8 +83,7 @@ export const Settings = props => {
                     }}
                     >
                         <Icon
-                        name="account-remove-outline"
-                        type="MaterialCommunityIcons"
+                        name="exit-outline"
                         size={20}
                         color="#f54545"
                         />
@@ -113,7 +112,6 @@ export const Settings = props => {
                     >
                         <Icon
                         name="apps"
-                        type="Octicons"
                         size={20}
                         color={theme.accent}
                         />
@@ -138,7 +136,6 @@ export const Settings = props => {
                     >
                         <Icon
                         name="compass"
-                        type="Entypo"
                         size={20}
                         color={theme.accent}
                         />
@@ -165,8 +162,7 @@ export const Settings = props => {
                     }}
                     >
                         <Icon
-                        name="bug-report"
-                        type="MaterialIcons"
+                        name="bug"
                         size={20}
                         color="#03fc41"
                         />

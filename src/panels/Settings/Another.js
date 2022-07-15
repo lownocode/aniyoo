@@ -1,10 +1,8 @@
 import React, { useContext } from "react";
-import { ScrollView, View, Switch } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { 
     Header,
-    Cell,
-    Icon
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";

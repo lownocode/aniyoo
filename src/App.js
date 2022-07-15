@@ -64,16 +64,14 @@ export default App = () => {
     const navigation = useNavigationContainerRef();
 
     const getTheme = async () => {
-        changeNavigationBarColor("translucent", false, true);
-
         const darkMode = await storage.getItem("DARK_THEME_MODE");
         if(darkMode === null) {
             await storage.setItem("DARK_THEME_MODE", true);
             return setDarkThemeMode(true);
         }
 
+        changeNavigationBarColor(darkMode ? theme.DARK.background_content : theme.LIGHT.background_content, !darkMode, true);
         setDarkThemeMode(darkMode);
-        return darkMode;
     }; 
 
     useEffect(() => {

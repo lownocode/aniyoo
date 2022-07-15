@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from 'react';
 import { View, Text, StyleSheet, StatusBar, Dimensions, } from 'react-native';
-import { SvgIcon, PressIcon, Divider } from '.';
+import { Icon, PressIcon, Divider } from '.';
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -93,7 +93,7 @@ export const Header = (props) => {
                         {backButton && 
                         <PressIcon 
                         icon={
-                            <SvgIcon
+                            <Icon
                             name="arrow-back"
                             color={theme.text_color}
                             />

@@ -101,7 +101,6 @@ export const LinkedAnime = (props) => {
                     item.id === route.params?.selectedAnimeId && (
                         <Icon
                         name="chevrons-left"
-                        type="Feather"
                         color={theme.accent}
                         size={20}
                         />

@@ -1,6 +1,7 @@
 import axios from "axios";
-import React, { useContext, useState, useRef } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { TextInput, View, StatusBar, ActivityIndicator, FlatList, Text } from "react-native";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import { 
     Avatar,
@@ -8,7 +9,6 @@ import {
     Icon,
     Placeholder,
     PressIcon,
-    SvgIcon
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -23,6 +23,10 @@ const SearchInput = (props) => {
         onChangeText
     } = props;
 
+    useEffect(() => {
+        changeNavigationBarColor("translucent", false, true);
+    }, []);
+
     return (
         <View
         style={{
@@ -34,16 +38,17 @@ const SearchInput = (props) => {
             flex: 1
         }}
         >
-            <Icon
-            name="account-search-outline"
-            type="MaterialCommunityIcons"
-            color={theme.text_secondary_color}
-            size={20}
+            <View
             style={{
                 marginLeft: 15,
                 marginRight: 10
             }}
-            />
+            >
+                <Icon
+                name="user-search-outline"
+                color={theme.text_secondary_color}
+                />
+            </View>
 
             <TextInput
             value={value}
@@ -51,6 +56,7 @@ const SearchInput = (props) => {
             style={{
                 height: 40,
                 flex: 1,
+                color: theme.text_color
             }}
             placeholderTextColor={theme.text_secondary_color}
             onChangeText={onChangeText}
@@ -64,8 +70,7 @@ const SearchInput = (props) => {
                     <PressIcon
                     icon={
                         <Icon
-                        name="backspace-outline"
-                        type="Ionicons"
+                        name="backspace"
                         color={theme.text_secondary_color}
                         size={20}
                         />
@@ -113,7 +118,7 @@ export const SearchUsers = (props) => {
             }
         })
         .then(({ data }) => {
-            setFindedUsers(data);
+            setFindedUsers(data.users);
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -134,7 +139,7 @@ export const SearchUsers = (props) => {
             }
         })
         .then(({ data }) => {
-            setFindedUsers(findedUsers.concat(data));
+            setFindedUsers(findedUsers.concat(data.users));
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -154,7 +159,7 @@ export const SearchUsers = (props) => {
                 >
                     {
                         item.relation === "friends" && (
-                            <SvgIcon
+                            <Icon
                             name="users-friends"
                             color={theme.text_color}
                             />
@@ -202,9 +207,7 @@ export const SearchUsers = (props) => {
                 icon={
                     <Icon
                     name="close"
-                    type="AntDesign"
                     color={theme.text_secondary_color}
-                    size={20}
                     />
                 }
                 containerStyle={{
@@ -225,7 +228,6 @@ export const SearchUsers = (props) => {
                     icon={
                         <Icon
                         name="feather"
-                        type="Entypo"
                         color={theme.icon_color}
                         size={40}
                         />
@@ -248,8 +250,7 @@ export const SearchUsers = (props) => {
                     <Placeholder
                     icon={
                         <Icon
-                        name="ios-sad-outline"
-                        type="Ionicons"
+                        name="smiley-sad"
                         color={theme.icon_color}
                         size={40}
                         />

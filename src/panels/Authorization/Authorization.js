@@ -11,7 +11,6 @@ import axios from "axios";
 
 import {
     Button,
-    SvgIcon,
     Icon,
     PressIcon,
 } from "../../components";
@@ -68,8 +67,7 @@ const Input = (props) => {
                     <PressIcon
                     icon={
                         <Icon
-                        name="backspace-outline"
-                        type="Ionicons"
+                        name="backspace"
                         color={theme.text_secondary_color}
                         size={20}
                         />
@@ -88,8 +86,7 @@ const Input = (props) => {
                     <PressIcon
                     icon={
                         <Icon
-                        name={secureTextEntry ? "eye-outline" : "eye-off-outline"}
-                        type="MaterialCommunityIcons"
+                        name={secureTextEntry ? "eye" : "eye-outline"}
                         color={theme.text_secondary_color}
                         size={20}
                         />
@@ -173,7 +170,7 @@ export const Authorization = (props) => {
                 marginVertical: 30
             }}
             >
-                <SvgIcon
+                <Icon
                 name="logo"
                 size={100}
                 />
@@ -275,15 +272,17 @@ export const Authorization = (props) => {
                                     autoComplete="email"
                                     value={email}
                                     before={
-                                        <Icon
-                                        name="alternate-email"
-                                        type="MaterialIcons"
-                                        color={theme.icon_color}
-                                        size={17}
+                                        <View
                                         style={{
                                             marginHorizontal: 10,
                                         }}
-                                        />
+                                        >
+                                            <Icon
+                                            name="email"
+                                            color={theme.icon_color}
+                                            size={17}
+                                            />
+                                        </View>
                                     }
                                     onChangeText={setEmail}
                                     />
@@ -295,15 +294,17 @@ export const Authorization = (props) => {
                                     autoComplete="password"
                                     value={password}
                                     before={
-                                        <Icon
-                                        name="shield-lock-outline"
-                                        type="MaterialCommunityIcons"
-                                        color={theme.icon_color}
-                                        size={17}
+                                        <View
                                         style={{
                                             marginHorizontal: 10,
                                         }}
-                                        />
+                                        >
+                                            <Icon
+                                            name="shield-security"
+                                            color={theme.icon_color}
+                                            size={17}
+                                            />
+                                        </View>
                                     }
                                     onChangeText={setPassword}
                                     secureTextEntry={secureSignInPassword}
@@ -354,15 +355,17 @@ export const Authorization = (props) => {
                                     autoComplete="username"
                                     value={nickname}
                                     before={
-                                        <Icon
-                                        name="format-letter-case-lower"
-                                        type="MaterialCommunityIcons"
-                                        color={theme.icon_color}
-                                        size={17}
+                                        <View
                                         style={{
                                             marginHorizontal: 10,
                                         }}
-                                        />
+                                        >
+                                            <Icon
+                                            name="alphabet"
+                                            color={theme.icon_color}
+                                            size={17}
+                                            />
+                                        </View>
                                     }
                                     onChangeText={setNickname}
                                     />
@@ -374,15 +377,17 @@ export const Authorization = (props) => {
                                     autoComplete="email"
                                     value={email}
                                     before={
-                                        <Icon
-                                        name="alternate-email"
-                                        type="MaterialIcons"
-                                        color={theme.icon_color}
-                                        size={17}
+                                        <View
                                         style={{
                                             marginHorizontal: 10,
                                         }}
-                                        />
+                                        >
+                                            <Icon
+                                            name="email"
+                                            color={theme.icon_color}
+                                            size={17}
+                                            />
+                                        </View>
                                     }
                                     onChangeText={setEmail}
                                     />
@@ -394,15 +399,17 @@ export const Authorization = (props) => {
                                     value={password}
                                     autoComplete="password"
                                     before={
-                                        <Icon
-                                        name="shield-lock-outline"
-                                        type="MaterialCommunityIcons"
-                                        color={theme.icon_color}
-                                        size={17}
+                                        <View
                                         style={{
                                             marginHorizontal: 10,
                                         }}
-                                        />
+                                        >
+                                            <Icon
+                                            name="shield-security"
+                                            color={theme.icon_color}
+                                            size={17}
+                                            />
+                                        </View>
                                     }
                                     onChangeText={setPassword}
                                     secureTextEntry={secureRegistrationPassword}
@@ -465,7 +472,6 @@ export const Authorization = (props) => {
                     before={
                         <Icon
                         name="vk"
-                        type="FontAwesome5Brands"
                         size={17}
                         color="#0062ff"
                         />
@@ -478,7 +484,7 @@ export const Authorization = (props) => {
                     backgroundColor={theme.divider_color}
                     type="outline"
                     before={
-                        <SvgIcon
+                        <Icon
                         name="google-logo"
                         size={17}
                         />

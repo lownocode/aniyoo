@@ -18,6 +18,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 import LinearGradient from "react-native-linear-gradient";
 import ImageColors from "react-native-image-colors";
+import { Menu as Popup } from "react-native-material-menu";
+import Clipboard from "@react-native-community/clipboard";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -28,7 +31,6 @@ import ThemeContext from "../../config/ThemeContext";
 import { 
     declOfNum, 
     storage, 
-    detectColorIsDark, 
     getAnimeAccentColor,
     invertColor
 } from "../../functions";
@@ -44,7 +46,6 @@ import {
     Progress,
     DonutChart,
     Rating,
-    SvgIcon
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS } from "../../../variables";
@@ -74,6 +75,7 @@ export const Anime = (props) => {
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
     const [ posterColors, setPosterColors ] = useState({});
     const [ animeStatus, setAnimeStatus ] = useState({ status: "NO_WATCHED" });
+    const [ popupVisible, setPopupVisible ] = useState(false);
 
     const accent = getAnimeAccentColor(posterColors?.dominant || theme.text_color, theme.name);
 
@@ -166,6 +168,7 @@ export const Anime = (props) => {
 
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
+            changeNavigationBarColor("translucent", false, true);
             onRefresh();
         });
     
@@ -390,7 +393,6 @@ export const Anime = (props) => {
                     item.id === animeData?.id && (
                         <Icon
                         name="chevrons-left"
-                        type="Feather"
                         color={accent}
                         size={20}
                         />
@@ -536,8 +538,7 @@ export const Anime = (props) => {
                         {
                             comment.editedAt && (
                                 <Icon
-                                name="pencil"
-                                type="EvilIcons"
+                                name="pencil-write"
                                 size={16}
                                 style={{
                                     marginLeft: 5
@@ -618,8 +619,7 @@ export const Anime = (props) => {
                                     }}
                                     before={
                                         <Icon
-                                        name="reply-all"
-                                        type="Entypo"
+                                        name="reply"
                                         color={theme.text_secondary_color}
                                         size={13}
                                         />
@@ -658,8 +658,7 @@ export const Anime = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-down-outline"
-                                    type="Ionicons"
+                                    name="chevron-down"
                                     color={comment.mark === "down" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -697,8 +696,7 @@ export const Anime = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-up-outline"
-                                    type="Ionicons"
+                                    name="chevron-up"
                                     color={comment.mark === "up" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -724,9 +722,8 @@ export const Anime = (props) => {
             icon: (
                 <Icon
                 name="eye"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={12}
                 />
             ),
         },
@@ -734,8 +731,7 @@ export const Anime = (props) => {
             name: "Просмотрено",
             icon: (
                 <Icon
-                name="check"
-                type="FontAwesome"
+                name="done-double"
                 color={theme.text_secondary_color}
                 size={12}
                 />
@@ -746,9 +742,8 @@ export const Anime = (props) => {
             icon: (
                 <Icon
                 name="calendar"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={10}
                 />
             )
         },
@@ -756,10 +751,9 @@ export const Anime = (props) => {
             name: "Отложено",
             icon: (
                 <Icon
-                name="pause-circle-outline"
-                type="MaterialIcons"
+                name="pause-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         },
@@ -767,10 +761,9 @@ export const Anime = (props) => {
             name: "Брошено",
             icon: (
                 <Icon
-                name="cancel"
-                type="MaterialIcons"
+                name="cancel-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         }
@@ -805,15 +798,17 @@ export const Anime = (props) => {
             >
                 <View
                 style={{
-                    paddingVertical: 2,
+                    paddingVertical: 3,
                     paddingLeft: 4,
-                    paddingRight: 5,
+                    paddingRight: 6,
                     borderRadius: 100,
                     borderWidth: 0.5,
                     borderColor: statisticsChartColors[index] + "90",
                     flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center"
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    height: 20,
+                    width: 40
                 }}
                 >
                     <View
@@ -891,6 +886,13 @@ export const Anime = (props) => {
         });
     };
 
+    const animeCopyLink = () => {
+        const copyString = `https://aniyoo.localhostov.ru:1007/anime?id=${animeData?.id}`;
+        Clipboard.setString(copyString);
+        ToastAndroid.show("Ссылка скопирована в буфер обмена", ToastAndroid.CENTER);
+        setPopupVisible(false);
+    };
+
     const styles = StyleSheet.create({
         modalContainer: {
             left: 10,
@@ -929,10 +931,11 @@ export const Anime = (props) => {
                 >
                     <View
                     style={{
+                        
                         padding: 9
                     }}
                     >
-                        <SvgIcon
+                        <Icon
                         name="arrow-back"
                         color={theme.text_color}
                         />
@@ -951,25 +954,92 @@ export const Anime = (props) => {
                 height: 45,
                 justifyContent: "center",
                 alignItems: "center",
-                zIndex: 100,
+                zIndex: 1000,
                 borderWidth: 0.5,
-                borderColor: theme.divider_color
+                borderColor: theme.divider_color,
             }}
             >
-                <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
-                >
-                    <View
-                    style={{
-                        padding: 9
-                    }}
+                <Popup
+                visible={popupVisible}
+                onRequestClose={() => setPopupVisible(false)}
+                animationDuration={100}
+                style={{
+                    backgroundColor: theme.popup_background,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                }}
+                anchor={
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
+                    onPress={() => setPopupVisible(true)}
                     >
-                        <SvgIcon
-                        name="four-dots"
-                        color={theme.text_color}
+                        <View
+                        style={{
+                            padding: 9
+                        }}
+                        >
+                            <Icon
+                            name="four-dots"
+                            color={theme.text_color}
+                            />
+                        </View>
+                    </TouchableNativeFeedback>
+                }
+                >
+                    <Cell
+                    title="Подробная информация"
+                    before={
+                        <Icon
+                        name="textbox-more"
+                        color={theme.icon_color}
                         />
-                    </View>
-                </TouchableNativeFeedback>
+                    }
+                    containerStyle={{
+                        paddingVertical: 15
+                    }}
+                    contentStyle={{
+                        flex: 0
+                    }}
+                    />
+
+                    <Divider />
+
+                    <Cell
+                    title="Скопировать ссылку"
+                    onPress={() => animeCopyLink()}
+                    before={
+                        <Icon
+                        name="external-link"
+                        color={theme.icon_color}
+                        />
+                    }
+                    containerStyle={{
+                        paddingVertical: 15
+                    }}
+                    contentStyle={{
+                        flex: 0
+                    }}
+                    />
+
+                    <Divider />
+
+                    <Cell
+                    title="Поделиться"
+                    flexedContent={false}
+                    before={
+                        <Icon
+                        color={theme.icon_color}
+                        name="share"
+                        />
+                    }
+                    containerStyle={{
+                        paddingVertical: 15
+                    }}
+                    contentStyle={{
+                        flex: 0
+                    }}
+                    />
+                </Popup>
             </View>
 
             <Modalize
@@ -1129,15 +1199,13 @@ export const Anime = (props) => {
                                     animeData?.inList === "watching" ? (
                                         <Icon
                                         name="eye"
-                                        type="MaterialCommunityIcons"
                                         size={17}
                                         color="#ffffff"
                                         />
                                     ) :
                                     animeData?.inList === "completed" ? (
                                         <Icon
-                                        name="check"
-                                        type="FontAwesome"
+                                        name="done-double"
                                         size={17}
                                         color="#ffffff"
                                         />
@@ -1145,15 +1213,13 @@ export const Anime = (props) => {
                                     animeData?.inList === "planned" ? (
                                         <Icon
                                         name="calendar"
-                                        type="MaterialCommunityIcons"
                                         size={17}
                                         color="#ffffff"
                                         />
                                     )  :
                                     animeData?.inList === "postponed" ? (
                                         <Icon
-                                        name="pause-circle-outline"
-                                        type="MaterialIcons"
+                                        name="pause-rounded"
                                         size={17}
                                         color="#ffffff"
                                         />
@@ -1161,14 +1227,12 @@ export const Anime = (props) => {
                                     animeData?.inList === "dropped" ? (
                                         <Icon
                                         name="cancel"
-                                        type="MaterialIcons"
                                         size={17}
                                         color="#ffffff"
                                         />
                                     )  : (
                                         <Icon
                                         name="chevron-down"
-                                        type="Feather"
                                         size={17}
                                         color="#ffffff"
                                         />
@@ -1191,12 +1255,12 @@ export const Anime = (props) => {
                                 textColor={animeData?.isFavorite ? "#ffffff" : theme.icon_color}
                                 before={
                                     animeData?.isFavorite ? (
-                                        <SvgIcon
+                                        <Icon
                                         name="bookmark"
                                         size={17}
                                         />
                                     ) : (
-                                        <SvgIcon
+                                        <Icon
                                         name="bookmark-outline"
                                         size={17}
                                         color={theme.icon_color}
@@ -1225,8 +1289,7 @@ export const Anime = (props) => {
                             {
                                 "NO_WATCHED": (
                                     <Icon
-                                    name="play-outline"
-                                    type="Ionicons"
+                                    name="play"
                                     size={17}
                                     color={invertColor(accent, true)}
                                     />
@@ -1234,8 +1297,7 @@ export const Anime = (props) => {
                                 "WATCHED_BEFORE": (
                                     <Icon
                                     name="pause"
-                                    type="MaterialCommunityIcons"
-                                    size={17}
+                                    size={20}
                                     color={invertColor(accent, true)}
                                     />
                                 )
@@ -1263,12 +1325,11 @@ export const Anime = (props) => {
                                     before={
                                         <Icon
                                         color="orangered"
-                                        type="MaterialIcons"
-                                        name="local-fire-department"
+                                        name="fire"
                                         size={20}
                                         />
                                     }
-                                    subtitle={`Остановлено на ${
+                                    subtitle={`Вы остановили на ${
                                         animeStatus?.data?.viewed_up_to > 3600 ?
                                         dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('HH:mm:ss') :
                                         dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('mm:ss')
@@ -1308,8 +1369,7 @@ export const Anime = (props) => {
                             subtitle="Формат"
                             icon={
                                 <Icon
-                                name="ev-plug-type1"
-                                type="MaterialCommunityIcons"
+                                name="director"
                                 size={17}
                                 color={theme.cell.subtitle_color}
                                 />
@@ -1325,8 +1385,7 @@ export const Anime = (props) => {
                             subtitle="Статус"
                             icon={
                                 <Icon
-                                name="calendar"
-                                type="MaterialCommunityIcons"
+                                name="status-ai"
                                 size={17}
                                 color={theme.cell.subtitle_color}
                                 />
@@ -1338,8 +1397,7 @@ export const Anime = (props) => {
                             subtitle="Студия"
                             icon={
                                 <Icon
-                                name="video-settings"
-                                type="MaterialIcons"
+                                name="play-gear"
                                 size={17}
                                 color={theme.cell.subtitle_color}
                                 />
@@ -1376,9 +1434,7 @@ export const Anime = (props) => {
                             subtitle="Дата выхода"
                             icon={
                                 <Icon
-                                name="calendar-check-o"
-                                type="FontAwesome"
-                                size={17}
+                                name="calendar"
                                 color={theme.cell.subtitle_color}
                                 />
                             }
@@ -1391,8 +1447,7 @@ export const Anime = (props) => {
                                     subtitle="Серий"
                                     icon={
                                         <Icon
-                                        name="filter-list"
-                                        type="MaterialIcons"
+                                        name="round-bar"
                                         size={17}
                                         color={theme.cell.subtitle_color}
                                         />
@@ -1408,8 +1463,7 @@ export const Anime = (props) => {
                                     subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
                                     icon={
                                         <Icon
-                                        name="progress-clock"
-                                        type="MaterialCommunityIcons"
+                                        name="time-progress"
                                         size={17}
                                         color={theme.cell.subtitle_color}
                                         />
@@ -1426,8 +1480,7 @@ export const Anime = (props) => {
                                     icon={
                                         <Icon
                                         name="clock"
-                                        type="MaterialCommunityIcons"
-                                        size={17}
+                                        size={25}
                                         color={theme.cell.subtitle_color}
                                         />
                                     }
@@ -1474,7 +1527,6 @@ export const Anime = (props) => {
                                     }}
                                     >
                                         <Icon
-                                        type="Feather"
                                         name="info"
                                         size={25}
                                         color={theme.text_secondary_color}
@@ -1505,13 +1557,11 @@ export const Anime = (props) => {
                                         hideDescription ? (
                                             <Icon
                                             name="chevron-down"
-                                            type="Feather"
                                             color={theme.icon_color}
                                             />
                                         ) : (
                                             <Icon
                                             name="chevron-up"
-                                            type="Feather"
                                             color={theme.icon_color}
                                             />
                                         )
@@ -1599,7 +1649,6 @@ export const Anime = (props) => {
                                         {
                                             statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
                                                 <Icon
-                                                type="FontAwesome"
                                                 name="pie-chart"
                                                 color={theme.divider_color}
                                                 size={109}
@@ -1743,7 +1792,6 @@ export const Anime = (props) => {
                                             before={
                                                 <Icon
                                                 name="star"
-                                                type="FontAwesome"
                                                 size={25}
                                                 color={theme.icon_color}
                                                 />
@@ -1803,7 +1851,6 @@ export const Anime = (props) => {
                                             before={
                                                 <Icon
                                                 name="plus-square-o"
-                                                type="FontAwesome"
                                                 color={theme.icon_color}
                                                 size={15}
                                                 />
@@ -1831,7 +1878,6 @@ export const Anime = (props) => {
                     before={
                         <Icon
                         name="comment-discussion"
-                        type="Octicons"
                         size={20}
                         color={theme.icon_color}
                         />
@@ -1859,7 +1905,6 @@ export const Anime = (props) => {
 
                             <Icon
                             name="chevron-right"
-                            type="Feather"
                             color={accent}
                             />
                         </View>

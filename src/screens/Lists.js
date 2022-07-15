@@ -14,12 +14,10 @@ import {
     Animated,
     Dimensions,
     TouchableOpacity,
-    FlatList
 } from "react-native";
 import axios from "axios";
 
 import {
-    Divider,
     Header,
     MyAnimeList
 } from "../components";
@@ -100,7 +98,7 @@ export const Lists = props => {
                     return {
                         id: tab,
                         tab: tabContent.find(x => x.id === tab).tab,
-                        list: data,
+                        list: data.list,
                     }
                 }
 

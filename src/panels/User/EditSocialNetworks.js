@@ -29,50 +29,35 @@ export const EditSocialNetworks = (props) => {
         {
             name: "ВКонтакте",
             network: "vk",
-            icon: {
-                name: "vk",
-                type: "Entypo",
-            },
+            icon:  "vk",
             domain: "https://vk.com/",
             background: "#0062ff"
         },
         {
             name: "Telegram",
             network: "telegram",
-            icon: {
-                name: "telegram",
-                type: "FontAwesome",
-            },
+            icon: "telegram",
             domain: "https://t.me/",
             background: "#00a6ff"
         },
         {
             name: "Instagram",
             network: "instagram",
-            icon: {
-                name: "instagram",
-                type: "AntDesign",
-            },
+            icon: "instagram",
             domain: "https://instagram.com/",
             background: "#ff005d"
         },
         {
             name: "TikTok",
             network: "tiktok",
-            icon: {
-                name: "tiktok",
-                type: "FontAwesome5Brands",
-            },
+            icon: "tiktok",
             domain: "https://tiktok.com/@",
             background: "#000"
         },
         {
             name: "Discord",
             network: "discord",
-            icon: {
-                name: "discord",
-                type: "FontAwesome5Brands",
-            },
+            icon: "discord",
             domain: "nickname#tag",
             background: "#5865F2"
         }
@@ -158,8 +143,7 @@ export const EditSocialNetworks = (props) => {
                             }}
                             >
                                 <Icon
-                                name={item.icon.name}
-                                type={item.icon.type}
+                                name={item.icon}
                                 size={25}
                                 color="#fff"
                                 />
@@ -307,19 +291,16 @@ export const EditSocialNetworks = (props) => {
                     }}
                     >
                         <Icon
-                        name="info"
-                        type="Feather"
-                        style={{
-                            marginRight: 5
-                        }}
-                        size={16}
+                        name="info-outline"
+                        size={13}
                         color={theme.text_color}
                         />
                         <Text
                         style={{
                             fontSize: 16,
                             fontWeight: "500",
-                            color: theme.text_color
+                            color: theme.text_color,
+                            marginLeft: 5
                         }}
                         >
                             Подсказка

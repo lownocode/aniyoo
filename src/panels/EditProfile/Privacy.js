@@ -6,7 +6,6 @@ import ThemeContext from "../../config/ThemeContext";
 import { 
     Header,
     Cell,
-    Icon
 } from "../../components";
 
 export const EditProfilePrivacy = (props) => {
@@ -36,14 +35,6 @@ export const EditProfilePrivacy = (props) => {
                 <Cell
                 title="Закрытый профиль"
                 subtitle="При включении этой функции все Ваши данные в профиле будут скрыты для всех людей"
-                // after={
-                //     // <Switch
-                //     // value={false}
-                //     // // onValueChange={}
-                //     // trackColor={{ false: style.switch_track_color_off, true: style.switch_track_color_on }}
-                //     // thumbColor={style.switch_thumb_color_light}
-                //     // />
-                // }
                 />
 
                 <View style={{marginTop: 5}}/>

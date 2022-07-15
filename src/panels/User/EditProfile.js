@@ -30,6 +30,7 @@ export const EditProfile = props => {
 
             <ScrollView 
             showsVerticalScrollIndicator={false}
+            overScrollMode="never"
             >
                 <View style={{  marginTop: 10 }}/>
 
@@ -49,8 +50,7 @@ export const EditProfile = props => {
                     }}
                     >
                         <Icon
-                        name="user-alt"
-                        type="FontAwesome5"
+                        name="user-profile"
                         size={18}
                         color={theme.accent}
                         />
@@ -76,8 +76,7 @@ export const EditProfile = props => {
                     }}
                     >
                         <Icon
-                        name="security"
-                        type="MaterialIcons"
+                        name="shield-security"
                         size={20}
                         color={theme.accent}
                         />
@@ -103,8 +102,7 @@ export const EditProfile = props => {
                     }}
                     >
                         <Icon
-                        name="privacy-tip"
-                        type="MaterialIcons"
+                        name="key"
                         size={20}
                         color={theme.accent}
                         />

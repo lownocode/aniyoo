@@ -14,7 +14,6 @@ import {
     Button,
     Icon,
     PressIcon,
-    SvgIcon,
     Cell,
 } from "../../components";
 
@@ -130,7 +129,7 @@ export const EditProfileChangeNickname = (props) => {
                     marginRight: 10
                 }}
                 >
-                    <SvgIcon
+                    <Icon
                     name="pencil-write"
                     color={theme.text_secondary_color}
                     />
@@ -194,7 +193,7 @@ export const EditProfileChangeNickname = (props) => {
                     alignItems: "center"
                 }}
                 >
-                    <SvgIcon
+                    <Icon
                     name="pencil-write"
                     color={theme.accent}
                     />

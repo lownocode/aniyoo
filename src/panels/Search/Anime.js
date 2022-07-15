@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { 
     View,
     StatusBar,
@@ -6,6 +6,7 @@ import {
     TextInput
 } from "react-native";
 import axios from "axios";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import {
     Icon,
@@ -29,6 +30,10 @@ const SearchInput = (props) => {
         onChangeText
     } = props;
 
+    useEffect(() => {
+        changeNavigationBarColor("translucent", false, true);
+    }, []);
+
     return (
         <View
         style={{
@@ -40,16 +45,18 @@ const SearchInput = (props) => {
             flex: 1
         }}
         >
-            <Icon
-            name="search"
-            type="Ionicons"
-            color={theme.text_secondary_color}
-            size={17}
+            <View
             style={{
                 marginLeft: 15,
-                marginRight: 10
+                marginRight: 10,
             }}
-            />
+            >
+                <Icon
+                name="search"
+                color={theme.text_secondary_color}
+                size={17}
+                />
+            </View>
 
             <TextInput
             value={value}
@@ -57,6 +64,7 @@ const SearchInput = (props) => {
             style={{
                 height: 40,
                 flex: 1,
+                color: theme.text_color
             }}
             placeholderTextColor={theme.text_secondary_color}
             onChangeText={onChangeText}
@@ -70,8 +78,7 @@ const SearchInput = (props) => {
                     <PressIcon
                     icon={
                         <Icon
-                        name="backspace-outline"
-                        type="Ionicons"
+                        name="backspace"
                         color={theme.text_secondary_color}
                         size={20}
                         />
@@ -121,7 +128,7 @@ export const SearchAnime = (props) => {
             }
         })
         .then(({ data }) => {
-            setFindedAnimes(data);
+            setFindedAnimes(data.animes);
         })
         .catch(({ response }) => {
             console.log(JSON.stringify(response, null, "\t"))
@@ -145,7 +152,7 @@ export const SearchAnime = (props) => {
             }
         })
         .then(({ data }) => {
-            setFindedAnimes(findedAnimes.concat(data));
+            setFindedAnimes(findedAnimes.concat(data.animes));
         });
     };
 
@@ -163,9 +170,7 @@ export const SearchAnime = (props) => {
                 icon={
                     <Icon
                     name="close"
-                    type="AntDesign"
                     color={theme.text_secondary_color}
-                    size={20}
                     />
                 }
                 containerStyle={{
@@ -186,7 +191,6 @@ export const SearchAnime = (props) => {
                     icon={
                         <Icon
                         name="feather"
-                        type="Entypo"
                         color={theme.icon_color}
                         size={40}
                         />
@@ -209,8 +213,7 @@ export const SearchAnime = (props) => {
                     <Placeholder
                     icon={
                         <Icon
-                        name="ios-sad-outline"
-                        type="Ionicons"
+                        name="smiley-sad"
                         color={theme.icon_color}
                         size={40}
                         />

@@ -10,7 +10,6 @@ import {
     Dimensions, 
     ToastAndroid,
     Image,
-    StatusBar
 } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
@@ -34,22 +33,18 @@ import {
     ContentHeader,
     Divider,
     Header,
-    Icon,
     Placeholder,
     PressIcon,
-    SvgIcon
+    Icon
 } from "../components";
 import {
     storage,
     declOfNum,
-    sleep
 } from "../functions";
 import {
     USER_SCHEMA
 } from "../../variables";
 import { SetStatus, SocialNetworks } from "../modals";
-
-const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Profile = props => {
     const theme = useContext(ThemeContext);
@@ -138,9 +133,8 @@ export const Profile = props => {
             icon: (
                 <Icon
                 name="eye"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={12}
                 />
             ),
         },
@@ -148,8 +142,7 @@ export const Profile = props => {
             name: "Просмотрено",
             icon: (
                 <Icon
-                name="check"
-                type="FontAwesome"
+                name="done-double"
                 color={theme.text_secondary_color}
                 size={12}
                 />
@@ -160,9 +153,8 @@ export const Profile = props => {
             icon: (
                 <Icon
                 name="calendar"
-                type="MaterialCommunityIcons"
                 color={theme.text_secondary_color}
-                size={13}
+                size={10}
                 />
             )
         },
@@ -170,10 +162,9 @@ export const Profile = props => {
             name: "Отложено",
             icon: (
                 <Icon
-                name="pause-circle-outline"
-                type="MaterialIcons"
+                name="pause-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         },
@@ -181,10 +172,9 @@ export const Profile = props => {
             name: "Брошено",
             icon: (
                 <Icon
-                name="cancel"
-                type="MaterialIcons"
+                name="cancel-rounded"
                 color={theme.text_secondary_color}
-                size={13}
+                size={11}
                 />
             )
         }
@@ -202,7 +192,7 @@ export const Profile = props => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 70 + bottomNavigationHeight,
+            bottom: 80,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -266,11 +256,10 @@ export const Profile = props => {
                     >
                         <Icon 
                         name="radio" 
-                        type="Feather" 
                         color="gray"
-                        style={{marginRight: 4}}
+                        size={13}
                         />
-                        <Text style={{color: "gray", fontSize: 12}}>
+                        <Text style={{ color: "gray", fontSize: 12, marginLeft: 4 }}>
                             {
                                 (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
                                 `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
@@ -322,18 +311,15 @@ export const Profile = props => {
                             >
                                 <Icon
                                 name={item?.icon?.name}
-                                type={item?.icon?.type}
                                 color={item?.icon?.color || item?.color || theme.accent}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 size={item?.icon?.size || 9}
                                 />
 
                                 <Text
                                 style={{
                                     fontWeight: "500",
-                                    color: item.color || theme.accent
+                                    color: item.color || theme.accent,
+                                    marginLeft: item?.icon ? 5 : 0
                                 }}
                                 >
                                     {
@@ -360,10 +346,9 @@ export const Profile = props => {
                 }}
                 before={
                     <Icon
-                    type="Ionicons"
-                    name="globe-outline"
+                    name="globe-online"
                     color={theme.button.primary.text_color}
-                    size={17}
+                    size={30}
                     />
                 }
                 containerStyle={{
@@ -393,10 +378,8 @@ export const Profile = props => {
                 }}
                 before={
                     <Icon
-                    type="MaterialCommunityIcons"
-                    name="account-edit-outline"
+                    name="user-edit"
                     color={theme.button.primary.text_color}
-                    size={19}
                     />
                 }
                 containerStyle={{
@@ -451,19 +434,16 @@ export const Profile = props => {
                             }}
                             >
                                 <Icon
-                                name="comment-multiple-outline"
-                                type="MaterialCommunityIcons"
+                                name="comments"
                                 color={theme.accent}
                                 size={10}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 />
                                 <Text
                                 style={{
                                     color: theme.accent,
                                     fontSize: 12,
-                                    fontWeight: "500"
+                                    fontWeight: "500",
+                                    marginLeft: 5
                                 }}
                                 >
                                     {declOfNum(userData?.comments, ["комментарий","комментария","комментариев"])}
@@ -509,18 +489,15 @@ export const Profile = props => {
                             >
                                 <Icon
                                 name="layers"
-                                type="Ionicons"
                                 color={theme.accent}
                                 size={10}
-                                style={{
-                                    marginRight: 5
-                                }}
                                 />
                                 <Text
                                 style={{
                                     color: theme.accent,
                                     fontSize: 12,
-                                    fontWeight: "500"
+                                    fontWeight: "500",
+                                    marginLeft: 5
                                 }}
                                 >
                                     {declOfNum(userData?.collections, ["коллекция","коллекции","коллекций"])}
@@ -563,15 +540,17 @@ export const Profile = props => {
                     >
                         <View
                         style={{
-                            paddingVertical: 2,
+                            paddingVertical: 3,
                             paddingLeft: 4,
-                            paddingRight: 5,
+                            paddingRight: 6,
                             borderRadius: 100,
                             borderWidth: 0.5,
                             borderColor: statisticsChartColors[index] + "90",
                             flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center"
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            height: 20,
+                            width: 40
                         }}
                         >
                             <View
@@ -630,7 +609,6 @@ export const Profile = props => {
             {
                 statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
                     <Icon
-                    type="FontAwesome"
                     name="pie-chart"
                     color={theme.divider_color}
                     size={109}
@@ -638,7 +616,7 @@ export const Profile = props => {
                 ) : (
                     <PieChart 
                     data={statisticsChartData}
-                    innerRadius={25}
+                    innerRadius={27}
                     animate={true}
                     style={{ height: 120, width: 109 }}
                     />
@@ -702,9 +680,9 @@ export const Profile = props => {
             centered
             before={
                 <Icon
-                name="users"
-                type="FontAwesome5"
+                name="users-outline"
                 color={theme.text_color}
+                size={17}
                 />
             }
             title={
@@ -740,8 +718,7 @@ export const Profile = props => {
                     </Text>
 
                     <Icon
-                    name="chevron-forward"
-                    type="Ionicons"
+                    name="chevron-right"
                     color="#fff"
                     size={14}
                     />
@@ -791,7 +768,12 @@ export const Profile = props => {
                     }}
                     anchor={
                         <PressIcon 
-                        icon={<Icon name="dots-three-horizontal" type="Entypo" color={theme.icon_color} size={20}/>}
+                        icon={
+                            <Icon 
+                            name="four-dots" 
+                            color={theme.icon_color} 
+                            />
+                        }
                         onPress={() => setPopupVisible(true)}
                         containerStyle={{
                             marginRight: 15
@@ -803,13 +785,15 @@ export const Profile = props => {
                         title="Скопировать ссылку"
                         before={
                             <Icon
-                            name="link"
-                            type="Fontisto"
+                            name="copy-outline"
                             color={theme.icon_color}
                             />
                         }
                         containerStyle={{
                             paddingVertical: 15
+                        }}
+                        contentStyle={{
+                            flex: 0
                         }}
                         />
 
@@ -817,8 +801,9 @@ export const Profile = props => {
 
                         <Cell
                         title="Поделиться"
+                        flexedContent={false}
                         before={
-                            <SvgIcon
+                            <Icon
                             color={theme.icon_color}
                             name="share"
                             />
@@ -826,11 +811,20 @@ export const Profile = props => {
                         containerStyle={{
                             paddingVertical: 15
                         }}
+                        contentStyle={{
+                            flex: 0
+                        }}
                         />
                     </Popup>
 
                     <PressIcon 
-                    icon={<Icon name="settings" type="Feather" color={theme.icon_color} size={20}/>}
+                    icon={
+                        <Icon 
+                        name="gear-outline" 
+                        color={theme.icon_color} 
+                        size={25}
+                        />
+                    }
                     onPress={() => navigate("settings")}
                     />
                 </View>
