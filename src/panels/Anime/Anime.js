@@ -94,7 +94,6 @@ export const Anime = (props) => {
         .then(({ data }) => {
             setAnimeData(data);
             setLinkedAnimes(data?.linked?.sort(sortLinkedAnimes)?.slice(0, 3));
-            getPosterColors(data?.poster);
             getAnimeStatusInLocalStorage();
 
             setRefreshing(false);
@@ -115,8 +114,8 @@ export const Anime = (props) => {
         })
     };
 
-    const getPosterColors = async (url) => {
-        const colors = await ImageColors.getColors(url, {
+    const getPosterColors = async () => {
+        const colors = await ImageColors.getColors(animeData?.poster, {
             fallback: theme.text_color,
             cache: false,
             quality: "high"
@@ -165,6 +164,10 @@ export const Anime = (props) => {
         setRefreshing(true);
         getAnimeData(route.params?.animeData?.id, true);
     }, []);
+    
+    useEffect(() => {
+        getPosterColors();
+    }, [animeData]);
 
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
@@ -392,7 +395,7 @@ export const Anime = (props) => {
                 after={
                     item.id === animeData?.id && (
                         <Icon
-                        name="chevrons-left"
+                        name="chevron-left-double"
                         color={accent}
                         size={20}
                         />
@@ -529,7 +532,8 @@ export const Anime = (props) => {
                     >
                         <Text
                         style={{
-                            color: theme.cell.subtitle_color
+                            color: theme.cell.subtitle_color,
+                            marginRight: 5
                         }}
                         >
                             {dayjs().to(comment.createdAt)}
@@ -539,27 +543,52 @@ export const Anime = (props) => {
                             comment.editedAt && (
                                 <Icon
                                 name="pencil-write"
-                                size={16}
-                                style={{
-                                    marginLeft: 5
-                                }}
+                                size={10}
+                                color={theme.cell.subtitle_color}
                                 />
                             )
                         }
                     </View>
 
-                    <Text
-                    selectable
-                    style={{
-                        marginTop: 3,
-                        color: comment.text ? theme.text_color : theme.text_secondary_color,
-                        fontStyle: comment.text ? "normal" : "italic"
-                    }}
-                    >
-                        {
-                            comment.text ? comment.text : "Комментарий удалён."
-                        }
-                    </Text>
+                    {
+                            comment.text ? (
+                                <Text
+                                selectable
+                                selectionColor={accent}
+                                style={{
+                                    marginTop: 3,
+                                    color: theme.text_color,
+                                }}
+                                >
+                                    {
+                                        comment.text
+                                    }
+                                </Text>
+                            ) : (
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center"
+                                }}
+                                >
+                                    <Icon
+                                    name="trash-outline"
+                                    color={theme.text_secondary_color}
+                                    />
+
+                                    <Text
+                                    style={{
+                                        marginTop: 3,
+                                        color: theme.text_secondary_color,
+                                        marginLeft: 5,
+                                        fontStyle: "italic"
+                                    }}
+                                    >
+                                        Комментарий удалён.
+                                    </Text>
+                                </View>
+                            )
+                    }
                 </View>
             }
             additionalContentBottom={
@@ -971,7 +1000,7 @@ export const Anime = (props) => {
                 anchor={
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
-                    onPress={() => setPopupVisible(true)}
+                    onPressIn={() => setPopupVisible(true)}
                     >
                         <View
                         style={{
@@ -1464,7 +1493,7 @@ export const Anime = (props) => {
                                     icon={
                                         <Icon
                                         name="time-progress"
-                                        size={17}
+                                        size={18}
                                         color={theme.cell.subtitle_color}
                                         />
                                     }
@@ -1480,7 +1509,7 @@ export const Anime = (props) => {
                                     icon={
                                         <Icon
                                         name="clock"
-                                        size={25}
+                                        size={17}
                                         color={theme.cell.subtitle_color}
                                         />
                                     }
@@ -1850,7 +1879,7 @@ export const Anime = (props) => {
                                             type="overlay"
                                             before={
                                                 <Icon
-                                                name="plus-square-o"
+                                                name="plus-square"
                                                 color={theme.icon_color}
                                                 size={15}
                                                 />
@@ -1877,7 +1906,7 @@ export const Anime = (props) => {
                     })}
                     before={
                         <Icon
-                        name="comment-discussion"
+                        name="comments"
                         size={20}
                         color={theme.icon_color}
                         />

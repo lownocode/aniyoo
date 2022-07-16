@@ -58,10 +58,9 @@ export const EditComment = (props) => {
             disabled
             before={
                 <Icon
-                name="pencil-outline"
-                type="MaterialCommunityIcons"
+                name="pencil-write"
                 color={theme.icon_color}
-                size={22}
+                size={20}
                 />
             }
             />

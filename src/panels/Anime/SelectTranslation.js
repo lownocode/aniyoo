@@ -4,6 +4,7 @@ import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import { Cell, Icon, Header } from "../../components";
 
@@ -49,6 +50,7 @@ export const AnimeSelectTranslation = (props) => {
     };
 
     useEffect(() => {
+        changeNavigationBarColor(theme.background_content, false, true);
         getTranslations();
     }, []);
 
@@ -122,7 +124,6 @@ export const AnimeSelectTranslation = (props) => {
                     ) : (
                         <Icon
                         name="mic"
-                        type="Feather"
                         color={theme.icon_color}
                         size={20}
                         />

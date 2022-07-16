@@ -248,7 +248,8 @@ export const AnimeAllComments = (props) => {
                                 >
                                     <Icon
                                     name="pencil-write"
-                                    size={16}
+                                    size={10}
+                                    color={theme.text_secondary_color}
                                     />
                                 </View>
                             )
@@ -290,18 +291,45 @@ export const AnimeAllComments = (props) => {
                             </View>
                         ) : (
                             <View>
-                                <Text
-                                selectable
-                                style={{
-                                    marginTop: 3,
-                                    color: item.text ? theme.text_color : theme.text_secondary_color,
-                                    fontStyle: item.text ? "normal" : "italic"
-                                }}
-                                >
-                                    {
-                                        item.text ? item.text : "Комментарий удалён."
-                                    }
-                                </Text>
+                                {
+                                    item.text ? (
+                                        <Text
+                                        selectable
+                                        selectionColor={theme.accent}
+                                        style={{
+                                            marginTop: 3,
+                                            color: theme.text_color,
+                                        }}
+                                        >
+                                            {
+                                                item.text
+                                            }
+                                        </Text>
+                                    ) : (
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center"
+                                        }}
+                                        >
+                                            <Icon
+                                            name="trash-outline"
+                                            color={theme.text_secondary_color}
+                                            />
+
+                                            <Text
+                                            style={{
+                                                marginTop: 3,
+                                                color: theme.text_secondary_color,
+                                                marginLeft: 5,
+                                                fontStyle: "italic"
+                                            }}
+                                            >
+                                                Комментарий удалён.
+                                            </Text>
+                                        </View>
+                                    )
+                                }
 
                                 {
                                     spoilers.findIndex(x => x?.id === item.id && !x?.closed) > -1 && (

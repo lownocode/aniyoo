@@ -6,7 +6,7 @@ import {
     Cell
 } from "../components";
 
-import { formatViews, storage } from "../functions";
+import { formatViews } from "../functions";
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -39,8 +39,7 @@ export const SelectVideoSource = (props) => {
                 subtitle={`Количество серий: ${item.episodes.length}`}
                 before={
                     <Icon
-                    type="MaterialCommunityIcons"
-                    name="source-commit-local"
+                    name="play"
                     color={theme.icon_color}
                     size={20}
                     />
@@ -98,8 +97,7 @@ export const SelectVideoSource = (props) => {
             disabled
             before={
                 <Icon
-                type="MaterialCommunityIcons"
-                name="source-branch"
+                name="play-gear"
                 color={theme.icon_color}
                 size={20}
                 />
@@ -123,10 +121,9 @@ export const SelectVideoSource = (props) => {
                 }}
                 >
                     <Icon
-                    type="Feather"
-                    name="info"
+                    name="info-outline"
                     color={theme.text_color}
-                    size={15}
+                    size={10}
                     />
                     <Text style={{ color: theme.text_color, marginLeft: 5, fontWeight: "500"}}>
                         Подсказка

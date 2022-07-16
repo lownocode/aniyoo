@@ -171,9 +171,8 @@ export const AnimeSelectEpisode = (props) => {
                 }}
                 before={
                     <Icon
-                    name="play-circle-outline"
-                    type="Ionicons"
-                    size={18}
+                    name="play"
+                    size={13}
                     color={theme.icon_color}
                     />
                 }
@@ -200,7 +199,6 @@ export const AnimeSelectEpisode = (props) => {
 
                         <Icon
                         name="eye-outline"
-                        type="Ionicons"
                         color={viewed_up_to >= 1 ? theme.accent : theme.text_secondary_color}
                         size={15}
                         />
@@ -230,6 +228,8 @@ export const AnimeSelectEpisode = (props) => {
             data={route.params?.episodes}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderEpisodes}
+            overScrollMode="never"
+            showsVerticalScrollIndicator={false}
             />
         </View>
     )

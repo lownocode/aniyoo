@@ -26,9 +26,8 @@ export const FriendActions = (props) => {
                         disabled
                         before={
                             <Icon
-                            name="dots-vertical"
-                            type="MaterialCommunityIcons"
-                            size={20}
+                            name="four-dots"
+                            size={16}
                             color={theme.icon_color}
                             />
                         }
@@ -56,7 +55,7 @@ export const FriendActions = (props) => {
                                 <Icon
                                 type="Ionicons"
                                 name="close"
-                                size={20}
+                                size={13}
                                 color="#f06d02"
                                 />
                             </View>
@@ -81,8 +80,7 @@ export const FriendActions = (props) => {
                             }}
                             >
                                 <Icon
-                                type="MaterialCommunityIcons"
-                                name="cancel"
+                                name="block"
                                 size={20}
                                 color="#f52105"
                                 />

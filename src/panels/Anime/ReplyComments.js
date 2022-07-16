@@ -290,18 +290,45 @@ export const AnimeReplyComments = (props) => {
                             </View>
                         ) : (
                             <View>
-                                <Text
-                                selectable
-                                style={{
-                                    marginTop: 3,
-                                    color: item.text ? theme.text_color : theme.text_secondary_color,
-                                    fontStyle: item.text ? "normal" : "italic"
-                                }}
-                                >
-                                    {
-                                        item.text ? item.text : "Комментарий удалён."
-                                    }
-                                </Text>
+                                {
+                                    item.text ? (
+                                        <Text
+                                        selectable
+                                        selectionColor={theme.accent}
+                                        style={{
+                                            marginTop: 3,
+                                            color: theme.text_color,
+                                        }}
+                                        >
+                                            {
+                                                item.text
+                                            }
+                                        </Text>
+                                    ) : (
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center"
+                                        }}
+                                        >
+                                            <Icon
+                                            name="trash-outline"
+                                            color={theme.text_secondary_color}
+                                            />
+
+                                            <Text
+                                            style={{
+                                                marginTop: 3,
+                                                color: theme.text_secondary_color,
+                                                marginLeft: 5,
+                                                fontStyle: "italic"
+                                            }}
+                                            >
+                                                Комментарий удалён.
+                                            </Text>
+                                        </View>
+                                    )
+                                }
 
                                 {
                                     spoilers.findIndex(x => x?.id === item.id && !x?.closed) > -1 && (
@@ -405,8 +432,7 @@ export const AnimeReplyComments = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-down-outline"
-                                    type="Ionicons"
+                                    name="chevron-down"
                                     color={item.mark === "down" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -444,8 +470,7 @@ export const AnimeReplyComments = (props) => {
                                 }}
                                 >
                                     <Icon
-                                    name="chevron-up-outline"
-                                    type="Ionicons"
+                                    name="chevron-up"
                                     color={item.mark === "up" ? "#fff" : theme.icon_color}
                                     size={15}
                                     />
@@ -570,18 +595,45 @@ export const AnimeReplyComments = (props) => {
                                         {dayjs().to(comment?.createdAt)}
                                     </Text>
 
-                                    <Text
-                                    selectable
-                                    style={{
-                                        marginTop: 3,
-                                        color: comment?.text ? theme.text_color : theme.text_secondary_color,
-                                        fontStyle: comment?.text ? "normal" : "italic"
-                                    }}
-                                    >
-                                        {
-                                            comment?.text ? comment?.text : "Комментарий удалён."
-                                        }
-                                    </Text>
+                                    {
+                                        comment.text ? (
+                                            <Text
+                                            selectable
+                                            selectionColor={theme.accent}
+                                            style={{
+                                                marginTop: 3,
+                                                color: theme.text_color,
+                                            }}
+                                            >
+                                                {
+                                                    comment.text
+                                                }
+                                            </Text>
+                                        ) : (
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                alignItems: "center"
+                                            }}
+                                            >
+                                                <Icon
+                                                name="trash-outline"
+                                                color={theme.text_secondary_color}
+                                                />
+
+                                                <Text
+                                                style={{
+                                                    marginTop: 3,
+                                                    color: theme.text_secondary_color,
+                                                    marginLeft: 5,
+                                                    fontStyle: "italic"
+                                                }}
+                                                >
+                                                    Комментарий удалён.
+                                                </Text>
+                                            </View>
+                                        )
+                                    }
                                 </View>
                             }
                             additionalContentBottom={
@@ -640,7 +692,7 @@ export const AnimeReplyComments = (props) => {
                                                 }}
                                                 >
                                                     <Icon
-                                                    name="chevron-down-outline"
+                                                    name="chevron-down"
                                                     type="Ionicons"
                                                     color={comment?.mark === "down" ? "#fff" : theme.icon_color}
                                                     size={15}
@@ -679,7 +731,7 @@ export const AnimeReplyComments = (props) => {
                                                 }}
                                                 >
                                                     <Icon
-                                                    name="chevron-up-outline"
+                                                    name="chevron-up"
                                                     type="Ionicons"
                                                     color={comment?.mark === "up" ? "#fff" : theme.icon_color}
                                                     size={15}

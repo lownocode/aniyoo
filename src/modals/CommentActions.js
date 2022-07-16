@@ -49,8 +49,7 @@ export const CommentActions = (props) => {
                 title="Перейти в профиль комментатора"
                 before={
                     <Icon
-                    name="link-external"
-                    type="Octicons"
+                    name="user-outline"
                     color={theme.icon_color}
                     size={17}
                     />
@@ -66,8 +65,7 @@ export const CommentActions = (props) => {
                         title="Скопировать текст комментария"
                         before={
                             <Icon
-                            name="copy"
-                            type="Feather"
+                            name="copy-outline"
                             color={theme.icon_color}
                             size={17}
                             />
@@ -88,8 +86,7 @@ export const CommentActions = (props) => {
                 title="Пожаловаться"
                 before={
                     <Icon
-                    name="warning"
-                    type="AntDesign"
+                    name="octagon-warning-outline"
                     color={theme.icon_color}
                     size={17}
                     />

@@ -61,7 +61,6 @@ import ChevronDown from "./icons/ChevronDown";
 import Reply from "./icons/Reply";
 import ChevronUp from "./icons/ChevronUp";
 import Send from "./icons/Send";
-import ChevronsLeft from "./icons/ChevronsLeft";
 import Pause from "./icons/Pause";
 import Play from "./icons/Play";
 import Fire from "./icons/Fire";
@@ -71,6 +70,25 @@ import RoundBar from "./icons/RoundBar";
 import StatusAi from "./icons/StatusAi";
 import PlayGear from "./icons/PlayGear";
 import Director from "./icons/Director";
+import Star from "./icons/Star";
+import StarOutline from "./icons/StarOutline";
+import StarPremium from "./icons/StarPremium";
+import PlusSquare from "./icons/PlusSquare";
+import TrashOutline from "./icons/TrashOutline";
+import OctagonWarningOutline from "./icons/OctagonWarningOutline";
+import Mic from "./icons/Mic";
+import Lock from "./icons/Lock";
+import LockOpen from "./icons/LockOpen";
+import SkipPrevious from "./icons/SkipPrevious";
+import SkipNext from "./icons/SkipNext";
+import ChevronRightDouble from "./icons/ChevronRightDouble";
+import ChevronLeftDouble from "./icons/ChevronLeftDouble";
+import Hd from "./icons/Hd";
+import Speedometer from "./icons/Speedometer";
+import Screenshot from "./icons/Screenshot";
+import PictureInPicture from "./icons/PictureInPicture";
+import Replay from "./icons/Replay";
+import Block from "./icons/Block";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -137,7 +155,6 @@ export const Icon = (props) => {
         "chevron-up": <ChevronUp {...props} />,
         "reply": <Reply {...props} />,
         "send": <Send {...props} />,
-        "chevrons-left": <ChevronsLeft {...props} />,
         "pause": <Pause {...props} />,
         "play": <Play {...props} />,
         "fire": <Fire {...props} />,
@@ -147,6 +164,25 @@ export const Icon = (props) => {
         "director": <Director {...props} />,
         "status-ai": <StatusAi {...props} />,
         "round-bar": <RoundBar {...props} />,
+        "star": <Star {...props} />,
+        "star-outline": <StarOutline {...props} />,
+        "star-premium": <StarPremium {...props} />,
+        "plus-square": <PlusSquare {...props} />,
+        "trash-outline": <TrashOutline {...props} />,
+        "octagon-warning-outline": <OctagonWarningOutline {...props} />,
+        "mic": <Mic {...props} />,
+        "lock": <Lock {...props} />,
+        "lock-open": <LockOpen {...props} />,
+        "skip-previous": <SkipPrevious {...props} />,
+        "skip-next": <SkipNext {...props} />,
+        "chevron-right-double": <ChevronRightDouble {...props} />,
+        "chevron-left-double": <ChevronLeftDouble {...props} />,
+        "hd": <Hd {...props} />,
+        "speedometer": <Speedometer {...props} />,
+        "screenshot": <Screenshot {...props} />,
+        "picture-in-picture": <PictureInPicture {...props} />,
+        "replay": <Replay {...props} />,
+        "block": <Block {...props} />,
     }[name];
 
     return (

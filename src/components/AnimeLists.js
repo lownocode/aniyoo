@@ -408,9 +408,8 @@ export const FoundedAnimeList = (props) => {
                             item.isFavorite && (
                                 <Icon
                                 type="Ionicons"
-                                name="bookmarks"
-                                color="#e2b227"
-                                size={17}
+                                name="bookmark"
+                                color="#c78b16"
                                 />
                             )
                         }{item.isFavorite && " "}{
@@ -660,8 +659,7 @@ export const MyAnimeList = (props) => {
                         {
                             item.isFavorite && (
                                 <Icon
-                                type="Ionicons"
-                                name="bookmarks"
+                                name="bookmark"
                                 color="#e2b227"
                                 size={17}
                                 />

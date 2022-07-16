@@ -53,7 +53,6 @@ export const Rating = props => {
                 icon={
                     <Icon
                     name="star"
-                    type="FontAwesome"
                     size={25}
                     color="gold"
                     />
@@ -73,8 +72,7 @@ export const Rating = props => {
                 onPress={() => onPress(select + (index + 1))}
                 icon={
                     <Icon
-                    name="star-o"
-                    type="FontAwesome"
+                    name="star-outline"
                     size={25}
                     color={theme.icon_color}
                     />

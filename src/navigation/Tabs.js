@@ -17,7 +17,7 @@ import UserContext from "../config/UserContext";
 
 const Tab = createBottomTabNavigator();
 
-export const Tabs = (props) => {
+export const Tabs = () => {
     const route = useRoute();
 
     const [ hideTabs, setHideTabs ] = useState(false);

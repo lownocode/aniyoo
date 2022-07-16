@@ -31,8 +31,7 @@ export const AnimeWatchedBefore = (props) => {
             before={
                 <Icon
                 color={theme.accent}
-                name="timelapse"
-                type="MaterialCommunityIcons"
+                name="clock"
                 size={25}
                 />
             }
@@ -50,9 +49,8 @@ export const AnimeWatchedBefore = (props) => {
             before={
                 <Icon
                 color={theme.icon_color}
-                name="timeline-clock-outline"
-                type="MaterialCommunityIcons"
-                size={17}
+                name="play"
+                size={13}
                 />
             }
             containerStyle={{
@@ -68,8 +66,7 @@ export const AnimeWatchedBefore = (props) => {
             before={
                 <Icon
                 color={theme.icon_color}
-                name="settings-backup-restore"
-                type="MaterialIcons"
+                name="replay"
                 size={17}
                 />
             }

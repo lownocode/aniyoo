@@ -52,61 +52,51 @@ export const AnimeSetList = (props) => {
     const lists = [
         {
             name: "Смотрю",
-            list: "watching",
             icon: (
                 <Icon
                 name="eye"
-                type="MaterialCommunityIcons"
-                color={list === "watching" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                color={theme.text_secondary_color}
+                size={22}
                 />
-            )
+            ),
         },
         {
             name: "Просмотрено",
-            list: "completed",
             icon: (
                 <Icon
-                name="check"
-                type="FontAwesome"
-                color={list === "completed" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                name="done-double"
+                color={theme.text_secondary_color}
+                size={22}
                 />
             )
         },
         {
             name: "В планах",
-            list: "planned",
             icon: (
                 <Icon
                 name="calendar"
-                type="MaterialCommunityIcons"
-                color={list === "planned" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                color={theme.text_secondary_color}
+                size={22}
                 />
             )
         },
         {
             name: "Отложено",
-            list: "postponed",
             icon: (
                 <Icon
-                name="pause-circle-outline"
-                type="MaterialIcons"
-                color={list === "postponed" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                name="pause-rounded"
+                color={theme.text_secondary_color}
+                size={22}
                 />
             )
         },
         {
             name: "Брошено",
-            list: "dropped",
             icon: (
                 <Icon
-                name="cancel"
-                type="MaterialIcons"
-                color={list === "dropped" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                name="cancel-rounded"
+                color={theme.text_secondary_color}
+                size={22}
                 />
             )
         },
@@ -118,7 +108,7 @@ export const AnimeSetList = (props) => {
                 name="close"
                 type="Ionicons"
                 color={list === "none" ? "#ffffff" : theme.text_secondary_color}
-                size={20}
+                size={17}
                 />
             )
         }

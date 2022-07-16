@@ -426,8 +426,7 @@ export const AnimeVideoPlayer = (props) => {
                                     >
                                         <View>
                                             <Icon
-                                            type="Ionicons"
-                                            name={lockedControls ? "lock-closed" : "lock-open"}
+                                            name={lockedControls ? "lock" : "lock-open"}
                                             size={25}
                                             color="#fff"
                                             />
@@ -463,9 +462,8 @@ export const AnimeVideoPlayer = (props) => {
                                             >
                                                 <View style={{ opacity: animeData?.playedEpisode === 1 ? 0.3 : 1 }}>
                                                     <Icon
-                                                    type="Ionicons"
-                                                    name="play-back"
-                                                    size={35}
+                                                    name="skip-previous"
+                                                    size={30}
                                                     color="#fff"
                                                     />
                                                 </View>
@@ -487,9 +485,8 @@ export const AnimeVideoPlayer = (props) => {
                                                 >
                                                     <View>
                                                         <Icon
-                                                        type="Ionicons"
-                                                        name={paused ? "play" : "ios-pause"}
-                                                        size={60}
+                                                        name={paused ? "play" : "pause"}
+                                                        size={45}
                                                         color="#fff"
                                                         />
                                                     </View>
@@ -504,8 +501,8 @@ export const AnimeVideoPlayer = (props) => {
                                                 <View style={{ opacity: animeData?.playedEpisode === animeData?.episodesCount ? 0.3 : 1 }}>
                                                     <Icon
                                                     type="Ionicons"
-                                                    name="play-forward"
-                                                    size={35}
+                                                    name="skip-next"
+                                                    size={30}
                                                     color="#fff"
                                                     />
                                                 </View>
@@ -637,13 +634,13 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            paddingVertical: 9,
-                                            paddingHorizontal: 9,
+                                            width: 30,
+                                            height: 30
                                         }}
                                         >
                                             <Icon
                                             type="MaterialCommunityIcons"
-                                            name="fit-to-screen-outline"
+                                            name="screenshot"
                                             size={15}
                                             color="#fff"
                                             />
@@ -666,13 +663,12 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            paddingVertical: 9,
-                                            paddingHorizontal: 9,
+                                            width: 30,
+                                            height: 30
                                         }}
                                         >
                                             <Icon
-                                            type="MaterialCommunityIcons"
-                                            name="picture-in-picture-bottom-right"
+                                            name="picture-in-picture"
                                             size={15}
                                             color="#fff"
                                             />
@@ -717,13 +713,12 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            paddingVertical: 7,
-                                            paddingHorizontal: 9,
+                                            width: 80,
+                                            height: 30
                                         }}
                                         >
                                             <Icon
-                                            type="MaterialCommunityIcons"
-                                            name="motion-play-outline"
+                                            name="speedometer"
                                             size={15}
                                             color="#fff"
                                             />
@@ -732,7 +727,8 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 7,
                                                 fontWeight: "700",
-                                                fontSize: 13
+                                                fontSize: 13,
+                                                color: "#fff"
                                             }}
                                             >
                                                 x{rate}
@@ -767,13 +763,12 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            paddingVertical: 7,
-                                            paddingHorizontal: 9,
+                                            width: 80,
+                                            height: 30
                                         }}
                                         >
                                             <Icon
-                                            type="MaterialCommunityIcons"
-                                            name="quality-high"
+                                            name="hd"
                                             size={15}
                                             color="#fff"
                                             />
@@ -782,7 +777,8 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 5,
                                                 fontWeight: "700",
-                                                fontSize: 13
+                                                fontSize: 13,
+                                                color: "#fff"
                                             }}
                                             >
                                                 {quality}p
@@ -818,14 +814,13 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            paddingVertical: 7,
-                                            paddingHorizontal: 9,
+                                            width: 80,
+                                            height: 30
                                         }}
                                         >
                                             <Icon
-                                            type="Feather"
-                                            name="chevrons-right"
-                                            size={15}
+                                            name="chevron-right-double"
+                                            size={20}
                                             color="#fff"
                                             />
 
@@ -833,7 +828,8 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 5,
                                                 fontWeight: "700",
-                                                fontSize: 13
+                                                fontSize: 13,
+                                                color: "#fff"
                                             }}
                                             >
                                                 +1:25
@@ -871,8 +867,7 @@ export const AnimeVideoPlayer = (props) => {
                         >
                             <View style={{ padding: 5 }}>
                                 <Icon
-                                type="Ionicons"
-                                name={lockedControls ? "lock-closed" : "lock-open"}
+                                name={lockedControls ? "lock" : "lock-open"}
                                 size={25}
                                 color="#fff"
                                 />
