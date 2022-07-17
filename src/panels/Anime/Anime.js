@@ -20,7 +20,6 @@ import LinearGradient from "react-native-linear-gradient";
 import ImageColors from "react-native-image-colors";
 import { Menu as Popup } from "react-native-material-menu";
 import Clipboard from "@react-native-community/clipboard";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -32,7 +31,8 @@ import {
     declOfNum, 
     storage, 
     getAnimeAccentColor,
-    invertColor
+    invertColor,
+    normalizeSize
 } from "../../functions";
 
 import { 
@@ -49,8 +49,6 @@ import {
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS } from "../../../variables";
-
-const bottomNavigationHeight = Dimensions.get("screen").height - Dimensions.get("window").height - StatusBar.currentHeight;
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
@@ -171,7 +169,6 @@ export const Anime = (props) => {
 
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
-            changeNavigationBarColor("translucent", false, true);
             onRefresh();
         });
     
@@ -301,15 +298,15 @@ export const Anime = (props) => {
             style={{
                 marginRight: index + 1 === animeData?.screenshots?.length ? 15 : 10,
                 marginLeft: index === 0 ? 15 : 0,
-                borderRadius: 10,
+                borderRadius: 8,
                 backgroundColor: theme.divider_color
             }}
             >
                 <Image
                 style={{
-                    width: 180,
-                    height: 100,
-                    borderRadius: 10
+                    width: normalizeSize(130),
+                    height: normalizeSize(70),
+                    borderRadius: 8
                 }}
                 resizeMethod="resize"
                 source={{
@@ -349,8 +346,8 @@ export const Anime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: 55,
-                            height: 80,
+                            width: normalizeSize(45),
+                            height: normalizeSize(65),
                         }}
                         source={{
                             uri: item?.poster
@@ -370,7 +367,7 @@ export const Anime = (props) => {
                                         width: "100%",
                                         textAlign: "center",
                                         color: "#fff",
-                                        fontSize: 12,
+                                        fontSize: normalizeSize(10),
                                         paddingHorizontal: 3,
                                         fontWeight: "500"
                                     }}
@@ -412,7 +409,7 @@ export const Anime = (props) => {
                             <Text
                             style={{
                                 color: theme.text_color,
-                                fontSize: 12,
+                                fontSize: normalizeSize(10),
                                 borderColor: theme.divider_color,
                                 backgroundColor: theme.divider_color + "98",
                                 borderWidth: 1,
@@ -431,7 +428,7 @@ export const Anime = (props) => {
                             <Text
                             style={{
                                 color: theme.text_color,
-                                fontSize: 12,
+                                fontSize: normalizeSize(10),
                                 borderColor: theme.divider_color,
                                 backgroundColor: theme.divider_color + "98",
                                 borderWidth: 1,
@@ -644,7 +641,7 @@ export const Anime = (props) => {
                                     })}
                                     size={30}
                                     textStyle={{
-                                        fontSize: 14
+                                        fontSize: normalizeSize(11.5)
                                     }}
                                     before={
                                         <Icon
@@ -739,6 +736,7 @@ export const Anime = (props) => {
                 <Avatar 
                 url={comment.user.photo}
                 online={(+new Date() - +new Date(comment?.user?.online?.time)) < 1 * 60 * 1000}
+                size={35}
                 />
             }
             />
@@ -865,7 +863,7 @@ export const Anime = (props) => {
                     <Text
                     style={{
                         marginLeft: 10,
-                        fontSize: 15,
+                        fontSize: normalizeSize(12),
                         fontWeight: "500",
                         color: theme.text_secondary_color + "90"
                     }}
@@ -880,7 +878,7 @@ export const Anime = (props) => {
                         marginLeft: 6,
                         fontWeight: "700",
                         color: theme.text_secondary_color,
-                        fontSize: 16
+                        fontSize: normalizeSize(12.5)
                     }}
                     > 
                         {
@@ -926,7 +924,7 @@ export const Anime = (props) => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 10 + bottomNavigationHeight,
+            bottom: 10,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -1098,62 +1096,66 @@ export const Anime = (props) => {
                     style={{
                         justifyContent: "flex-start",
                         alignItems: "center",
-                        position: "relative"
                     }}
                     >
-                        <Image
-                        source={{
-                            uri: animeData?.poster
-                        }}
-                        resizeMode="cover"
-                        style={{
-                            width: Dimensions.get("window").width,
-                            height: 600,
-                            opacity: 0.5,
-                            backgroundColor: theme.divider_color
-                        }}
-                        blurRadius={15}
-                        />
+                        <View>
+                            <Image
+                            source={{
+                                uri: animeData?.poster
+                            }}
+                            resizeMode="cover"
+                            style={{
+                                width: Dimensions.get("window").width,
+                                height: normalizeSize(400),
+                                opacity: 0.5
+                            }}
+                            blurRadius={10}
+                            />
 
-                        <Image
-                        source={{
-                            uri: animeData?.poster
-                        }}
-                        resizeMethod="resize"
+                            <LinearGradient
+                            colors={[
+                                "transparent",
+                                theme.background_content + "90",
+                                theme.background_content
+                            ]}
+                            style={{
+                                height: 200,
+                                width: "100%",
+                                position: "absolute",
+                                bottom: 0,
+                                justifyContent: "flex-end"
+                            }}
+                            />
+                        </View>
+
+                        <View
                         style={{
-                            width: 230,
-                            height: 310,
-                            position: "absolute",
-                            marginTop: StatusBar.currentHeight + 70,
-                            borderRadius: 10,
-                            zIndex: 12,
-                            backgroundColor: theme.divider_color
+                            marginTop: normalizeSize(-400)
                         }}
-                        onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
-                        />
+                        >
+                            <Image
+                            source={{
+                                uri: animeData?.poster
+                            }}
+                            resizeMethod="resize"
+                            resizeMode="cover"
+                            style={{
+                                width: normalizeSize(170),
+                                height: normalizeSize(240),
+                                marginTop: StatusBar.currentHeight + 70,
+                                borderRadius: 10,
+                                zIndex: 12,
+                                backgroundColor: theme.divider_color
+                            }}
+                            onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
+                            />
+                        </View>
                     </View>
-
-                    <LinearGradient
-                    colors={[
-                        "transparent",
-                        "transparent",
-                        theme.background_content,
-                        theme.background_content,
-                    ]}
-                    style={{
-                        width: "100%",
-                        height: 500,
-                        marginTop: -400,
-                        zIndex: 1,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    />
 
                     <View
                     style={{
-                        marginTop: -270,
-                        zIndex: 5,
+                        marginTop: 10,
+                        zIndex: 15,
                     }}
                     >
                         <View
@@ -1165,7 +1167,7 @@ export const Anime = (props) => {
                             selectable
                             numberOfLines={2}
                             style={{
-                                fontSize: 20,
+                                fontSize: normalizeSize(16),
                                 fontWeight: "500",
                                 marginHorizontal: 15,
                                 textAlign: "center",
@@ -1319,14 +1321,14 @@ export const Anime = (props) => {
                                 "NO_WATCHED": (
                                     <Icon
                                     name="play"
-                                    size={17}
+                                    size={12}
                                     color={invertColor(accent, true)}
                                     />
                                 ),
                                 "WATCHED_BEFORE": (
                                     <Icon
                                     name="pause"
-                                    size={20}
+                                    size={12}
                                     color={invertColor(accent, true)}
                                     />
                                 )
@@ -1441,9 +1443,11 @@ export const Anime = (props) => {
                                     icon={
                                         <Image
                                         style={{
-                                            width: 22,
-                                            height: 14,
-                                            borderRadius: 2
+                                            width: normalizeSize(20),
+                                            height: normalizeSize(13),
+                                            borderRadius: 3,
+                                            borderWidth: 0.5,
+                                            borderColor: theme.divider_color
                                         }}
                                         resizeMethod="resize"
                                         source={{
@@ -1538,8 +1542,9 @@ export const Anime = (props) => {
                                     numberOfLines={hideDescription ? 5 : 10000}
                                     onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
                                     style={{
-                                        fontStyle: animeData?.description ? "normal" : "italic",
+                                        fontStyle: "normal",
                                         color: theme.text_color,
+                                        fontSize: normalizeSize(12)
                                     }}
                                     >
                                         {animeData?.description ? animeData.description : "Описание не указано"}
@@ -1556,14 +1561,14 @@ export const Anime = (props) => {
                                     }}
                                     >
                                         <Icon
-                                        name="info"
-                                        size={25}
+                                        name="info-outline"
+                                        size={20}
                                         color={theme.text_secondary_color}
                                         />
                                         <Text
                                         style={{
                                             marginLeft: 15,
-                                            fontSize: 16,
+                                            fontSize: normalizeSize(13.5),
                                             color: theme.text_secondary_color
                                         }}
                                         >
@@ -1643,7 +1648,7 @@ export const Anime = (props) => {
                                         <Text 
                                         style={{ 
                                             color: theme.anime.planned, 
-                                            fontSize: 25,
+                                            fontSize: normalizeSize(21),
                                             textAlign: "center",
                                             fontWeight: "500"
                                         }}
@@ -1743,7 +1748,7 @@ export const Anime = (props) => {
                                             >
                                                 <View style={{ marginRight: 25 }}>
                                                     <DonutChart
-                                                    radius={55}
+                                                    radius={normalizeSize(45)}
                                                     percentage={animeData?.marks?.avg || 0}
                                                     strokeWidth={8}
                                                     color={theme.anime_mark[Math.round(animeData?.marks?.avg - 0.1 || 1)]}
@@ -1752,7 +1757,7 @@ export const Anime = (props) => {
                                                         <View>
                                                             <Text
                                                             style={{
-                                                                fontSize: 45,
+                                                                fontSize: normalizeSize(37),
                                                                 fontWeight: "700",
                                                                 color: theme.text_color,
                                                                 textAlign: "center"
@@ -1765,7 +1770,7 @@ export const Anime = (props) => {
                                                             style={{
                                                                 textAlign: "center",
                                                                 color: theme.text_secondary_color,
-                                                                fontSize: 12,
+                                                                fontSize: normalizeSize(10),
                                                                 marginTop: -7,
                                                                 paddingHorizontal: 15
                                                             }}
@@ -1799,7 +1804,7 @@ export const Anime = (props) => {
                                                                     <Text
                                                                     style={{
                                                                         marginRight: 10,
-                                                                        fontSize: 12
+                                                                        fontSize: normalizeSize(9)
                                                                     }}
                                                                     >
                                                                         {mark}

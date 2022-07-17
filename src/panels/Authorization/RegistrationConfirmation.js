@@ -10,7 +10,7 @@ import {
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage } from "../../functions";
+import { storage, normalizeSize } from "../../functions";
 
 export const AuthorizationRegistrationConfirmation = (props) => {
     const theme = useContext(ThemeContext);
@@ -202,7 +202,7 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 <Text
                 style={{
                     color: theme.text_color,
-                    fontSize: 22,
+                    fontSize: normalizeSize(20),
                     fontWeight: "500",
                     marginHorizontal: 15,
                     textAlign: "center"

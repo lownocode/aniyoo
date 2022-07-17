@@ -33,7 +33,7 @@ import {
 } from "../../components";
 import { CommentActions } from "../../modals";
 
-import { declOfNum, storage } from "../../functions";
+import { declOfNum, storage, normalizeSize } from "../../functions";
 import ThemeContext from "../../config/ThemeContext";
 
 export const AnimeReplyComments = (props) => {
@@ -280,7 +280,7 @@ export const AnimeReplyComments = (props) => {
                                         style={{
                                             textAlign: "center",
                                             color: theme.text_secondary_color,
-                                            fontSize: 12.5
+                                            fontSize: normalizeSize(10)
                                         }}
                                         >
                                             Автор указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
@@ -355,7 +355,7 @@ export const AnimeReplyComments = (props) => {
                                                     style={{
                                                         textAlign: "center",
                                                         color: theme.text_secondary_color,
-                                                        fontSize: 12.5
+                                                        fontSize: normalizeSize(10)
                                                     }}
                                                     >
                                                         Нажмите, чтобы скрыть
@@ -483,7 +483,7 @@ export const AnimeReplyComments = (props) => {
             before={
                 <Avatar 
                 url={item?.user?.photo} 
-                size={45}
+                size={30}
                 online={(+new Date() - +new Date(item?.user?.online?.time)) < 1 * 60 * 1000}
                 />
             }
@@ -831,7 +831,7 @@ export const AnimeReplyComments = (props) => {
                                         upperTitle={false}
                                         textStyle={{
                                             color: theme.anime.dropped,
-                                            fontSize: 11,
+                                            fontSize: normalizeSize(9),
                                             marginLeft: 5
                                         }}
                                         type="outline"
@@ -851,7 +851,7 @@ export const AnimeReplyComments = (props) => {
                                             name="close"
                                             type="AntDesign"
                                             color={theme.anime.dropped}
-                                            size={11}
+                                            size={5}
                                             />
                                         }
                                         onPress={() => setReply({})}
@@ -900,8 +900,8 @@ export const AnimeReplyComments = (props) => {
                                         alignItems: "center",
                                     }}
                                     >
-                                        <ActivityIndicator size={11} color={theme.activity_indicator_color}/>
-                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: 10 }}>Загрузка комментариев...</Text>
+                                        <ActivityIndicator size={8} color={theme.activity_indicator_color}/>
+                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: normalizeSize(8) }}>Загрузка комментариев...</Text>
                                     </View>
                                 )
                             }

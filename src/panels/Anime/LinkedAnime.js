@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, ScrollView, Image, Text , ToastAndroid, FlatList } from "react-native";
+import { View, Image, Text , ToastAndroid, FlatList } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -9,6 +9,7 @@ import {
     Cell,
     Icon
 } from "../../components";
+import { normalizeSize } from "../../functions";
 
 export const LinkedAnime = (props) => {
     const theme = useContext(ThemeContext);
@@ -53,8 +54,8 @@ export const LinkedAnime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: 55,
-                            height: 80,
+                            width: normalizeSize(45),
+                            height: normalizeSize(65),
                             borderRadius: 8
                         }}
                         source={{
@@ -75,7 +76,7 @@ export const LinkedAnime = (props) => {
                                         width: "100%",
                                         textAlign: "center",
                                         color: "#fff",
-                                        fontSize: 12,
+                                        fontSize: normalizeSize(10),
                                         paddingHorizontal: 3,
                                         fontWeight: "500"
                                     }}
@@ -94,7 +95,7 @@ export const LinkedAnime = (props) => {
                     </View>
                 }
                 containerStyle={{
-                    opacity: item.id ? 1 : .3
+                    opacity: item.id ? 1 : .3,
                 }}
                 disabled={item.id === route.params?.selectedAnimeId}
                 after={
@@ -116,7 +117,7 @@ export const LinkedAnime = (props) => {
                         <Text
                         style={{
                             color: theme.text_color,
-                            fontSize: 12,
+                            fontSize: normalizeSize(10),
                             borderColor: theme.divider_color,
                             backgroundColor: theme.divider_color + "98",
                             borderWidth: 1,
@@ -133,7 +134,7 @@ export const LinkedAnime = (props) => {
                         <Text
                         style={{
                             color: theme.text_color,
-                            fontSize: 12,
+                            fontSize: normalizeSize(10),
                             borderColor: theme.divider_color,
                             backgroundColor: theme.divider_color + "98",
                             borderWidth: 1,

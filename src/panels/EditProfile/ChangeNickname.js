@@ -19,6 +19,7 @@ import {
 
 import {
     storage,
+    normalizeSize
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -223,7 +224,7 @@ export const EditProfileChangeNickname = (props) => {
                 <View>
                     <View
                     style={{
-                        marginVertical: 30
+                        marginVertical: 30,
                     }}
                     >
                         <View
@@ -242,7 +243,7 @@ export const EditProfileChangeNickname = (props) => {
                         style={{
                             textAlign: "center",
                             color: theme.text_color,
-                            fontSize: 24,
+                            fontSize: normalizeSize(20),
                             fontWeight: "700",
                             marginHorizontal: 15
                         }}
@@ -254,7 +255,7 @@ export const EditProfileChangeNickname = (props) => {
 
                         <Text
                         style={{
-                            fontSize: 13,
+                            fontSize: normalizeSize(10.5),
                             color: theme.text_secondary_color,
                             textAlign: "center"
                         }}

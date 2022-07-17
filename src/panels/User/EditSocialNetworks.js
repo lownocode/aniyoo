@@ -12,7 +12,7 @@ import {
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage } from "../../functions";
+import { storage, normalizeSize } from "../../functions";
 
 export const EditSocialNetworks = (props) => {
     const theme = useContext(ThemeContext);
@@ -151,7 +151,7 @@ export const EditSocialNetworks = (props) => {
                                 <Text
                                 style={{
                                     color: "#fff",
-                                    fontSize: 20,
+                                    fontSize: normalizeSize(16),
                                     fontWeight: "500",
                                     marginLeft: 8
                                 }}
@@ -297,7 +297,7 @@ export const EditSocialNetworks = (props) => {
                         />
                         <Text
                         style={{
-                            fontSize: 16,
+                            fontSize: normalizeSize(13),
                             fontWeight: "500",
                             color: theme.text_color,
                             marginLeft: 5

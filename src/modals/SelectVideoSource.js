@@ -41,7 +41,7 @@ export const SelectVideoSource = (props) => {
                     <Icon
                     name="play"
                     color={theme.icon_color}
-                    size={20}
+                    size={15}
                     />
                 }
                 after={

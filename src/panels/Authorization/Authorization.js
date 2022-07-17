@@ -16,6 +16,7 @@ import {
 } from "../../components";
 import {
     storage,
+    normalizeSize
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -210,7 +211,7 @@ export const Authorization = (props) => {
                             style={{
                                 textAlign: "center",
                                 fontWeight: "500",
-                                fontSize: 16,
+                                fontSize: normalizeSize(13),
                                 color: mode === "signIn" ? theme.accent : theme.text_secondary_color,
                             }}
                             >
@@ -244,7 +245,7 @@ export const Authorization = (props) => {
                             style={{
                                 textAlign: "center",
                                 fontWeight: "500",
-                                fontSize: 16,
+                                fontSize: normalizeSize(13),
                                 color: mode === "registration" ? theme.accent : theme.text_secondary_color,
                             }}
                             >

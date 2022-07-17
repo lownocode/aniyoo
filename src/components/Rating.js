@@ -9,6 +9,7 @@ import {
 } from ".";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const Rating = props => {
     const theme = useContext(ThemeContext);
@@ -95,7 +96,7 @@ export const Rating = props => {
                     <Text
                     style={{
                         fontWeight: "700",
-                        fontSize: 45,
+                        fontSize: normalizeSize(40),
                         color: theme.text_color
                     }}
                     >

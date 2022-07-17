@@ -30,7 +30,6 @@ import {
     Avatar,
     Button,
     Cell,
-    ContentHeader,
     Divider,
     Header,
     Placeholder,
@@ -40,6 +39,7 @@ import {
 import {
     storage,
     declOfNum,
+    normalizeSize
 } from "../functions";
 import {
     USER_SCHEMA
@@ -215,7 +215,7 @@ export const Profile = props => {
                 <Text
                 style={{
                     color: theme.text_color,
-                    fontSize: 20,
+                    fontSize: normalizeSize(16),
                     fontWeight: "600"
                 }}
                 >
@@ -239,12 +239,12 @@ export const Profile = props => {
                     >
                         <Text 
                         style={{
-                            color: theme.text_secondary_color,
-                            fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic"
+                            color: userData?.status?.trim()?.length >= 1 ? theme.text_secondary_color : theme.accent,
+                            fontSize: normalizeSize(11.5)
                         }}
                         numberOfLines={3}
                         >
-                            {userData?.status?.trim()?.length >= 1 ? userData?.status : "Статус не установлен"}
+                            {userData?.status?.trim()?.length >= 1 ? userData?.status : "Установить статус"}
                         </Text>
                     </TouchableNativeFeedback>
 
@@ -259,11 +259,8 @@ export const Profile = props => {
                         color="gray"
                         size={13}
                         />
-                        <Text style={{ color: "gray", fontSize: 12, marginLeft: 4 }}>
-                            {
-                                (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
-                                `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
-                            } 
+                        <Text style={{ color: "gray", fontSize: normalizeSize(11), marginLeft: 4 }}>
+                            Онлайн
                         </Text>
                     </View>
                 </View>
@@ -272,7 +269,7 @@ export const Profile = props => {
             before={
                 <Avatar
                 url={userData?.photo}
-                size={85}
+                size={60}
                 borderRadius={29}
                 />
             }
@@ -418,7 +415,7 @@ export const Profile = props => {
                         >
                             <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: normalizeSize(17),
                                 color: theme.accent,
                                 fontWeight: "700"
                             }}
@@ -441,7 +438,7 @@ export const Profile = props => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -472,7 +469,7 @@ export const Profile = props => {
                         >
                             <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: normalizeSize(17),
                                 color: theme.accent,
                                 fontWeight: "700"
                             }}
@@ -495,7 +492,7 @@ export const Profile = props => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -578,7 +575,7 @@ export const Profile = props => {
                             <Text
                             style={{
                                 marginLeft: 10,
-                                fontSize: 15,
+                                fontSize: normalizeSize(12),
                                 fontWeight: "500",
                                 color: theme.text_secondary_color + "90"
                             }}
@@ -593,7 +590,7 @@ export const Profile = props => {
                                 marginLeft: 6,
                                 fontWeight: "700",
                                 color: theme.text_secondary_color,
-                                fontSize: 16
+                                fontSize: normalizeSize(12.5)
                             }}
                             > 
                                 {
@@ -649,7 +646,7 @@ export const Profile = props => {
                     }}
                     >
                         <Avatar
-                        size={55}
+                        size={40}
                         url={item.photo}
                         online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
@@ -658,7 +655,7 @@ export const Profile = props => {
                         numberOfLines={2}
                         style={{
                             color: theme.text_color,
-                            fontSize: 12,
+                            fontSize: normalizeSize(10),
                             textAlign: "center"
                         }}
                         >
@@ -710,7 +707,7 @@ export const Profile = props => {
                     <Text
                     style={{
                         color: "#fff",
-                        fontSize: 12,
+                        fontSize: normalizeSize(10),
                         textAlignVertical: "center"
                     }}
                     >
@@ -858,118 +855,6 @@ export const Profile = props => {
             }
             >
                 {userInfoRender()}  
-                {
-                    userData?.online?.payload?.anime && (
-                        <>
-                            <ContentHeader
-                            text={`${userData?.nickname} сейчас смотрит`}
-                            indents
-                            />
-                            <View
-                            style={{
-                                marginBottom: 10,
-                                marginHorizontal: 10,
-                                height: 120,
-                                justifyContent: "center"
-                            }}
-                            >
-                                <Image
-                                source={{
-                                    uri: userData?.online?.payload?.anime?.poster
-                                }}
-                                style={{
-                                    width: "100%",
-                                    height: 120,
-                                    // opacity: 0.3,
-                                    borderRadius: 15,
-                                }}
-                                resizeMethod="resize"
-                                resizeMode="cover"
-                                blurRadius={15}
-                                />
-
-                                <View
-                                style={{
-                                    position: "absolute",
-                                    width: "100%",
-                                    borderRadius: 15,
-                                    overflow: "hidden"
-                                }}
-                                >
-                                    <Cell
-                                    title={userData?.online?.payload?.anime?.title}
-                                    centered={false}
-                                    before={
-                                        <Image
-                                        resizeMethod="resize"
-                                        source={{
-                                            uri: userData?.online?.payload?.anime?.poster
-                                        }}
-                                        style={{
-                                            width: 60,
-                                            height: 100,
-                                            resizeMode: "cover",
-                                            borderRadius: 10,
-                                        }}
-                                        />
-                                    }
-                                    titleStyle={{
-                                        color: "#fff",
-                                        textShadowColor: "#000",
-                                        textShadowRadius: 5
-                                    }}
-                                    subtitle={
-                                        <View
-                                        style={{
-                                            flexDirection: "row",
-                                            flexWrap: "wrap"
-                                        }}
-                                        >
-                                            <View>
-                                                <Text
-                                                style={{
-                                                    color: "#fff",
-                                                    textShadowColor: "#000",
-                                                    textShadowRadius: 5,
-                                                    fontSize: 12,
-                                                    backgroundColor: theme.divider_color + "98",
-                                                    paddingHorizontal: 5,
-                                                    paddingVertical: 1,
-                                                    borderRadius: 5,
-                                                    marginTop: 5,
-                                                    marginRight: 10,
-                                                }}
-                                                >
-                                                    {userData?.online?.payload?.episode} серия
-                                                </Text>
-                                            </View>
-
-                                            <View>
-                                                <Text
-                                                style={{
-                                                    color: "#fff",
-                                                    textShadowColor: "#000",
-                                                    textShadowRadius: 5,
-                                                    fontSize: 12,
-                                                    backgroundColor: theme.divider_color + "98",
-                                                    paddingHorizontal: 5,
-                                                    paddingVertical: 1,
-                                                    borderRadius: 5,
-                                                    marginTop: 5,
-                                                    marginRight: 10,
-                                                }}
-                                                >
-                                                    {userData?.online?.payload?.translation?.title}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    }
-                                    />
-                                </View>
-                            </View> 
-                        </>
-                    )
-                } 
                 {statisticsRender()}
 
                 <View

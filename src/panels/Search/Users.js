@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { TextInput, View, StatusBar, ActivityIndicator, FlatList, Text } from "react-native";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import { 
     Avatar,
@@ -12,7 +11,7 @@ import {
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage } from "../../functions";
+import { storage, normalizeSize } from "../../functions";
 
 const SearchInput = (props) => {
     const theme = useContext(ThemeContext);
@@ -22,10 +21,6 @@ const SearchInput = (props) => {
         value,
         onChangeText
     } = props;
-
-    useEffect(() => {
-        changeNavigationBarColor("translucent", false, true);
-    }, []);
 
     return (
         <View
@@ -170,7 +165,7 @@ export const SearchUsers = (props) => {
                     numberOfLines={1}
                     style={{
                         fontWeight: "500",
-                        fontSize: 17,
+                        fontSize: normalizeSize(13.5),
                         color: theme.text_color,
                         marginLeft: item.relation === "friends" ? 5 : 0,
                         width: "90%"

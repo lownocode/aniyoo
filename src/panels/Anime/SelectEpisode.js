@@ -11,7 +11,7 @@ dayjs.extend(duration);
 import { Cell, Header, Icon } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { formatViews, storage } from "../../functions";
+import { formatViews, normalizeSize, storage } from "../../functions";
 import { showNavigationBar } from "react-native-navigation-bar-color";
 
 export const AnimeSelectEpisode = (props) => {
@@ -131,7 +131,7 @@ export const AnimeSelectEpisode = (props) => {
                                     paddingHorizontal: 5,
                                     paddingVertical: 2,
                                     borderRadius: 5,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     marginRight: 10,
                                     color: theme.text_secondary_color
                                 }}
@@ -147,7 +147,7 @@ export const AnimeSelectEpisode = (props) => {
                                     paddingHorizontal: 5,
                                     paddingVertical: 2,
                                     borderRadius: 5,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     color: theme.text_secondary_color
                                 }}
                                 >
@@ -189,7 +189,7 @@ export const AnimeSelectEpisode = (props) => {
                             marginRight: 10,
                             fontWeight: "300",
                             color: viewed_up_to >= 1 ? theme.accent : theme.text_secondary_color,
-                            fontSize: 12
+                            fontSize: normalizeSize(10)
                         }}
                         >
                             {

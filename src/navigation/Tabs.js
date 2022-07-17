@@ -14,6 +14,7 @@ import {
 import { Avatar, Icon } from "../components";
 import ThemeContext from "../config/ThemeContext";
 import UserContext from "../config/UserContext";
+import { normalizeSize } from "../functions";
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +47,7 @@ export const Tabs = () => {
             <View 
             style={{
                 backgroundColor: theme.bottom_tabbar.background, 
-                height: 60, 
+                height: normalizeSize(50), 
                 shadowColor: "transparent",
                 flexDirection: "row", 
                 alignItems: "center",
@@ -92,7 +93,7 @@ export const Tabs = () => {
                                     paddingVertical: 7,
                                     backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
                                     flex: 1,
-                                    height: 59
+                                    height: "100%"
                                 }}
                                 >
                                     {
@@ -103,7 +104,7 @@ export const Tabs = () => {
                                                 borderWidth: 0,
                                                 borderRadius: 100,
                                             }}
-                                            size={isFocused ? 20 : 30}
+                                            size={isFocused ? 20 : 25}
                                             />
                                         ) : (
                                             <Icon

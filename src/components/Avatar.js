@@ -1,6 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import { View, Image, StyleSheet, Animated } from "react-native";
 
+import { normalizeSize } from "../functions";
 import ThemeContext from "../config/ThemeContext";
 
 export const Avatar = props => {
@@ -10,7 +11,6 @@ export const Avatar = props => {
         url,
         size,
         containerStyle,
-        borderRadius = 20,
         online = false
     } = props;
 
@@ -59,19 +59,16 @@ export const Avatar = props => {
             <View 
             style={{
                 backgroundColor: imageLoadEnd ? "transparent" : theme.divider_color,
-                width: size ? size : 50,
-                height: size ? size :  50,
-                borderRadius: borderRadius,
+                width: size ? normalizeSize(size) : normalizeSize(40),
+                height: size ? normalizeSize(size) :  normalizeSize(40),
+                borderRadius: 100,
                 overflow: "hidden",
-                borderWidth: 1,
-                borderColor: theme.divider_color,
                 ...containerStyle
             }}
             >
                 <Image
                 resizeMethod="resize"
                 style={localStyles.image}
-                borderRadius={borderRadius}
                 onLoadEnd={() => setImageLoadEnd(true)}
                 source={{
                     uri: url,

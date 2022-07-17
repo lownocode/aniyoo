@@ -14,6 +14,7 @@ const theme = {
         text_secondary_color: "#666666",
         refresh_control_background: "#ffffff",
         incomplete_text_secondary_color: "#c2c2c2",
+        widget_background: "rgba(0, 0, 0, .1)",
 
         //components
 
@@ -113,6 +114,7 @@ const theme = {
         text_secondary_color: "#b8b8b8",
         refresh_control_background: "#1c1c1c",
         incomplete_text_secondary_color: "#c2c2c2",
+        widget_background: "rgba(255, 255, 255, .1)",
 
         //components
 

@@ -1,8 +1,9 @@
 import React, { Fragment, useContext } from 'react';
-import { View, Text, StyleSheet, StatusBar, Dimensions, } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, } from 'react-native';
 import { Icon, PressIcon, Divider } from '.';
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const Header = (props) => {
     const theme = useContext(ThemeContext);
@@ -39,14 +40,14 @@ export const Header = (props) => {
             marginTop: 3,
         },
         title: {
-            fontSize: 22,
+            fontSize: normalizeSize(15),
             fontWeight: "500",
             color: theme.text_color,
             marginLeft: backButton ? 0 : 25,
         },
         subtitle: {
             color: 'gray',
-            fontSize: 15,
+            fontSize: normalizeSize(12),
             fontWeight: "400",
             marginLeft: backButton ? 0 : 25,
             marginTop: -2

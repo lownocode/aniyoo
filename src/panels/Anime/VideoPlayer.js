@@ -30,7 +30,7 @@ import {
 } from "../../modals";
 
 import ThemeContext from "../../config/ThemeContext";
-import { declOfNum, sleep, storage } from "../../functions";
+import { declOfNum, normalizeSize, storage } from "../../functions";
 
 export const AnimeVideoPlayer = (props) => {
     const theme = useContext(ThemeContext);
@@ -399,7 +399,7 @@ export const AnimeVideoPlayer = (props) => {
                                     numberOfLines={1}
                                     style={{
                                         fontWeight: "600",
-                                        fontSize: 17,
+                                        fontSize: normalizeSize(14),
                                         color: "#fff",
                                         textAlign: "center",
                                     }}
@@ -458,9 +458,9 @@ export const AnimeVideoPlayer = (props) => {
                                             <TouchableNativeFeedback
                                             onPress={() => prevEpisode()}
                                             background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
-                                            disabled={animeData?.playedEpisode === 1}
+                                            disabled={Number(animeData?.playedEpisode) === 1}
                                             >
-                                                <View style={{ opacity: animeData?.playedEpisode === 1 ? 0.3 : 1 }}>
+                                                <View style={{ opacity: Number(animeData?.playedEpisode) === 1 ? 0.3 : 1 }}>
                                                     <Icon
                                                     name="skip-previous"
                                                     size={30}
@@ -498,7 +498,7 @@ export const AnimeVideoPlayer = (props) => {
                                             background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
                                             disabled={animeData?.playedEpisode === animeData?.episodesCount}
                                             >
-                                                <View style={{ opacity: animeData?.playedEpisode === animeData?.episodesCount ? 0.3 : 1 }}>
+                                                <View style={{ opacity: Number(animeData?.playedEpisode) === animeData?.episodesCount ? 0.3 : 1 }}>
                                                     <Icon
                                                     type="Ionicons"
                                                     name="skip-next"
@@ -551,7 +551,7 @@ export const AnimeVideoPlayer = (props) => {
                                                 style={{
                                                     marginLeft: 5,
                                                     fontWeight: "700",
-                                                    fontSize: 13
+                                                    fontSize: normalizeSize(10.5)
                                                 }}
                                                 >
                                                     Пропустить опенинг
@@ -727,7 +727,7 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 7,
                                                 fontWeight: "700",
-                                                fontSize: 13,
+                                                fontSize: normalizeSize(10.5),
                                                 color: "#fff"
                                             }}
                                             >
@@ -777,7 +777,7 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 5,
                                                 fontWeight: "700",
-                                                fontSize: 13,
+                                                fontSize: normalizeSize(10.5),
                                                 color: "#fff"
                                             }}
                                             >
@@ -828,7 +828,7 @@ export const AnimeVideoPlayer = (props) => {
                                             style={{
                                                 marginLeft: 5,
                                                 fontWeight: "700",
-                                                fontSize: 13,
+                                                fontSize: normalizeSize(10.5),
                                                 color: "#fff"
                                             }}
                                             >
@@ -920,7 +920,7 @@ export const AnimeVideoPlayer = (props) => {
                                 style={{
                                     backgroundColor: "rgba(0, 0, 0, .3)",
                                     fontWeight: "500",
-                                    fontSize: 32,
+                                    fontSize: normalizeSize(28),
                                     color: "#fff",
                                     paddingHorizontal: 15,
                                     paddingVertical: 2,
@@ -936,7 +936,7 @@ export const AnimeVideoPlayer = (props) => {
                             style={{
                                 backgroundColor: "rgba(0, 0, 0, .3)",
                                 fontWeight: "500",
-                                fontSize: 18,
+                                fontSize: normalizeSize(14),
                                 color: "#fff",
                                 paddingHorizontal: 15,
                                 paddingVertical: 2,

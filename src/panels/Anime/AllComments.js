@@ -36,8 +36,11 @@ import {
 } from "../../components";
 import { CommentActions } from "../../modals";
 
-import { declOfNum, storage } from "../../functions";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
+import { 
+    declOfNum, 
+    storage,
+    normalizeSize
+} from "../../functions";
 
 export const AnimeAllComments = (props) => {
     const theme = useContext(ThemeContext);
@@ -123,7 +126,6 @@ export const AnimeAllComments = (props) => {
     };
 
     useEffect(() => {
-        changeNavigationBarColor(theme.input.background, false, true);
         getComments();
     }, []);
 
@@ -281,7 +283,7 @@ export const AnimeAllComments = (props) => {
                                         style={{
                                             textAlign: "center",
                                             color: theme.text_secondary_color,
-                                            fontSize: 12.5
+                                            fontSize: normalizeSize(10)
                                         }}
                                         >
                                             Автор указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
@@ -356,7 +358,7 @@ export const AnimeAllComments = (props) => {
                                                     style={{
                                                         textAlign: "center",
                                                         color: theme.text_secondary_color,
-                                                        fontSize: 12.5
+                                                        fontSize: normalizeSize(10)
                                                     }}
                                                     >
                                                         Нажмите, чтобы скрыть
@@ -424,7 +426,7 @@ export const AnimeAllComments = (props) => {
                                     })}
                                     size={30}
                                     textStyle={{
-                                        fontSize: 14
+                                        fontSize: normalizeSize(11.5)
                                     }}
                                     before={
                                         <Icon
@@ -518,6 +520,7 @@ export const AnimeAllComments = (props) => {
                 <Avatar 
                 url={item.user.photo}
                 online={(+new Date() - +new Date(item?.user?.online?.time)) < 1 * 60 * 1000}
+                size={35}
                 />
             }
             />
@@ -629,8 +632,15 @@ export const AnimeAllComments = (props) => {
                                         alignItems: "center",
                                     }}
                                     >
-                                        <ActivityIndicator size={11} color={theme.activity_indicator_color}/>
-                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: 10 }}>Загрузка комментариев...</Text>
+                                        <ActivityIndicator size={8} color={theme.activity_indicator_color}/>
+                                        <Text 
+                                        style={{ 
+                                            marginLeft: 5, 
+                                            color: theme.text_secondary_color, 
+                                            fontSize: normalizeSize(8) 
+                                        }}>
+                                            Загрузка комментариев...
+                                        </Text>
                                     </View>
                                 )
                             }

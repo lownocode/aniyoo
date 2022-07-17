@@ -40,6 +40,7 @@ import {
 import {
     storage,
     declOfNum,
+    normalizeSize
 } from "../../functions";
 import UserContext from "../../config/UserContext";
 
@@ -235,7 +236,7 @@ export const AnotherUserProfile = (props) => {
                     }}
                     >
                         <Avatar
-                        size={55}
+                        size={40}
                         url={item.photo}
                         online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
@@ -244,7 +245,7 @@ export const AnotherUserProfile = (props) => {
                         numberOfLines={2}
                         style={{
                             color: theme.text_color,
-                            fontSize: 12,
+                            fontSize: normalizeSize(10),
                             textAlign: "center"
                         }}
                         >
@@ -295,7 +296,7 @@ export const AnotherUserProfile = (props) => {
                     <Text
                     style={{
                         color: "#fff",
-                        fontSize: 12,
+                        fontSize: normalizeSize(10),
                         textAlignVertical: "center"
                     }}
                     >
@@ -341,7 +342,7 @@ export const AnotherUserProfile = (props) => {
                 <Text
                 style={{
                     color: theme.text_color,
-                    fontSize: 20,
+                    fontSize: normalizeSize(16),
                     fontWeight: "600"
                 }}
                 >
@@ -370,7 +371,7 @@ export const AnotherUserProfile = (props) => {
                         name="radio" 
                         color="gray"
                         />
-                        <Text style={{ color: "gray", fontSize: 12, marginLeft: 4 }}>
+                        <Text style={{ color: "gray", fontSize: normalizeSize(11), marginLeft: 4 }}>
                             {
                                 (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
                                 `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
@@ -383,7 +384,7 @@ export const AnotherUserProfile = (props) => {
             before={
                 <Avatar
                 url={userData?.photo || ""}
-                size={85}
+                size={60}
                 borderRadius={29}
                 />
             }
@@ -548,7 +549,7 @@ export const AnotherUserProfile = (props) => {
                         >
                             <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: normalizeSize(17),
                                 color: theme.accent,
                                 fontWeight: "700",
                             }}
@@ -571,7 +572,7 @@ export const AnotherUserProfile = (props) => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -602,7 +603,7 @@ export const AnotherUserProfile = (props) => {
                         >
                             <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: normalizeSize(17),
                                 color: theme.accent,
                                 fontWeight: "700"
                             }}
@@ -625,7 +626,7 @@ export const AnotherUserProfile = (props) => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: 12,
+                                    fontSize: normalizeSize(10),
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -707,7 +708,7 @@ export const AnotherUserProfile = (props) => {
                             <Text
                             style={{
                                 marginLeft: 10,
-                                fontSize: 15,
+                                fontSize: normalizeSize(12),
                                 fontWeight: "500",
                                 color: theme.text_secondary_color + "90"
                             }}
@@ -722,7 +723,7 @@ export const AnotherUserProfile = (props) => {
                                 marginLeft: 6,
                                 fontWeight: "700",
                                 color: theme.text_secondary_color,
-                                fontSize: 16
+                                fontSize: normalizeSize(12.5)
                             }}
                             > 
                                 {

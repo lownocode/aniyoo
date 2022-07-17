@@ -6,7 +6,6 @@ import {
     TextInput
 } from "react-native";
 import axios from "axios";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 import {
     Icon,
@@ -29,10 +28,6 @@ const SearchInput = (props) => {
         value,
         onChangeText
     } = props;
-
-    useEffect(() => {
-        changeNavigationBarColor("translucent", false, true);
-    }, []);
 
     return (
         <View

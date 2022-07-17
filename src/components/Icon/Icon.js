@@ -89,6 +89,8 @@ import Screenshot from "./icons/Screenshot";
 import PictureInPicture from "./icons/PictureInPicture";
 import Replay from "./icons/Replay";
 import Block from "./icons/Block";
+import JapanFlag from "./icons/JapanFlag";
+import ChinaFlag from "./icons/ChinaFlag";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -183,6 +185,8 @@ export const Icon = (props) => {
         "picture-in-picture": <PictureInPicture {...props} />,
         "replay": <Replay {...props} />,
         "block": <Block {...props} />,
+        "japan-flag": <JapanFlag {...props} />,
+        "china-flag": <ChinaFlag {...props} />,
     }[name];
 
     return (

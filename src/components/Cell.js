@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet } from "react-native";
+
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const Cell = (props) => {
     const theme = useContext(ThemeContext);
@@ -48,14 +50,14 @@ export const Cell = (props) => {
         },
         title: {
             color: theme.cell.title_color,
-            fontSize: 16.5,
+            fontSize: normalizeSize(14),
             flex: 1,
             fontWeight: "500",
             ...titleStyle,
         },
         subtitle: {
             color: theme.cell.subtitle_color,
-            fontSize: 15,
+            fontSize: normalizeSize(11.2),
             flex: 1,
             ...subtitleStyle
         },

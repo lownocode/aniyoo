@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { View, Text, TouchableNativeFeedback, StyleSheet, ActivityIndicator } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const Button = (props) => {
     const theme = useContext(ThemeContext);
@@ -55,7 +56,7 @@ export const Button = (props) => {
         },
         text: {
             textAlign: "center",
-            fontSize: size === "s" ? 12 : size === "m" ? 15 : size === "l" ? 17 : 15,
+            fontSize: normalizeSize(13),
             fontWeight: "600",
             letterSpacing: 0.5,
             color: textColor ? textColor : theme.button[type][`text_color`],

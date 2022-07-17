@@ -6,6 +6,8 @@ import {
     Header
 } from "../components";
 
+import { normalizeSize } from "../functions";
+
 import ThemeContext from "../config/ThemeContext";
 
 export const Search = (props) => {
@@ -54,7 +56,7 @@ export const Search = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: 18,
+                                    fontSize: normalizeSize(13),
                                     fontWeight: "500"
                                 }}
                                 >
@@ -117,7 +119,7 @@ export const Search = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: 18,
+                                    fontSize: normalizeSize(13),
                                     fontWeight: "500"
                                 }}
                                 >

@@ -51,6 +51,7 @@ export const AnimeSetList = (props) => {
 
     const lists = [
         {
+            list: "watching",
             name: "Смотрю",
             icon: (
                 <Icon
@@ -61,6 +62,7 @@ export const AnimeSetList = (props) => {
             ),
         },
         {
+            list: "completed",
             name: "Просмотрено",
             icon: (
                 <Icon
@@ -71,6 +73,7 @@ export const AnimeSetList = (props) => {
             )
         },
         {
+            list: "planned",
             name: "В планах",
             icon: (
                 <Icon
@@ -81,6 +84,7 @@ export const AnimeSetList = (props) => {
             )
         },
         {
+            list: "postponed",
             name: "Отложено",
             icon: (
                 <Icon
@@ -91,6 +95,7 @@ export const AnimeSetList = (props) => {
             )
         },
         {
+            list: "dropped",
             name: "Брошено",
             icon: (
                 <Icon
