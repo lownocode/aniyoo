@@ -16,7 +16,7 @@ import {
     SetStatus
 } from "../../modals";
 
-import { storage } from "../../functions";
+import { normalizeSize, storage } from "../../functions";
 
 export const EditProfileProfile = (props) => {
     const theme = useContext(ThemeContext);
@@ -111,8 +111,8 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -137,8 +137,8 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -163,8 +163,8 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",

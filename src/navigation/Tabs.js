@@ -100,10 +100,6 @@ export const Tabs = () => {
                                         route.name === "profile" ? (
                                             <Avatar
                                             url={user?.photo}
-                                            containerStyle={{
-                                                borderWidth: 0,
-                                                borderRadius: 100,
-                                            }}
                                             size={isFocused ? 20 : 25}
                                             />
                                         ) : (

@@ -31,11 +31,13 @@ export const SettingsApplication = (props) => {
     }, []);
 
     const switchDarkTheme = (value) => {
-        EventRegister.emit("changeTheme", value);
+        EventRegister.emit("app", {
+            type: "changeTheme",
+            value: value
+        });
         setDarkThemeMode(value);
 
         storage.setItem("DARK_THEME_MODE", value);
-        console.log(value)
     };
 
     return (
@@ -73,7 +75,7 @@ export const SettingsApplication = (props) => {
                     thumbColor={darkThemeMode ? theme.switch.thumb : theme.switch.thumb_light}
                     />
                 }
-                disabled
+                onPress={() => switchDarkTheme(!darkThemeMode)}
                 />
             </ScrollView>
         </View>

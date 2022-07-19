@@ -1,6 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { Text, View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import axios from "axios";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -23,7 +24,6 @@ import {
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
-import axios from "axios";
 
 export const EditProfileChangeNickname = (props) => {
     const theme = useContext(ThemeContext);
@@ -186,8 +186,8 @@ export const EditProfileChangeNickname = (props) => {
             before={
                 <View
                 style={{
-                    width: 45,
-                    height: 45,
+                    width: normalizeSize(33),
+                    height: normalizeSize(33),
                     borderRadius: 10,
                     backgroundColor: theme.accent + "20",
                     justifyContent: "center",

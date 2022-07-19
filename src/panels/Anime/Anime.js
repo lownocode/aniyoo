@@ -834,14 +834,14 @@ export const Anime = (props) => {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    height: 20,
-                    width: 40
+                    height: normalizeSize(15),
+                    width: normalizeSize(30)
                 }}
                 >
                     <View
                     style={{
-                        width: 10,
-                        height: 10,
+                        width: normalizeSize(8),
+                        height: normalizeSize(8),
                         borderRadius: 100,
                         backgroundColor: statisticsChartColors[index],
                         marginRight: 5
@@ -943,8 +943,8 @@ export const Anime = (props) => {
                 left: 20,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: 45,
-                height: 45,
+                width: normalizeSize(33),
+                height: normalizeSize(33),
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 100,
@@ -977,8 +977,8 @@ export const Anime = (props) => {
                 right: 20,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: 45,
-                height: 45,
+                width: normalizeSize(33),
+                height: normalizeSize(33),
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 1000,

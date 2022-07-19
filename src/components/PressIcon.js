@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { StyleSheet, TouchableNativeFeedback, View } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const PressIcon = (props) => {
     const theme = useContext(ThemeContext);
@@ -17,8 +18,8 @@ export const PressIcon = (props) => {
     const localStyles = StyleSheet.create({
         container: {
             borderRadius: 100,
-            width: 32, 
-            height: 32,
+            width: normalizeSize(26), 
+            height: normalizeSize(26),
             justifyContent: "center",
             alignItems: "center",
             ...containerStyle

@@ -8,6 +8,7 @@ import {
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
+import { normalizeSize } from "../../functions";
 
 export const EditProfile = props => {
     const theme = useContext(ThemeContext);
@@ -41,8 +42,8 @@ export const EditProfile = props => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -67,8 +68,8 @@ export const EditProfile = props => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -93,8 +94,8 @@ export const EditProfile = props => {
                 before={
                     <View
                     style={{
-                        width: 42,
-                        height: 42,
+                        width: normalizeSize(33),
+                        height: normalizeSize(33),
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",

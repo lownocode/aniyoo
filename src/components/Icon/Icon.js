@@ -91,6 +91,10 @@ import Replay from "./icons/Replay";
 import Block from "./icons/Block";
 import JapanFlag from "./icons/JapanFlag";
 import ChinaFlag from "./icons/ChinaFlag";
+import ClockOutline from "./icons/ClockOutline";
+import ForwardArrow from "./icons/ForwardArrow";
+import MicOutline from "./icons/MicOutline";
+import Options from "./icons/Options";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -187,6 +191,10 @@ export const Icon = (props) => {
         "block": <Block {...props} />,
         "japan-flag": <JapanFlag {...props} />,
         "china-flag": <ChinaFlag {...props} />,
+        "clock-outline": <ClockOutline {...props} />,
+        "forward-arrow": <ForwardArrow {...props} />,
+        "mic-outline": <MicOutline {...props} />,
+        "options": <Options {...props} />,
     }[name];
 
     return (

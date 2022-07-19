@@ -679,14 +679,14 @@ export const AnotherUserProfile = (props) => {
                             flexDirection: "row",
                             justifyContent: "space-between",
                             alignItems: "center",
-                            height: 20,
-                            width: 40
+                            height: normalizeSize(15),
+                            width: normalizeSize(30)
                         }}
                         >
                             <View
                             style={{
-                                width: 10,
-                                height: 10,
+                                width: normalizeSize(8),
+                                height: normalizeSize(8),
                                 borderRadius: 100,
                                 backgroundColor: statisticsChartColors[index],
                                 marginRight: 5

@@ -9,6 +9,7 @@ import {
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const FriendActions = (props) => {
     const theme = useContext(ThemeContext);
@@ -44,8 +45,8 @@ export const FriendActions = (props) => {
                         before={
                             <View
                             style={{
-                                width: 40,
-                                height: 40,
+                                width: normalizeSize(33),
+                                height: normalizeSize(33),
                                 backgroundColor: "#f06d0220",
                                 borderRadius: 15,
                                 justifyContent: "center",
@@ -71,8 +72,8 @@ export const FriendActions = (props) => {
                         before={
                             <View
                             style={{
-                                width: 40,
-                                height: 40,
+                                width: normalizeSize(33),
+                                height: normalizeSize(33),
                                 backgroundColor: "#f5210520",
                                 borderRadius: 15,
                                 justifyContent: "center",

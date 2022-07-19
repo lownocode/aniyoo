@@ -80,14 +80,15 @@ export const Profile = props => {
             }
         })
         .then(({ data }) => {
+            EventRegister.emit("app", {
+                type: "changeUser",
+                user: data
+            });
+
             setUserData(data);
             if(data?.friendsCount >= 1) {
                 getFriends();
             }
-        })
-        .catch(({ response: { data } }) => {
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
-            navigate("authorization");
         })
         .finally(() => {
             setRefreshing(false);
@@ -270,7 +271,6 @@ export const Profile = props => {
                 <Avatar
                 url={userData?.photo}
                 size={60}
-                borderRadius={29}
                 />
             }
             />
@@ -546,14 +546,14 @@ export const Profile = props => {
                             flexDirection: "row",
                             justifyContent: "space-between",
                             alignItems: "center",
-                            height: 20,
-                            width: 40
+                            height: normalizeSize(15),
+                            width: normalizeSize(30)
                         }}
                         >
                             <View
                             style={{
-                                width: 10,
-                                height: 10,
+                                width: normalizeSize(8),
+                                height: normalizeSize(8),
                                 borderRadius: 100,
                                 backgroundColor: statisticsChartColors[index],
                                 marginRight: 5

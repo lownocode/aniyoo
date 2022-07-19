@@ -3,18 +3,23 @@ import {
     View,
     StatusBar,
     ActivityIndicator,
-    TextInput
+    TextInput,
+    Text,
+    TouchableNativeFeedback
 } from "react-native";
 import axios from "axios";
+import Clipboard from "@react-native-community/clipboard";
 
 import {
     Icon,
     PressIcon,
-    FoundedAnimeList,
-    Placeholder
+    SearchAnimeList,
+    Placeholder,
+    Cell
 } from "../../components";
 
 import {
+    normalizeSize,
     storage,
 } from "../../functions";
 
@@ -105,6 +110,16 @@ export const SearchAnime = (props) => {
     const [ text, setText ] = useState("");
     const [ findedAnimes, setFindedAnimes ] = useState([]);
     const [ loading, setLoading ] = useState(false);
+    const [ clipboardText, setClipboardText ] = useState("");
+
+    const getClipboardText = async () => {
+        const text = await Clipboard.getString();
+        setClipboardText(text);
+    };
+
+    useEffect(() => {
+        getClipboardText();
+    }, []);
 
     const search = async (text) => {
         setText(text);
@@ -139,8 +154,7 @@ export const SearchAnime = (props) => {
             order: {
                 season: 0
             },
-            offset: findedAnimes.length,
-            limit: 15
+            offset: 15,
         }, {
             headers: {
                 "Authorization": sign,
@@ -166,6 +180,7 @@ export const SearchAnime = (props) => {
                     <Icon
                     name="close"
                     color={theme.text_secondary_color}
+                    size={20}
                     />
                 }
                 containerStyle={{
@@ -178,14 +193,107 @@ export const SearchAnime = (props) => {
                 onChangeText={search} 
                 value={text} 
                 />
+
+                <PressIcon
+                icon={
+                    <Icon
+                    name="mic-outline"
+                    color={theme.text_secondary_color}
+                    size={22}
+                    />
+                }
+                containerStyle={{
+                    marginRight: 5
+                }}
+                onPress={() => goBack()}
+                />
+
+                <PressIcon
+                icon={
+                    <Icon
+                    name="options"
+                    color={theme.text_secondary_color}
+                    size={22}
+                    />
+                }
+                containerStyle={{
+                    marginRight: 15
+                }}
+                onPress={() => goBack()}
+                />
             </View>
+
+            {
+                clipboardText.length > 1 && (findedAnimes.length === 0 && text.length === 0) ? (
+                    <View
+                    style={{
+                        margin: 10,
+                        borderRadius: 10,
+                        backgroundColor: theme.divider_color,
+                        overflow: "hidden",
+                    }}
+                    >
+                        <TouchableNativeFeedback
+                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                        onPress={() => search(clipboardText)}
+                        >
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                paddingVertical: 12,
+                                paddingHorizontal: 10
+                            }}
+                            >
+                                <Icon
+                                name="copy-outline"
+                                size={17}
+                                color={theme.icon_color}
+                                />
+
+                                <View
+                                style={{
+                                    marginHorizontal: 10,
+                                    flex: 1
+                                }}
+                                >
+                                    <Text
+                                    numberOfLines={2}
+                                    style={{
+                                        fontWeight: "500",
+                                        color: theme.text_color,
+                                        fontSize: normalizeSize(12)
+                                    }}
+                                    >
+                                        {clipboardText}
+                                    </Text>
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                        fontSize: normalizeSize(11)
+                                    }}
+                                    >
+                                        Возможно, вы скопировали название аниме
+                                    </Text>
+                                </View>
+
+                                <Icon
+                                name="chevron-right"
+                                color={theme.icon_color}
+                                />
+                            </View>
+                        </TouchableNativeFeedback>
+                    </View>
+                ) : null
+            }
 
             {
                 (findedAnimes.length === 0 && text.length === 0) ? (
                     <Placeholder
                     icon={
                         <Icon
-                        name="feather"
+                        name="pencil-write"
                         color={theme.icon_color}
                         size={40}
                         />
@@ -217,7 +325,7 @@ export const SearchAnime = (props) => {
                     subtitle="К сожалению, аниме с таким названием не найдено. Попробуйте использовать оригинальное название или настроить фильтры"
                     />
                 ) : (
-                    <FoundedAnimeList
+                    <SearchAnimeList
                     animes={findedAnimes}
                     loadMoreAnimes={loadMoreAnimes}
                     navigation={navigation}

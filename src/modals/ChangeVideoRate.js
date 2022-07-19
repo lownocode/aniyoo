@@ -2,13 +2,12 @@ import React, { useContext } from "react";
 import { TouchableNativeFeedback, View, Text } from "react-native";
 
 import {
-    Button,
     Cell,
-    Divider,
     Icon
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const ChangeVideoRate = (props) => {
     const theme = useContext(ThemeContext);
@@ -38,7 +37,7 @@ export const ChangeVideoRate = (props) => {
                 >
                     <View
                     style={{
-                        width: 50
+                        width: normalizeSize(40)
                     }}
                     >
                         <Text

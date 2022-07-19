@@ -75,10 +75,32 @@ export default App = () => {
     }; 
 
     useEffect(() => {
-        const eventListener = EventRegister.addEventListener("changeTheme", mode => {
-            storage.setItem("DARK_THEME_MODE", mode);
+        axios.interceptors.response.use((response) => {
+            return response;
+        }, (error) => {
+            if(error.response.data.code === "INVALID_SIGN") {
+                storage.setItem("AITHORIZATION_SIGN", null);
+                navigation.navigate("authorization");
+            }
+        
+            return Promise.reject(error);
+        });
+    }, []);
 
-            setDarkThemeMode(mode);
+    useEffect(() => {
+        const eventListener = EventRegister.addEventListener("app", (data) => {
+            if(data.type === "changeTheme") {
+                storage.setItem("DARK_THEME_MODE", data.value);
+
+                changeNavigationBarColor(data.value ? theme.DARK.background_content : theme.LIGHT.background_content, !data.value, true);
+                setDarkThemeMode(data.value);
+                return;
+            }
+
+            if(data.type === "changeUser") {
+                setUserData(data.user)
+                return;
+            }
         });
 
         return () => {
@@ -149,23 +171,11 @@ export default App = () => {
     const readyHandler = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        await axios.post("/users.signIn", {
-          // notifySign: notifySign
-        }, {
-            headers: {
-              "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            setUserData(data);
-        })
-        .catch(async () => {
-            navigation.navigate("authorization");
-            storage.setItem("AUTHORIZATION_SIGN", null);
-            await sleep(1);
-        });
-
-        handleDeeplink().finally(async () => {
+        handleDeeplink().finally(() => {
+            if(!sign) {
+                navigation.navigate("authorization");
+            }   
+            
             SplashScreen.hide();
         });
     };
@@ -188,7 +198,6 @@ export default App = () => {
                       <Stack.Screen 
                       name="tabs" 
                       component={Tabs}
-                      // options={{ orientation: "portrait" }}
                       initialParams={{
                         userData: UserData
                       }}
@@ -196,7 +205,7 @@ export default App = () => {
 
                       <Stack.Screen 
                       name="settings" 
-                      options={{ animation: "slide_from_left", }}
+                      options={{ animation: "none", }}
                       component={Settings}
                       />
 
@@ -207,85 +216,85 @@ export default App = () => {
 
                       <Stack.Screen 
                       name="edit_profile" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditProfile}
                       />
 
                       <Stack.Screen 
                       name="edit_profile.profile" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditProfileProfile}
                       />
 
                       <Stack.Screen 
                       name="edit_profile.privacy" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditProfilePrivacy}
                       />
 
                       <Stack.Screen 
                       name="edit_profile.security" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditProfileSecurity}
                       />
 
                       <Stack.Screen 
                       name="edit_profile.change_nickname" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditProfileChangeNickname}
                       />
 
                       <Stack.Screen 
                       name="settings.application" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={SettingsApplication}
                       />
 
                       <Stack.Screen 
                       name="settings.another" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={SettingsAnother}
                       />
 
                       <Stack.Screen 
                       name="edit_social_networks" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={EditSocialNetworks}
                       />
 
                       <Stack.Screen 
                       name="anime" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={Anime}
                       />
 
                       <Stack.Screen 
                       name="linked_anime" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={LinkedAnime}
                       />
 
                       <Stack.Screen 
                       name="anime.reply_comments" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={AnimeReplyComments}
                       />
 
                       <Stack.Screen 
                       name="anime.all_comments" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={AnimeAllComments}
                       />
 
                       <Stack.Screen 
                       name="anime.select_translation" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={AnimeSelectTranslation}
                       />
 
                       <Stack.Screen 
                       name="anime.select_episode" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={AnimeSelectEpisode}
                       />
 
@@ -297,19 +306,19 @@ export default App = () => {
 
                       <Stack.Screen 
                       name="user_profile" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={AnotherUserProfile}
                       />
 
                       <Stack.Screen 
                       name="search_anime" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={SearchAnime}
                       />
 
                       <Stack.Screen 
                       name="search_users" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={SearchUsers}
                       />
 
@@ -321,7 +330,7 @@ export default App = () => {
 
                       <Stack.Screen 
                       name="user.friends" 
-                      options={{ animation: "slide_from_left" }}
+                      options={{ animation: "none" }}
                       component={UserFriends}
                       />
                     </Stack.Navigator>

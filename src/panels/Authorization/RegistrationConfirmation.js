@@ -52,8 +52,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 ref={value1Ref}
                 textAlign="center"
                 style={{
-                    width: 40,
-                    height: 50,
+                    width: normalizeSize(30),
+                    height: normalizeSize(40),
                     borderRadius: 8,
                     borderColor: selectInput === 1 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -78,8 +78,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[2]}
                 ref={value2Ref}
                 style={{
-                    width: 40,
-                    height: 50,
+                    width: normalizeSize(30),
+                    height: normalizeSize(40),
                     borderRadius: 8,
                     borderColor: selectInput === 2 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -106,8 +106,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[3]}
                 ref={value3Ref}
                 style={{
-                    width: 40,
-                    height: 50,
+                    width: normalizeSize(30),
+                    height: normalizeSize(40),
                     borderRadius: 8,
                     borderColor: selectInput === 3 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -134,8 +134,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[4]}
                 ref={value4Ref}
                 style={{
-                    width: 40,
-                    height: 50,
+                    width: normalizeSize(30),
+                    height: normalizeSize(40),
                     borderRadius: 8,
                     borderColor: selectInput === 4 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -175,7 +175,7 @@ export const AuthorizationRegistrationConfirmation = (props) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
         })
         .catch(({ response: { data } }) => {
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            ToastAndroid.show(data.message, ToastAndroid.LONG);
         }).finally(() => setLoading(false));
     };
     

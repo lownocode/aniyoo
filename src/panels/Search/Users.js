@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { TextInput, View, StatusBar, ActivityIndicator, FlatList, Text } from "react-native";
+import { TextInput, View, StatusBar, ActivityIndicator, FlatList, Text, TouchableNativeFeedback } from "react-native";
+import Clipboard from "@react-native-community/clipboard";
 
 import { 
     Avatar,
@@ -97,6 +98,16 @@ export const SearchUsers = (props) => {
     const [ text, setText ] = useState("");
     const [ findedUsers, setFindedUsers ] = useState([]);
     const [ loading, setLoading ] = useState(false);
+    const [ clipboardText, setClipboardText ] = useState("");
+
+    const getClipboardText = async () => {
+        const text = await Clipboard.getString();
+        setClipboardText(text);
+    };
+
+    useEffect(() => {
+        getClipboardText();
+    }, []);
 
     const search = async (text) => {
         setText(text);
@@ -203,6 +214,7 @@ export const SearchUsers = (props) => {
                     <Icon
                     name="close"
                     color={theme.text_secondary_color}
+                    size={20}
                     />
                 }
                 containerStyle={{
@@ -215,14 +227,107 @@ export const SearchUsers = (props) => {
                 onChangeText={search} 
                 value={text} 
                 />
+
+                <PressIcon
+                icon={
+                    <Icon
+                    name="mic-outline"
+                    color={theme.text_secondary_color}
+                    size={22}
+                    />
+                }
+                containerStyle={{
+                    marginRight: 5
+                }}
+                onPress={() => goBack()}
+                />
+
+                <PressIcon
+                icon={
+                    <Icon
+                    name="options"
+                    color={theme.text_secondary_color}
+                    size={22}
+                    />
+                }
+                containerStyle={{
+                    marginRight: 15
+                }}
+                onPress={() => goBack()}
+                />
             </View>
+
+            {
+                clipboardText.length > 1 && (findedUsers.length === 0 && text.length === 0) ? (
+                    <View
+                    style={{
+                        margin: 10,
+                        borderRadius: 10,
+                        backgroundColor: theme.divider_color,
+                        overflow: "hidden",
+                    }}
+                    >
+                        <TouchableNativeFeedback
+                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                        onPress={() => search(clipboardText)}
+                        >
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                paddingVertical: 12,
+                                paddingHorizontal: 10
+                            }}
+                            >
+                                <Icon
+                                name="copy-outline"
+                                size={17}
+                                color={theme.icon_color}
+                                />
+
+                                <View
+                                style={{
+                                    marginHorizontal: 10,
+                                    flex: 1
+                                }}
+                                >
+                                    <Text
+                                    numberOfLines={2}
+                                    style={{
+                                        fontWeight: "500",
+                                        color: theme.text_color,
+                                        fontSize: normalizeSize(12)
+                                    }}
+                                    >
+                                        {clipboardText}
+                                    </Text>
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                        fontSize: normalizeSize(11)
+                                    }}
+                                    >
+                                        Возможно, вы скопировали имя пользователя
+                                    </Text>
+                                </View>
+
+                                <Icon
+                                name="chevron-right"
+                                color={theme.icon_color}
+                                />
+                            </View>
+                        </TouchableNativeFeedback>
+                    </View>
+                ) : null
+            }
 
             {
                 (findedUsers.length === 0 && text.length === 0) ? (
                     <Placeholder
                     icon={
                         <Icon
-                        name="feather"
+                        name="pencil-write"
                         color={theme.icon_color}
                         size={40}
                         />

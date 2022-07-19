@@ -8,6 +8,7 @@ import {
     Text,
     Image
 } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -20,7 +21,8 @@ import {
     Header,
     Icon,
     Button,
-    Divider
+    Divider,
+    Placeholder
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";
@@ -68,7 +70,63 @@ export const Home = (props) => {
             key={"comment-" + index}
             >
                 <Cell
-                title={item.user.nickname}
+                centered={false}
+                title={
+                    <View>
+                        <Text
+                        numberOfLines={1}
+                        style={{
+                            color: theme.text_color,
+                            fontSize: normalizeSize(14),
+                            fontWeight: "500",
+                        }}
+                        >
+                            {item.user.nickname}
+                        </Text>
+
+                        <View
+                        style={{
+                            overflow: "hidden",
+                            marginVertical: 5,
+                            borderRadius: 100
+                        }}
+                        >
+                            <TouchableNativeFeedback
+                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                            >
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    paddingRight: 10,
+                                }}
+                                >
+                                    <Icon
+                                    name="forward-arrow"
+                                    size={10}
+                                    color={theme.text_secondary_color}
+                                    /> 
+
+                                    <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                        marginLeft: 5
+                                    }}
+                                    >
+                                        {item.anime.title}
+                                    </Text>
+
+                                    <Icon
+                                    name="chevron-right"
+                                    size={10}
+                                    color={theme.text_secondary_color}
+                                    /> 
+                                </View>
+                            </TouchableNativeFeedback>
+                        </View>
+                    </View>
+                }
                 before={
                     <Avatar
                     url={item.user.photo}
@@ -99,8 +157,25 @@ export const Home = (props) => {
                         marginBottom: 10
                     }}
                     >
-                        <View>
-                            <Text>
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="clock-outline"
+                            size={10}
+                            color={theme.text_secondary_color}
+                            />
+
+                            <Text
+                            style={{
+                                color: theme.text_secondary_color,
+                                marginLeft: 5
+                            }}
+                            >
                                 {
                                     dayjs().to(item.editedAt || item.createdAt)
                                 }
@@ -183,32 +258,14 @@ export const Home = (props) => {
                     </View>
                 }
                 />
-
-                <Cell
-                title={item.anime.title}
-                before={
-                    <Image
-                    source={{
-                        uri: item.anime.poster
-                    }}
-                    style={{
-                        width: normalizeSize(35),
-                        height: normalizeSize(46),
-                        borderRadius: 6
-                    }}
-                    resizeMethod="resize"
-                    resizeMode="cover"
-                    />
+                
+                {
+                    index + 1 !== popularComments.length && (
+                        <View style={{ marginVertical: 10 }}>
+                            <Divider/>
+                        </View>
+                    )
                 }
-                centered={false}
-                />
-
-                <Divider
-                dividerStyle={{
-                    backgroundColor: theme.widget_background
-                }}
-                indents
-                />
             </View>
         )
     };
@@ -224,13 +281,18 @@ export const Home = (props) => {
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
             >
-                <View
+                <LinearGradient
                 style={{
                     backgroundColor: theme.widget_background,
                     margin: 15,
                     borderRadius: 20,
-                    overflow: "hidden"
+                    overflow: "hidden",
                 }}
+                colors={[
+                    theme.widget_background,
+                    "transparent",
+                    "transparent",
+                ]}
                 >
                     <Cell
                     title="Популярные комментарии"
@@ -252,9 +314,14 @@ export const Home = (props) => {
                     />
 
                     {
-                        popularComments.map(renderPopularComments)
+                        popularComments.length === 0 ? (
+                            <Placeholder
+                            title="Ничего нет"
+                            subtitle="Сегодня ещё никто не прокомментировал ни одно аниме :("
+                            />
+                        ) : popularComments.map(renderPopularComments)
                     }
-                </View>
+                </LinearGradient>
             </ScrollView>
         </View>
     )

@@ -1,5 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { View, Image, StyleSheet, Animated } from "react-native";
+import { View, Image, Animated } from "react-native";
+
+import { Icon, DonutChart } from ".";
 
 import { normalizeSize } from "../functions";
 import ThemeContext from "../config/ThemeContext";
@@ -14,18 +16,7 @@ export const Avatar = props => {
         online = false
     } = props;
 
-    const [ imageLoadEnd, setImageLoadEnd ] = useState(false);
-
     const onlineScaleValue = useRef(new Animated.Value(1)).current;
-
-    const localStyles = StyleSheet.create({
-        container: {
-            
-        },
-        image: {
-            height: "100%",
-        },
-    });
 
     const scaleOnline = () => {
         Animated.loop(
@@ -58,31 +49,42 @@ export const Avatar = props => {
         >
             <View 
             style={{
-                backgroundColor: imageLoadEnd ? "transparent" : theme.divider_color,
-                width: size ? normalizeSize(size) : normalizeSize(40),
-                height: size ? normalizeSize(size) :  normalizeSize(40),
+                width: size ? normalizeSize(size) : normalizeSize(35),
+                height: size ? normalizeSize(size) :  normalizeSize(35),
                 borderRadius: 100,
                 overflow: "hidden",
+                justifyContent: "center",
+                alignItems: "center",
+                borderColor: theme.divider_color + "50",
+                borderWidth: url ? 0 : 1,
                 ...containerStyle
             }}
             >
-                <Image
-                resizeMethod="resize"
-                style={localStyles.image}
-                onLoadEnd={() => setImageLoadEnd(true)}
-                source={{
-                    uri: url,
-                    cache: "reload"
-                }}
-                />
+                {
+                    url ? (
+                        <Image
+                        resizeMethod="resize"
+                        style={{ height: "100%", width: "100%" }}
+                        source={{
+                            uri: url,
+                        }}
+                        />
+                    ) : (
+                        <Icon
+                        name="logo"
+                        size={normalizeSize(size / 1.2)}
+                        color={theme.divider_color}
+                        />
+                    )
+                }
             </View>
 
             {
                 online && (
                     <View
                     style={{
-                        width: 13,
-                        height: 13,
+                        width: normalizeSize(10),
+                        height: normalizeSize(10),
                         backgroundColor: theme.background_content,
                         position: "absolute",
                         bottom: 0,
@@ -94,8 +96,8 @@ export const Avatar = props => {
                     >
                         <Animated.View
                         style={{
-                            width: 10,
-                            height: 10,
+                            width: normalizeSize(8),
+                            height: normalizeSize(8),
                             backgroundColor: theme.accent,
                             borderRadius: 100,
                             transform: [

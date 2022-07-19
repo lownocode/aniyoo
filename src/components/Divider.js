@@ -1,60 +1,34 @@
 import React, { useContext } from "react";
-import { Dimensions, View, StyleSheet } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 
 import ThemeContext from "../config/ThemeContext";
 
-export const Divider = (props) => {
+export const Divider = () => {
     const theme = useContext(ThemeContext);
 
-    const { 
-        dividerStyle, 
-        indents = false,
-        centerComponent,
-    } = props;
-
-    const { width } = Dimensions.get("window");
-
-    const localStyles = StyleSheet.create({
-        container: {
-            flexDirection: "row", 
-            justifyContent: "center", 
-            alignItems: "center", 
-            marginLeft: 20, 
-            marginRight: 20, 
-            overflow: indents ? "visible" : "hidden" 
-        },
-        dividerCenterComponent: {
-            backgroundColor: theme.divider_color, 
-            height: 0.5,
-            width: width,
-            ...dividerStyle
-        },
-        divider: {
-            backgroundColor: theme.divider_color, 
-            height: 0.5,
-            marginLeft: indents ? 0 : 20,
-            marginRight: indents ? 0 : 20,
-            ...dividerStyle
-        }
-    });
-
     return (
-        <>
-            {
-                centerComponent ? (
-                    <View style={localStyles.container}>
-                        <View style={localStyles.dividerCenterComponent}/>
-                        
-                        <View style={{ marginRight: 5, marginLeft: 5 }}>
-                            {centerComponent}
-                        </View>
-
-                        <View style={localStyles.dividerCenterComponent}/>
-                    </View>
-                ) : (
-                    <View style={localStyles.divider}/>
-                )
-            }
-        </>
+        <LinearGradient
+        style={{
+            height: 0.7,
+            marginHorizontal: 15
+        }}
+        colors={[
+            "transparent",
+            theme.divider_color,
+            theme.divider_color,
+            theme.divider_color,
+            theme.divider_color,
+            theme.divider_color,
+            "transparent"
+        ]}
+        start={{
+            x: 1,
+            y: 0
+        }}
+        end={{
+            x: 0,
+            y: 0
+        }}
+        />
     )
 };

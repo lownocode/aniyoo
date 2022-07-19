@@ -7,7 +7,8 @@ import {
     ActivityIndicator,
     Dimensions,
     StyleSheet,
-    PanResponder
+    PanResponder,
+    ToastAndroid
 } from "react-native";
 import Video from "react-native-video";
 import { useRoute } from "@react-navigation/native";
@@ -337,6 +338,10 @@ export const AnimeVideoPlayer = (props) => {
             }}
             progressUpdateInterval={1000}
             rate={rate}
+            onError={(e) => {
+                ToastAndroid.show(`Произошла ошибка при загрузке видео, попробуйте позже.\n${e.error.errorString}`, ToastAndroid.LONG);
+                goBack();
+            }}
             />
 
             <Modalize
@@ -634,8 +639,8 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: 30,
-                                            height: 30
+                                            width: normalizeSize(25),
+                                            height: normalizeSize(25)
                                         }}
                                         >
                                             <Icon
@@ -663,8 +668,8 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: 30,
-                                            height: 30
+                                            width: normalizeSize(25),
+                                            height: normalizeSize(25)
                                         }}
                                         >
                                             <Icon
@@ -678,8 +683,8 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View
                                 style={{
-                                    width: 0.5,
-                                    height: 10,
+                                    width: normalizeSize(2),
+                                    height: normalizeSize(8),
                                     backgroundColor: "#fff",
                                     borderRadius: 100,
                                     marginHorizontal: 15,
@@ -789,8 +794,8 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View
                                 style={{
-                                    width: 0.5,
-                                    height: 10,
+                                    width: normalizeSize(2),
+                                    height: normalizeSize(8),
                                     backgroundColor: "#fff",
                                     borderRadius: 100,
                                     marginHorizontal: 15,

@@ -55,6 +55,7 @@ const Input = (props) => {
             style={{
                 height: 45,
                 flex: 1,
+                color: theme.text_color
             }}
             autoComplete={autoComplete}
             placeholderTextColor={theme.text_secondary_color}
