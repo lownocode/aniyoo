@@ -12,7 +12,8 @@ export const PressIcon = (props) => {
         icon, 
         containerStyle,
         disabled,
-        background
+        background,
+        onPressIn
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -31,6 +32,7 @@ export const PressIcon = (props) => {
         onPress={onPress}
         background={TouchableNativeFeedback.Ripple(background || theme.press_icon_background, true)}
         disabled={disabled}
+        onPressIn={onPressIn}
         >
             <View style={localStyles.container}>
                 {

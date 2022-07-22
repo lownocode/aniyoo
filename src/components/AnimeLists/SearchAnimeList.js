@@ -110,11 +110,13 @@ export const SearchAnimeList = (props) => {
                                 }}
                                 >
                                     {
-                                        item.inList === "watching" ? "Смотрю" :
-                                        item.inList === "completed" ? "Просмотрено" :
-                                        item.inList === "planned" ? "В планах" :
-                                        item.inList === "postponed" ? "Отложено" :
-                                        item.inList === "dropped" ? "Брошено" : "Неизвестно"
+                                        {
+                                            "watching": "Смотрю",
+                                            "completed": "Просмотрено",
+                                            "planned": "В планах",
+                                            "postponed": "Отложено",
+                                            "dropped": "Брошено"
+                                        }[item.inList]
                                     }
                                 </Text>
                             </View>
@@ -196,11 +198,13 @@ export const SearchAnimeList = (props) => {
                             }}
                             >
                                 {
-                                    item.other.kind === "tv" ? "Сериал" :
-                                    item.other.kind === "ona" ? "ONA" :
-                                    item.other.kind === "ova" ? "OVA" :
-                                    item.other.kind === "special" ? "Спешл" :
-                                    item.other.kind === "movie" ? "Фильм" : "Неизвестно"
+                                    {
+                                        "tv": "Сериал",
+                                        "ona": "ONA",
+                                        "ova": "OVA",
+                                        "special": "Спешл",
+                                        "movie": "Фильм"
+                                    }[item.other.kind]
                                 }, { 
                                     item.status === "released" ? "вышел" :
                                     item.status === "ongoing" ? "выходит" : 

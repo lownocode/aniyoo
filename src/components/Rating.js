@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
 
 import {
     Icon,
@@ -11,7 +11,7 @@ import {
 import ThemeContext from "../config/ThemeContext";
 import { normalizeSize } from "../functions";
 
-export const Rating = props => {
+export const Rating = (props) => {
     const theme = useContext(ThemeContext);
 
     const {
@@ -19,7 +19,8 @@ export const Rating = props => {
         select = 0,
         containerStyle,
         onPress = () => null,
-        cancelPress = () => null
+        cancelPress = () => null,
+        loading = 0
     } = props;
 
     const localStyles = StyleSheet.create({
@@ -52,11 +53,15 @@ export const Rating = props => {
                 <PressIcon
                 onPress={() => onPress(index + 1)}
                 icon={
-                    <Icon
-                    name="star"
-                    size={25}
-                    color="gold"
-                    />
+                    loading === index + 1 ? (
+                        <ActivityIndicator color={theme.activity_indicator_color}/>
+                    ) : (
+                        <Icon
+                        name="star"
+                        size={25}
+                        color="gold"
+                        />
+                    )
                 }
                 />
             </View>
@@ -72,11 +77,15 @@ export const Rating = props => {
                 <PressIcon
                 onPress={() => onPress(select + (index + 1))}
                 icon={
-                    <Icon
-                    name="star-outline"
-                    size={25}
-                    color={theme.icon_color}
-                    />
+                    loading === select + (index + 1) ? (
+                        <ActivityIndicator color={theme.activity_indicator_color}/>
+                    ) : (
+                        <Icon
+                        name="star-outline"
+                        size={25}
+                        color={theme.icon_color}
+                        />
+                    )
                 }
                 />
             </View>

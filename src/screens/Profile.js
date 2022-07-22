@@ -62,6 +62,7 @@ export const Profile = props => {
     const [ modalContent, setModalContent ] = useState(null);
     const [ friends, setFriends ] = useState([]);
     const [ popupVisible, setPopupVisible ] = useState(false);
+    const [ browsingHistory, setBrowsingHistory ] = useState([]);
 
     const modalRef = useRef();
 
@@ -306,11 +307,15 @@ export const Profile = props => {
                                 flexDirection: "row",
                             }}
                             >
-                                <Icon
-                                name={item?.icon?.name}
-                                color={item?.icon?.color || item?.color || theme.accent}
-                                size={item?.icon?.size || 9}
-                                />
+                                {
+                                    item?.icon && (
+                                        <Icon
+                                        name={item?.icon?.name}
+                                        color={item?.icon?.color || item?.color || theme.accent}
+                                        size={item?.icon?.size || 9}
+                                        />
+                                    )
+                                }
 
                                 <Text
                                 style={{
@@ -420,7 +425,7 @@ export const Profile = props => {
                                 fontWeight: "700"
                             }}
                             >
-                                {userData?.comments}
+                                {userData?.commentsCount}
                             </Text>
 
                             <View
@@ -443,7 +448,7 @@ export const Profile = props => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.comments, ["комментарий","комментария","комментариев"])}
+                                    {declOfNum(userData?.commentsCount, ["комментарий","комментария","комментариев"])}
                                 </Text>
                             </View>
                         </View>
@@ -474,7 +479,7 @@ export const Profile = props => {
                                 fontWeight: "700"
                             }}
                             >
-                                {userData?.collections}
+                                {userData?.collectionsCount}
                             </Text>
 
                             <View
@@ -497,7 +502,7 @@ export const Profile = props => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.collections, ["коллекция","коллекции","коллекций"])}
+                                    {declOfNum(userData?.collectionsCount, ["коллекция","коллекции","коллекций"])}
                                 </Text>
                             </View>
                         </View>
@@ -514,111 +519,115 @@ export const Profile = props => {
     );
 
     const statisticsRender = () => (
-        <View
-        style={{
-            marginHorizontal: 10,
-            marginTop: 20,
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-        }}
-        >
-            <View>
-            {
-                lists.map((item, index) => (
-                    <View
-                    key={"list-" + index}
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginTop: index !== 0 ? 5 : 0
-                    }}
-                    >
+        <View>
+            <View
+            style={{
+                marginHorizontal: 10,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginVertical: 20
+            }}
+            >
+                <View>
+                {
+                    lists.map((item, index) => (
                         <View
+                        key={"list-" + index}
                         style={{
-                            paddingVertical: 3,
-                            paddingLeft: 4,
-                            paddingRight: 6,
-                            borderRadius: 100,
-                            borderWidth: 0.5,
-                            borderColor: statisticsChartColors[index] + "90",
                             flexDirection: "row",
-                            justifyContent: "space-between",
                             alignItems: "center",
-                            height: normalizeSize(15),
-                            width: normalizeSize(30)
+                            marginTop: index !== 0 ? 5 : 0
                         }}
                         >
                             <View
                             style={{
-                                width: normalizeSize(8),
-                                height: normalizeSize(8),
+                                paddingVertical: 3,
+                                paddingLeft: 4,
+                                paddingRight: 6,
                                 borderRadius: 100,
-                                backgroundColor: statisticsChartColors[index],
-                                marginRight: 5
-                            }}
-                            />
-
-                            {
-                                item.icon
-                            }
-                        </View>
-
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Text
-                            style={{
-                                marginLeft: 10,
-                                fontSize: normalizeSize(12),
-                                fontWeight: "500",
-                                color: theme.text_secondary_color + "90"
+                                borderWidth: 0.5,
+                                borderColor: statisticsChartColors[index] + "90",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                height: normalizeSize(15),
+                                width: normalizeSize(30)
                             }}
                             >
-                                {
-                                    item.name
-                                }
-                            </Text>
+                                <View
+                                style={{
+                                    width: normalizeSize(8),
+                                    height: normalizeSize(8),
+                                    borderRadius: 100,
+                                    backgroundColor: statisticsChartColors[index],
+                                    marginRight: 5
+                                }}
+                                />
 
-                            <Text
-                            style={{
-                                marginLeft: 6,
-                                fontWeight: "700",
-                                color: theme.text_secondary_color,
-                                fontSize: normalizeSize(12.5)
-                            }}
-                            > 
                                 {
-                                    statisticsChartValues[index]
+                                    item.icon
                                 }
-                            </Text>
+                            </View>
+
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                            >
+                                <Text
+                                style={{
+                                    marginLeft: 10,
+                                    fontSize: normalizeSize(12),
+                                    fontWeight: "500",
+                                    color: theme.text_secondary_color + "90"
+                                }}
+                                >
+                                    {
+                                        item.name
+                                    }
+                                </Text>
+
+                                <Text
+                                style={{
+                                    marginLeft: 6,
+                                    fontWeight: "700",
+                                    color: theme.text_secondary_color,
+                                    fontSize: normalizeSize(12.5)
+                                }}
+                                > 
+                                    {
+                                        statisticsChartValues[index]
+                                    }
+                                </Text>
+                            </View>
                         </View>
-                    </View>
-                ))
-            }
+                    ))
+                }
+                </View>
+                
+                {
+                    statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
+                        <Icon
+                        name="pie-chart"
+                        color={theme.divider_color}
+                        size={109}
+                        />
+                    ) : (
+                        <PieChart 
+                        data={statisticsChartData}
+                        innerRadius={27}
+                        animate={true}
+                        style={{ height: 120, width: 109 }}
+                        />
+                    )
+                }
             </View>
-            
-            {
-                statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
-                    <Icon
-                    name="pie-chart"
-                    color={theme.divider_color}
-                    size={109}
-                    />
-                ) : (
-                    <PieChart 
-                    data={statisticsChartData}
-                    innerRadius={27}
-                    animate={true}
-                    style={{ height: 120, width: 109 }}
-                    />
-                )
-            }
+
+            <Divider />
         </View>
     );
 
@@ -689,7 +698,14 @@ export const Profile = props => {
                     color: theme.text_color
                 }}
                 >
-                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friendsCount}</Text>
+                    Друзья <Text 
+                    style={{ 
+                        color: theme.text_secondary_color, 
+                        fontWeight: "300",
+                    }}
+                    >
+                        {userData?.friendsCount}
+                    </Text>
                 </Text>
             }
             onPress={() => navigate("user.friends", { friends: friends })}
@@ -741,6 +757,17 @@ export const Profile = props => {
         </View>
     );
 
+    const renderBrowsingHistory = () => {
+        if(browsingHistory.length === 0) { 
+            return (
+                <Placeholder
+                title="Пусто"
+                subtitle="Вы ещё ничего не посмотрели"
+                />
+            )
+        }
+    };
+
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
@@ -771,7 +798,7 @@ export const Profile = props => {
                             color={theme.icon_color} 
                             />
                         }
-                        onPress={() => setPopupVisible(true)}
+                        onPressIn={() => setPopupVisible(true)}
                         containerStyle={{
                             marginRight: 15
                         }}
@@ -812,6 +839,21 @@ export const Profile = props => {
                             flex: 0
                         }}
                         />
+
+                        <View
+                        style={{
+                            marginVertical: 10
+                        }}
+                        >
+                            <Text
+                            style={{
+                                fontSize: normalizeSize(11),
+                                textAlign: "center"
+                            }}
+                            >
+                                Дата регистрации: {dayjs(userData?.createdAt).format("DD MMM YYYY")}
+                            </Text>
+                        </View>
                     </Popup>
 
                     <PressIcon 
@@ -856,6 +898,7 @@ export const Profile = props => {
             >
                 {userInfoRender()}  
                 {statisticsRender()}
+                {renderBrowsingHistory()}
 
                 <View
                 style={{marginBottom: 100}}

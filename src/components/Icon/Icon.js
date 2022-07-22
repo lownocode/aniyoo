@@ -95,6 +95,9 @@ import ClockOutline from "./icons/ClockOutline";
 import ForwardArrow from "./icons/ForwardArrow";
 import MicOutline from "./icons/MicOutline";
 import Options from "./icons/Options";
+import VkVideoLogo from "./icons/VkVideoLogo";
+import YoutubeLogo from "./icons/YoutubeLogo";
+import SibnetLogo from "./icons/SibnetLogo";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -195,6 +198,9 @@ export const Icon = (props) => {
         "forward-arrow": <ForwardArrow {...props} />,
         "mic-outline": <MicOutline {...props} />,
         "options": <Options {...props} />,
+        "vk-video-logo": <VkVideoLogo {...props} />,
+        "youtube-logo": <YoutubeLogo {...props} />,
+        "sibnet-logo": <SibnetLogo {...props} />,
     }[name];
 
     return (

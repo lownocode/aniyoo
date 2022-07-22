@@ -263,7 +263,7 @@ export const SearchUsers = (props) => {
                     style={{
                         margin: 10,
                         borderRadius: 10,
-                        backgroundColor: theme.divider_color,
+                        backgroundColor: theme.divider_color + "50",
                         overflow: "hidden",
                     }}
                     >

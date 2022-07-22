@@ -279,7 +279,14 @@ export const AnotherUserProfile = (props) => {
                     color: theme.text_color
                 }}
                 >
-                    Друзья <Text style={{color: theme.text_secondary_color}}>{userData?.friendsCount}</Text>
+                    Друзья <Text 
+                    style={{ 
+                        color: theme.text_secondary_color, 
+                        fontWeight: "300",
+                    }}
+                    >
+                        {userData?.friendsCount}
+                    </Text>
                 </Text>
             }
             after={
@@ -421,17 +428,21 @@ export const AnotherUserProfile = (props) => {
                                 flexDirection: "row",
                             }}
                             >
-                                <Icon
-                                name={item?.icon?.name}
-                                color={item?.icon?.color || item?.color || theme.accent}
-                                size={item?.icon?.size || 9}
-                                />
+                                {
+                                    item?.icon && (
+                                        <Icon
+                                        name={item?.icon?.name}
+                                        color={item?.icon?.color || item?.color || theme.accent}
+                                        size={item?.icon?.size || 9}
+                                        />
+                                    )
+                                }
 
                                 <Text
                                 style={{
                                     fontWeight: "500",
                                     color: item.color || theme.accent,
-                                    marginLeft: 5
+                                    marginLeft: item?.icon ? 5 : 0
                                 }}
                                 >
                                     {
@@ -554,7 +565,7 @@ export const AnotherUserProfile = (props) => {
                                 fontWeight: "700",
                             }}
                             >
-                                {userData?.comments}
+                                {userData?.commentsCount}
                             </Text>
 
                             <View
@@ -577,7 +588,7 @@ export const AnotherUserProfile = (props) => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.comments, ["комментарий","комментария","комментариев"])}
+                                    {declOfNum(userData?.commentsCount, ["комментарий","комментария","комментариев"])}
                                 </Text>
                             </View>
                         </View>
@@ -608,7 +619,7 @@ export const AnotherUserProfile = (props) => {
                                 fontWeight: "700"
                             }}
                             >
-                                {userData?.collections}
+                                {userData?.collectionsCount}
                             </Text>
 
                             <View
@@ -631,7 +642,7 @@ export const AnotherUserProfile = (props) => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.collections, ["коллекция","коллекции","коллекций"])}
+                                    {declOfNum(userData?.collectionsCount, ["коллекция","коллекции","коллекций"])}
                                 </Text>
                             </View>
                         </View>
@@ -789,7 +800,7 @@ export const AnotherUserProfile = (props) => {
                 {userInfoRender()}
 
                 <Cell
-                title="Списки"
+                title="Статистика"
                 subtitle="Нажмите, чтобы открыть"
                 before={
                     <Icon

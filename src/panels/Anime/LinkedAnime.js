@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
-import { View, Image, Text , ToastAndroid, FlatList } from "react-native";
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import { View, Image, Text , ToastAndroid, FlatList, RefreshControl } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import axios from "axios";
 
 import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
     Cell,
-    Icon
 } from "../../components";
-import { normalizeSize } from "../../functions";
+import { normalizeSize, storage } from "../../functions";
 
 export const LinkedAnime = (props) => {
     const theme = useContext(ThemeContext);
@@ -17,14 +17,42 @@ export const LinkedAnime = (props) => {
     const {
         navigation: {
             goBack,
-            navigate
+            push
         },
-        navigation
     } = props;
 
     const route = useRoute();
 
-    const [ animeList ] = useState(route.params?.animeList || {});
+    const [ refreshing, setRefreshing ] = useState(true);
+    const [ animeList, setAnimeList ] = useState(route.params?.animes || {});
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        getLinked();
+    }, []);
+
+    const getLinked = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/animes.getLinked", {
+            animeId: route.params?.animeId,
+        }, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            setAnimeList(data);
+            setRefreshing(false);
+        })
+        .catch(({ response: { data } }) => {
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+        });
+    };
+
+    useEffect(() => {
+        getLinked();
+    }, []);
 
     const renderList = ({ item, index }) => {
         return (
@@ -32,18 +60,11 @@ export const LinkedAnime = (props) => {
             key={"linked-anime-" + index}
             >
                 <Cell
-                title={item.name}
+                title={item.title}
                 centered={false}
                 maxTitleLines={2}
-                onPress={() => {
-                    if(!item.id) {
-                        return ToastAndroid.show("К сожалению, такого аниме ещё нет в нашем приложении", ToastAndroid.CENTER)
-                    }
-                    
-                    navigation.push("anime", { animeData: { id: item.id } })
-                }}
                 before={
-                    <View
+                    <View 
                     style={{
                         borderRadius: 6, 
                         backgroundColor: theme.divider_color,
@@ -54,15 +75,14 @@ export const LinkedAnime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: normalizeSize(45),
-                            height: normalizeSize(65),
-                            borderRadius: 8
+                            width: normalizeSize(60),
+                            height: normalizeSize(85),
                         }}
                         source={{
-                            uri: item.poster
+                            uri: item?.poster
                         }}
                         />
-
+                        
                         {
                             item.inList !== "none" && (
                                 <View>
@@ -82,11 +102,13 @@ export const LinkedAnime = (props) => {
                                     }}
                                     >
                                         {
-                                            item.inList === "watching" ? "Смотрю" :
-                                            item.inList === "completed" ? "Просмотрено" :
-                                            item.inList === "planned" ? "В планах" :
-                                            item.inList === "postponed" ? "Отложено" :
-                                            item.inList === "dropped" ? "Брошено" : null
+                                            {
+                                                "watching": "Смотрю",
+                                                "completed": "Просмотрено",
+                                                "planned": "В планах",
+                                                "postponed": "Отложено",
+                                                "dropped": "Брошено"
+                                            }[item.inList]
                                         }
                                     </Text>
                                 </View>
@@ -96,56 +118,81 @@ export const LinkedAnime = (props) => {
                 }
                 containerStyle={{
                     opacity: item.id ? 1 : .3,
+                    backgroundColor: item.id === route.params?.animeId ? route.params?.accent + "10" : "transparent"
                 }}
-                disabled={item.id === route.params?.selectedAnimeId}
-                after={
-                    item.id === route.params?.selectedAnimeId && (
-                        <Icon
-                        name="chevron-left-double"
-                        color={theme.accent}
-                        size={20}
-                        />
-                    )
-                }
+                disabled={item.id === route.params?.animeId}
+                onPress={() => {
+                    if(!item.id) {
+                        return ToastAndroid.show("К сожалению, такого аниме ещё нет в нашем приложении", ToastAndroid.CENTER)
+                    }
+                    
+                    push("anime", { animeData: { id: item.id } });
+                }}
                 subtitle={
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        flexWrap: "wrap"
-                    }}
-                    >
-                        <Text
+                    <View>
+                        <View
                         style={{
-                            color: theme.text_color,
-                            fontSize: normalizeSize(10),
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
+                            flexDirection: "row",
+                            flexWrap: "wrap"
                         }}
                         >
-                            {item.year || "?"} год
-                        </Text>
+                            <View>
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: normalizeSize(10),
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginRight: 10,
+                                    marginTop: 5,
+                                }}
+                                >
+                                    {item?.year || "Неизвестный"} год
+                                </Text>
+                            </View>
+
+                            <View>
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: normalizeSize(10),
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginRight: 10,
+                                    marginTop: 5,
+                                }}
+                                >
+                                    {
+                                        {
+                                            "tv": "Сериал",
+                                            "ona": "ONA",
+                                            "ova": "OVA",
+                                            "special": "Спешл",
+                                            "movie": "Фильм"
+                                        }[item.kind]
+                                    }
+                                </Text>
+                            </View>
+                        </View>
 
                         <Text
+                        numberOfLines={3}
                         style={{
-                            color: theme.text_color,
-                            fontSize: normalizeSize(10),
-                            borderColor: theme.divider_color,
-                            backgroundColor: theme.divider_color + "98",
-                            borderWidth: 1,
-                            paddingHorizontal: 5,
-                            paddingVertical: 1,
-                            borderRadius: 5,
-                            marginRight: 10,
-                            marginTop: 5,
+                            color: theme.text_secondary_color,
+                            fontSize: normalizeSize(11)
                         }}
                         >
-                            {item.kind}
+                            {   
+                                item.description || "Описание не указано"
+                            }
                         </Text>
                     </View>
                 }
@@ -168,6 +215,14 @@ export const LinkedAnime = (props) => {
             data={animeList}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderList}
+            refreshControl={
+                <RefreshControl
+                progressBackgroundColor={theme.refresh_control_background}
+                colors={[route.params?.accent]}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                />
+            }
             />
         </View>
     )

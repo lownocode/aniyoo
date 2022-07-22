@@ -101,11 +101,10 @@ export const Home = (props) => {
                                     paddingRight: 10,
                                 }}
                                 >
-                                    <Icon
-                                    name="forward-arrow"
-                                    size={10}
-                                    color={theme.text_secondary_color}
-                                    /> 
+                                    <Avatar
+                                    url={item.anime.poster}
+                                    size={15}
+                                    />
 
                                     <Text
                                     numberOfLines={1}

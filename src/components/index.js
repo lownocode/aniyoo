@@ -14,3 +14,4 @@ export * from "./DonutChart";
 export * from "./Icon/Icon";
 export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";
+export * from "./FormattedText";

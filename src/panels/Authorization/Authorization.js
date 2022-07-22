@@ -270,7 +270,7 @@ export const Authorization = (props) => {
                             <View style={{ marginTop: 25 }}>
                                 <View style={{ flexDirection: "row" }}>
                                     <Input
-                                    placeholder="Ваш email"
+                                    placeholder="Ваш email или никнейм"
                                     autoComplete="email"
                                     value={email}
                                     before={

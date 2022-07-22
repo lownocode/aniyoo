@@ -1,4 +1,6 @@
-export const REQUEST_DOMAIN = "https://aniyoo.localhostov.ru:1007/api";
+export const REQUEST_DOMAIN = "https://aniyoo.localhostov.ru/api";
+export const DOMAIN = "https://aniyoo.localhostov.ru/"
+
 export const USER_SCHEMA = {
     "id": 1,
     "nickname": "...",

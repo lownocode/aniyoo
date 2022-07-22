@@ -101,7 +101,8 @@ export const AnimeVideoPlayer = (props) => {
                     duration: progress.seekableDuration || 0,
                     translationId: route.params?.translationId,
                     episode: animeData.playedEpisode,
-                    translation: animeData.translation
+                    translation: animeData.translation,
+                    source: route.params?.source
                 }
             ]);
         }
@@ -274,13 +275,32 @@ export const AnimeVideoPlayer = (props) => {
     };
     
     const swipeHandler = (x) => {
+        const uncertainty = 2;
+
+        if(lockedControls) return;
+        if(swipeStartPoint === null) {
+            return setSwipeStartPoint(x);
+        } 
+
         if(swipeBefore > x) {//swipe to left
             const swipeLeftDistance = (swipeStartPoint - x) / 10;
-            return setSwipeOffset(-swipeLeftDistance);
+            
+            if(swipeLeftDistance < uncertainty) return;
+
+            setPaused(true);
+            setSwipeMode(true);
+            setSwipeOffset(-swipeLeftDistance);
         }
 
-        const swipeRightDistance = (x - swipeStartPoint) / 10;
-        setSwipeOffset(swipeRightDistance);
+        if(swipeBefore < x) {
+            const swipeRightDistance = (x - swipeStartPoint) / 10;
+
+            if(swipeRightDistance < uncertainty && swipeRightDistance > 0) return;
+            
+            setPaused(true);
+            setSwipeMode(true);
+            setSwipeOffset(swipeRightDistance);
+        } 
     };
 
     const styles = StyleSheet.create({
@@ -310,16 +330,8 @@ export const AnimeVideoPlayer = (props) => {
             controls={false}
             ref={videoRef}
             onTouchMove={(e) => {
-                if(lockedControls) return;
-                
-                if(!paused) { setPaused(true) };
-                if(!swipeMode) { setSwipeMode(true) };
-
                 setSwipeBefore(e.nativeEvent.locationX);
                 swipeHandler(e.nativeEvent.locationX);
-
-                if(swipeStartPoint !== null) return;
-                setSwipeStartPoint(e.nativeEvent.locationX);
             }}
             onTouchEnd={onTouch}
             onEnd={() => nextEpisode()}

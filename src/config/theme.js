@@ -99,7 +99,13 @@ const theme = {
             play_button_background: "#2fa844",
             play_button_foreground: "#fff",
             continue_view_button_background: "#3562bf",
-            continue_view_button_foreground: "#fff"
+            continue_view_button_foreground: "#fff",
+            rating_mpaa_background: {
+                "0+": "#34e40c",
+                "6+": "#aae40c",
+                "16+": "#f38816",
+                "18+": "#f33016",
+            }
         },
     },
 
@@ -199,7 +205,13 @@ const theme = {
             play_button_background: "#63c955",
             play_button_foreground: "#fff",
             continue_view_button_background: "#4380ff",
-            continue_view_button_foreground: "#fff"
+            continue_view_button_foreground: "#fff",
+            rating_mpaa_background: {
+                "0+": "#34e40c",
+                "6+": "#aae40c",
+                "16+": "#f38816",
+                "18+": "#f33016",
+            }
         },
         anime_mark: {
             "1": "#f52105",

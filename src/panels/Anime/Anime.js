@@ -10,6 +10,9 @@ import {
     StyleSheet,
     ToastAndroid,
     RefreshControl,
+    Linking,
+    ActivityIndicator,
+    TouchableWithoutFeedback
 } from "react-native";
 import { PieChart } from "react-native-svg-charts";
 import { useRoute } from "@react-navigation/native";
@@ -20,6 +23,8 @@ import LinearGradient from "react-native-linear-gradient";
 import ImageColors from "react-native-image-colors";
 import { Menu as Popup } from "react-native-material-menu";
 import Clipboard from "@react-native-community/clipboard";
+import { showNavigationBar } from "react-native-navigation-bar-color";
+import Orientation from "react-native-orientation";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -46,9 +51,10 @@ import {
     Progress,
     DonutChart,
     Rating,
+    FormattedText,
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
-import { FLAGS } from "../../../variables";
+import { FLAGS, DOMAIN } from "../../../variables";
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
@@ -65,21 +71,40 @@ export const Anime = (props) => {
     const scrollViewRef = useRef();
     const modalRef = useRef();
 
-    const [ refreshing, setRefreshing ] = useState(false);
+    const [ refreshing, setRefreshing ] = useState(true);
     const [ animeData, setAnimeData ] = useState(route.params?.animeData);
     const [ hideDescription, setHideDescription ] = useState(true);
     const [ modalContent, setModalContent ] = useState(null);
-    const [ linkedAnimes, setLinkedAnimes ] = useState([]);
+    const [ linkedAnimes, setLinkedAnimes ] = useState({});
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
     const [ posterColors, setPosterColors ] = useState({});
     const [ animeStatus, setAnimeStatus ] = useState({ status: "NO_WATCHED" });
     const [ popupVisible, setPopupVisible ] = useState(false);
+    const [ comments, setComments ] = useState({});
+    const [ stats, setStats ] = useState({});
+    const [ marks, setMarks ] = useState({});
+    const [ markLoading, setMarkLoading ] = useState(0);
+    const [ loadingBackToWatch, setLoadingBackToWatch ] = useState(false);
+    const [ playlists, setPlaylists ] = useState([]);
 
     const accent = getAnimeAccentColor(posterColors?.dominant || theme.text_color, theme.name);
 
-    const getAnimeData = async (id, refreshing = false) => {
-        setRefreshing(refreshing);
+    const ratingMPAADecode = {
+        "G": "0+",
+        "PG": "6+",
+        "PG-13": "16+",
+        "R": "18+",
+        "NC-17": "18+",
+    };
 
+    const playlistKindDecode = {
+        "pv": ["трейлер", "трейлера", "трейлеров"],
+        "op": ["опенинг", "опенинга", "опенингов"],
+        "ed": ["эндинг", "эндинга", "эндингов"],
+        "op_ed_clip": ["музыкальный клип", "музыкальных клипа", "музыкальных клипов"],
+    };
+
+    const getAnimeData = async (id) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.get", {
@@ -91,14 +116,82 @@ export const Anime = (props) => {
         })
         .then(({ data }) => {
             setAnimeData(data);
-            setLinkedAnimes(data?.linked?.sort(sortLinkedAnimes)?.slice(0, 3));
             getAnimeStatusInLocalStorage();
+            getExtendeds(data.id);
 
             setRefreshing(false);
         })
-        .catch(({ response: { data}  }) => {
+        .catch(({ response: { data } }) => {
             console.log("err\n", data);
         });
+    };
+
+    const getExtendeds = async (id) => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/animes.get", {
+            animeId: id || route.params?.animeData?.id,
+            extended: true
+        }, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            setStats(data.stats);
+            setPlaylists(data.playlists);
+            setLinkedAnimes({
+                count: data.linkedCount,
+                items: data.linked
+            });
+            setMarks({
+                userMark: data.userMark,
+                items: data.marks
+            });
+            setComments({
+                count: data.commentsCount,
+                items: data.comments
+            });
+        })
+        .catch(({ response: { data } }) => {
+            console.log("err\n", data);
+        });
+    };
+
+    const backToWatch = async () => {
+        setLoadingBackToWatch(true);
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/animes.getVideoLink", {
+            animeId: animeStatus?.data?.id,
+            translationId: animeStatus?.data?.translationId,
+            episode: animeStatus?.data?.episode,
+            source: animeStatus?.data?.source
+        }, {
+            headers: {
+                "Authorization": sign
+            }
+        })
+        .then(({ data }) => {
+            navigate("anime.videoplayer", {
+                videos: data.links,
+                data: {
+                    translation: animeStatus?.data?.translation,
+                    episodesCount: animeData?.episodesAired,
+                    playedEpisode: animeStatus?.data?.episode,
+                    title: animeData?.title,
+                    opening: data.opening,
+                    ending: data.ending
+                },
+                translationId: animeStatus?.data?.translationId,
+                animeId: animeData?.id,
+                source: animeStatus?.data?.source
+            });
+        })
+        .catch(({ response: { data } }) => {
+            ToastAndroid.show(data.message, ToastAndroid.LONG);
+        })
+        .finally(() => setLoadingBackToWatch(false));
     };
 
     const getAnimeStatusInLocalStorage = async () => {
@@ -123,16 +216,14 @@ export const Anime = (props) => {
     };
 
     const addAnimeToList = (list) => {
-        const newAnimeStatsData = Object.defineProperty(animeData?.stats, list, { value: animeData?.isFavorite ? animeData?.stats?.favorite - 1 : animeData?.stats?.favorite + 1 });
         setAnimeData({
             ...animeData,
-            stats: newAnimeStatsData,
             inList: list
         });
     };
 
     const setIsFavorite = async () => {
-        const newAnimeStatsData = Object.defineProperty(animeData?.stats, "favorite", { value: animeData?.isFavorite ? animeData?.stats?.favorite - 1 : animeData?.stats?.favorite + 1 });
+        const newAnimeStatsData = Object.defineProperty(stats, "favorite", { value: animeData?.isFavorite ? stats?.favorite - 1 : stats?.favorite + 1 });
         setAnimeData({
             ...animeData,
             stats: newAnimeStatsData,
@@ -168,12 +259,24 @@ export const Anime = (props) => {
     }, [animeData]);
 
     useEffect(() => {
-        const willFocusSubscription = navigation.addListener('focus', () => {
-            onRefresh();
+        const willFocusSubscription = navigation.addListener("focus", () => {
+            Orientation.lockToPortrait();
+            StatusBar.setHidden(false);
+            showNavigationBar();
+            getAnimeData();
         });
     
         return willFocusSubscription;
     }, []);
+
+    const openUrl = (link) => {
+        const validLink = Linking.canOpenURL(link);
+        if(!validLink) {
+            return ToastAndroid.show("Невозможно открыть эту ссылку", ToastAndroid.LONG);
+        }
+
+        return Linking.openURL(link);
+    };
 
     const seriesCount = (total, aired, status) => {
         if(typeof total !== "number" || Number.isNaN(total) || typeof aired !== "number" || Number.isNaN(aired)) {
@@ -304,8 +407,8 @@ export const Anime = (props) => {
             >
                 <Image
                 style={{
-                    width: normalizeSize(130),
-                    height: normalizeSize(70),
+                    width: normalizeSize(200),
+                    height: normalizeSize(110),
                     borderRadius: 8
                 }}
                 resizeMethod="resize"
@@ -317,11 +420,126 @@ export const Anime = (props) => {
         )
     };
 
-    const sortLinkedAnimes = (a, b) => {
-        if(b.year > a.year) return -1;
-        if(b.year < a.year) return 1;
+    const renderPlaylists = (item, index) => {
+        console.log(JSON.stringify(item, null, "\t"))
 
-        return 0;
+        return (
+            <View
+            key={"playlist-" + index}
+            style={{
+                marginRight: index + 1 === playlists?.length ? 15 : 10,
+                marginLeft: index === 0 ? 15 : 0,
+                borderRadius: 8,
+                backgroundColor: theme.divider_color,
+                overflow: "hidden",
+            }}
+            >
+                <Image
+                style={{
+                    width: normalizeSize(200),
+                    height: normalizeSize(110),
+                    borderRadius: 8
+                }}
+                resizeMethod="resize"
+                source={{
+                    uri: item.image
+                }}
+                />
+
+                <TouchableNativeFeedback
+                onPress={() => console.log("test")}
+                background={TouchableNativeFeedback.Ripple("#ffffff20", false)}
+                >
+                    <View
+                    style={{
+                        position: "absolute",
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: "rgba(0, 0, 0, .5)",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                    >
+                        <View
+                        style={{
+                            position: "absolute",
+                            top: 8,
+                            right: 0,
+                            flexDirection: "row",
+                            alignItems: "center"
+                        }}
+                        >
+                            {
+                                item.hostings.map((hosting, index) => {
+                                    return (
+                                        <View key={"hosting-" + index}>
+                                            {
+                                                {
+                                                    "vk": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="vk-video-logo"
+                                                            size={20}
+                                                            />
+                                                        </View>
+                                                    ),
+                                                    "youtube": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="youtube-logo"
+                                                            size={25}
+                                                            />
+                                                        </View>
+                                                    ),
+                                                    "sibnet": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="sibnet-logo"
+                                                            size={25}
+                                                            />
+                                                        </View>
+                                                    )
+                                                }[hosting]
+                                            }
+                                        </View>
+                                    )
+                                })
+                            }
+                        </View>
+
+                        <Text
+                        style={{
+                            color: "#fff",
+                            fontWeight: "600",
+                            fontSize: normalizeSize(20),
+                            textTransform: "uppercase",
+                            marginHorizontal: 20,
+                            textAlign: "center"
+                        }}
+                        >
+                            {
+                                item.count
+                            }
+                        </Text>
+
+                        <Text
+                        style={{
+                            color: "#dedede",
+                            fontWeight: "500",
+                            fontSize: normalizeSize(14),
+                            textTransform: "uppercase",
+                            marginHorizontal: 20,
+                            textAlign: "center",
+                        }}
+                        >
+                            {
+                                declOfNum(item.count, playlistKindDecode[item.kind])
+                            }
+                        </Text>
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
+        )
     };
 
     const renderLinked = (item, index) => {
@@ -330,7 +548,7 @@ export const Anime = (props) => {
             key={"linked-anime-" + index}
             >
                 <Cell
-                title={item.name}
+                title={item.title}
                 centered={false}
                 maxTitleLines={2}
                 onPress={() => navigation.push("anime", { animeData: { id: item.id } })}
@@ -346,8 +564,8 @@ export const Anime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: normalizeSize(45),
-                            height: normalizeSize(65),
+                            width: normalizeSize(60),
+                            height: normalizeSize(85),
                         }}
                         source={{
                             uri: item?.poster
@@ -373,11 +591,13 @@ export const Anime = (props) => {
                                     }}
                                     >
                                         {
-                                            item.inList === "watching" ? "Смотрю" :
-                                            item.inList === "completed" ? "Просмотрено" :
-                                            item.inList === "planned" ? "В планах" :
-                                            item.inList === "postponed" ? "Отложено" :
-                                            item.inList === "dropped" ? "Брошено" : null
+                                            {
+                                                "watching": "Смотрю",
+                                                "completed": "Просмотрено",
+                                                "planned": "В планах",
+                                                "postponed": "Отложено",
+                                                "dropped": "Брошено"
+                                            }[item.inList]
                                         }
                                     </Text>
                                 </View>
@@ -386,62 +606,76 @@ export const Anime = (props) => {
                     </View>
                 }
                 containerStyle={{
-                    opacity: item.id ? 1 : .3
+                    opacity: item.id ? 1 : .3,
+                    backgroundColor: item.id === animeData?.id ? accent + "10" : "transparent"
                 }}
                 disabled={!item.id || item.id === animeData?.id}
-                after={
-                    item.id === animeData?.id && (
-                        <Icon
-                        name="chevron-left-double"
-                        color={accent}
-                        size={20}
-                        />
-                    )
-                }
                 subtitle={
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        flexWrap: "wrap"
-                    }}
-                    >
-                        <View>
-                            <Text
-                            style={{
-                                color: theme.text_color,
-                                fontSize: normalizeSize(10),
-                                borderColor: theme.divider_color,
-                                backgroundColor: theme.divider_color + "98",
-                                borderWidth: 1,
-                                paddingHorizontal: 5,
-                                paddingVertical: 1,
-                                borderRadius: 5,
-                                marginRight: 10,
-                                marginTop: 5,
-                            }}
-                            >
-                                {item?.year || "Неизвестный"} год
-                            </Text>
+                    <View>
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            flexWrap: "wrap"
+                        }}
+                        >
+                            <View>
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: normalizeSize(10),
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginRight: 10,
+                                    marginTop: 5,
+                                }}
+                                >
+                                    {item?.year || "Неизвестный"} год
+                                </Text>
+                            </View>
+
+                            <View>
+                                <Text
+                                style={{
+                                    color: theme.text_color,
+                                    fontSize: normalizeSize(10),
+                                    borderColor: theme.divider_color,
+                                    backgroundColor: theme.divider_color + "98",
+                                    borderWidth: 1,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 1,
+                                    borderRadius: 5,
+                                    marginRight: 10,
+                                    marginTop: 5,
+                                }}
+                                >
+                                    {
+                                        {
+                                            "tv": "Сериал",
+                                            "ona": "ONA",
+                                            "ova": "OVA",
+                                            "special": "Спешл",
+                                            "movie": "Фильм"
+                                        }[item.kind]
+                                    }
+                                </Text>
+                            </View>
                         </View>
 
-                        <View>
-                            <Text
-                            style={{
-                                color: theme.text_color,
-                                fontSize: normalizeSize(10),
-                                borderColor: theme.divider_color,
-                                backgroundColor: theme.divider_color + "98",
-                                borderWidth: 1,
-                                paddingHorizontal: 5,
-                                paddingVertical: 1,
-                                borderRadius: 5,
-                                marginRight: 10,
-                                marginTop: 5,
-                            }}
-                            >
-                                {item?.kind}
-                            </Text>
-                        </View>
+                        <Text
+                        numberOfLines={3}
+                        style={{
+                            color: theme.text_secondary_color,
+                            fontSize: normalizeSize(11)
+                        }}
+                        >
+                            {   
+                                item.description || "Описание не указано"
+                            }
+                        </Text>
                     </View>
                 }
                 />
@@ -478,7 +712,7 @@ export const Anime = (props) => {
                 }
             })
             .then(({ data }) => {
-                const newCommentsData = animeData.comments.map(comment => {
+                const newCommentsData = comments?.items?.map(comment => {
                     if(comment.id === commentId) {
                         return { 
                             ...comment, 
@@ -797,11 +1031,11 @@ export const Anime = (props) => {
     ];
 
     const statisticsChartValues = [
-        animeData?.stats?.watching || 0,
-        animeData?.stats?.completed || 0,
-        animeData?.stats?.planned || 0,
-        animeData?.stats?.postponed || 0,
-        animeData?.stats?.dropped || 0,
+        stats?.watching || 0,
+        stats?.completed || 0,
+        stats?.planned || 0,
+        stats?.postponed || 0,
+        stats?.dropped || 0,
     ];
     const statisticsChartColors = [theme.anime.watching, theme.anime.completed, theme.anime.planned, theme.anime.postponed, theme.anime.dropped];
     
@@ -891,6 +1125,7 @@ export const Anime = (props) => {
     };
 
     const markAnime = async (v) => {
+        setMarkLoading(v);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.mark", {
@@ -902,11 +1137,11 @@ export const Anime = (props) => {
             }
         })
         .then(({ data }) => {
-            setAnimeData({
-                ...animeData,
-                userMark: v === animeData.userMark ? null : v,
-                marks: data.marks
+            setMarks({
+                items: data.marks,
+                userMark: v === marks?.userMark ? null : v
             });
+            setMarkLoading(0);
         })
         .catch(({ reponse: { data } }) => {
             console.log(data);
@@ -914,7 +1149,7 @@ export const Anime = (props) => {
     };
 
     const animeCopyLink = () => {
-        const copyString = `https://aniyoo.localhostov.ru:1007/anime?id=${animeData?.id}`;
+        const copyString = DOMAIN + `anime?id=${animeData?.id}`;
         Clipboard.setString(copyString);
         ToastAndroid.show("Ссылка скопирована в буфер обмена", ToastAndroid.CENTER);
         setPopupVisible(false);
@@ -1130,7 +1365,7 @@ export const Anime = (props) => {
 
                         <View
                         style={{
-                            marginTop: normalizeSize(-400)
+                            marginTop: normalizeSize(-400),
                         }}
                         >
                             <Image
@@ -1145,7 +1380,7 @@ export const Anime = (props) => {
                                 marginTop: StatusBar.currentHeight + 70,
                                 borderRadius: 10,
                                 zIndex: 12,
-                                backgroundColor: theme.divider_color
+                                backgroundColor: theme.divider_color,
                             }}
                             onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
                             />
@@ -1160,18 +1395,20 @@ export const Anime = (props) => {
                     >
                         <View
                         style={{
-                            marginBottom: 10
+                            marginBottom: 10,
+                            alignItems: "center"
                         }}
                         >
                             <Text
                             selectable
+                            selectionColor={accent}
                             numberOfLines={2}
                             style={{
                                 fontSize: normalizeSize(16),
                                 fontWeight: "500",
                                 marginHorizontal: 15,
-                                textAlign: "center",
-                                color: theme.text_color
+                                color: theme.text_color,
+                                textAlign: "center"
                             }}
                             >
                                 {
@@ -1181,6 +1418,7 @@ export const Anime = (props) => {
 
                             <Text
                             selectable
+                            selectionColor={accent}
                             numberOfLines={2}
                             style={{
                                 marginHorizontal: 15,
@@ -1193,117 +1431,6 @@ export const Anime = (props) => {
                                     animeData?.origTitle
                                 }
                             </Text>
-                        </View>
-
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            flexWrap: "wrap",
-                        }}
-                        >
-                            <View>
-                                <Button
-                                title={
-                                    animeData?.inList === "watching" ? "Смотрю" :
-                                    animeData?.inList === "completed" ? "Просмотрено" :
-                                    animeData?.inList === "planned" ? "В планах" :
-                                    animeData?.inList === "postponed" ? "Отложено" :
-                                    animeData?.inList === "dropped" ? "Брошено" : "Не в списке"
-                                }
-                                onPress={() => {
-                                    setModalContent(
-                                        <AnimeSetList 
-                                        animeId={animeData?.id} 
-                                        inList={animeData?.inList}
-                                        getAnimeData={getAnimeData}
-                                        addAnimeToList={addAnimeToList}
-                                        onClose={() => modalRef.current?.close()}
-                                        />
-                                    );
-                                    modalRef.current?.open();
-                                }}
-                                upperTitle={false}
-                                backgroundColor={theme.anime[animeData?.inList || "none"]}
-                                textColor="#ffffff"
-                                size={35}
-                                before={
-                                    animeData?.inList === "watching" ? (
-                                        <Icon
-                                        name="eye"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    ) :
-                                    animeData?.inList === "completed" ? (
-                                        <Icon
-                                        name="done-double"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    )  :
-                                    animeData?.inList === "planned" ? (
-                                        <Icon
-                                        name="calendar"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    )  :
-                                    animeData?.inList === "postponed" ? (
-                                        <Icon
-                                        name="pause-rounded"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    )  :
-                                    animeData?.inList === "dropped" ? (
-                                        <Icon
-                                        name="cancel"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    )  : (
-                                        <Icon
-                                        name="chevron-down"
-                                        size={17}
-                                        color="#ffffff"
-                                        />
-                                    )
-                                }
-                                containerStyle={{
-                                    marginRight: 0
-                                }}
-                                />
-                            </View>
-
-                            <View>
-                                <Button
-                                title={animeData?.stats?.favorite || "0"}
-                                upperTitle={false}
-                                loading={refreshing}
-                                type={animeData?.isFavorite ? "primary" : "outline"}
-                                backgroundColor={animeData?.isFavorite ? "#c78b16" : theme.icon_color}
-                                size={35}
-                                textColor={animeData?.isFavorite ? "#ffffff" : theme.icon_color}
-                                before={
-                                    animeData?.isFavorite ? (
-                                        <Icon
-                                        name="bookmark"
-                                        size={17}
-                                        />
-                                    ) : (
-                                        <Icon
-                                        name="bookmark-outline"
-                                        size={17}
-                                        color={theme.icon_color}
-                                        />
-                                    )
-                                }
-                                containerStyle={{
-                                    marginRight: 0
-                                }}
-                                onPress={() => setIsFavorite()}
-                                />
-                            </View>
                         </View>
 
                         <Button
@@ -1337,22 +1464,156 @@ export const Anime = (props) => {
                         size={45}
                         disabled={!animeData?.id || animeData?.status === "anons"}
                         onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
+                        containerStyle={{
+                            marginBottom: 0
+                        }}
                         />
+
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            flexWrap: "wrap",
+                            marginBottom: 10
+                        }}
+                        >
+                            <Button
+                            title={
+                                {
+                                    "watching": "Смотрю",
+                                    "completed": "Просмотрено",
+                                    "planned": "В планах",
+                                    "postponed": "Отложено",
+                                    "dropped": "Брошено",
+                                    "none": "Не в списке"
+                                }[animeData?.inList]
+                            }
+                            onPress={() => {
+                                setModalContent(
+                                    <AnimeSetList 
+                                    animeId={animeData?.id} 
+                                    inList={animeData?.inList}
+                                    getAnimeData={getAnimeData}
+                                    addAnimeToList={addAnimeToList}
+                                    onClose={() => modalRef.current?.close()}
+                                    />
+                                );
+                                modalRef.current?.open();
+                            }}
+                            upperTitle={false}
+                            backgroundColor={theme.anime[animeData?.inList || "none"]}
+                            textColor="#ffffff"
+                            size={35}
+                            before={
+                                animeData?.inList === "watching" ? (
+                                    <Icon
+                                    name="eye"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                ) :
+                                animeData?.inList === "completed" ? (
+                                    <Icon
+                                    name="done-double"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                )  :
+                                animeData?.inList === "planned" ? (
+                                    <Icon
+                                    name="calendar"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                )  :
+                                animeData?.inList === "postponed" ? (
+                                    <Icon
+                                    name="pause-rounded"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                )  :
+                                animeData?.inList === "dropped" ? (
+                                    <Icon
+                                    name="cancel"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                )  : (
+                                    <Icon
+                                    name="chevron-down"
+                                    size={17}
+                                    color="#ffffff"
+                                    />
+                                )
+                            }
+                            containerStyle={{
+                                marginRight: 0
+                            }}
+                            />
+
+                            <View>
+                                <Button
+                                title={stats?.favorite || "0"}
+                                upperTitle={false}
+                                loading={refreshing}
+                                type={animeData?.isFavorite ? "primary" : "outline"}
+                                backgroundColor={animeData?.isFavorite ? "#c78b16" : theme.icon_color}
+                                size={35}
+                                textColor={animeData?.isFavorite ? "#ffffff" : theme.icon_color}
+                                before={
+                                    animeData?.isFavorite ? (
+                                        <Icon
+                                        name="bookmark"
+                                        size={17}
+                                        />
+                                    ) : (
+                                        <Icon
+                                        name="bookmark-outline"
+                                        size={17}
+                                        color={theme.icon_color}
+                                        />
+                                    )
+                                }
+                                onPress={() => setIsFavorite()}
+                                />
+                            </View>
+                        </View>
 
                         {
                             animeStatus?.status === "WATCHED_BEFORE" && (
-                                <View
+                                <LinearGradient
                                 style={{
-                                    backgroundColor: theme.divider_color,
                                     marginHorizontal: 10,
                                     marginBottom: 10,
                                     zIndex: 0,
                                     borderRadius: 10,
                                     overflow: "hidden"
                                 }}
+                                colors={
+                                    [
+                                        theme.divider_color + "90",
+                                        "transparent",
+                                    ]
+                                }
+                                start={{
+                                    x: 0,
+                                    y: 0
+                                }}
+                                end={{
+                                    x: 1,
+                                    y: 0
+                                }}
                                 >
                                     <Cell
                                     title="Можно вернуться к просмотру"
+                                    onPress={() => backToWatch()}
+                                    after={
+                                        loadingBackToWatch && (
+                                            <ActivityIndicator
+                                            color={accent}
+                                            />
+                                        )
+                                    }
                                     before={
                                         <Icon
                                         color="orangered"
@@ -1366,17 +1627,110 @@ export const Anime = (props) => {
                                         dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('mm:ss')
                                     } в ${animeStatus?.data?.episode} серии в озвучке от ${animeStatus?.data?.translation}`}
                                     />
-                                </View>
+                                </LinearGradient>
                             )
                         }
+
+                        {/* <View
+                        style={{
+                            backgroundColor: theme.divider_color,
+                            marginHorizontal: 10,
+                            marginBottom: 10,
+                            zIndex: 0,
+                            borderRadius: 10,
+                            overflow: "hidden",
+                            paddingHorizontal: normalizeSize(15),
+                            paddingVertical: normalizeSize(8)
+                        }}
+                        >
+                            <FormattedText
+                            style={{
+                                color: theme.text_color
+                            }}
+                            patterns={
+                                [
+                                    { 
+                                        type: "url", 
+                                        style: { 
+                                            color: theme.accent,
+                                        }, 
+                                        onPress: (link) => openUrl(link) 
+                                    },
+                                    { 
+                                        type: "bold", 
+                                        symbol: "*",
+                                        style: { 
+                                            fontWeight: "700",
+                                        }, 
+                                    },
+                                    {
+                                        type: "crossedOut",
+                                        symbol: "-",
+                                        style: {
+                                            textDecorationLine: "line-through"
+                                        }
+                                    },
+                                    {
+                                        type: "underline",
+                                        symbol: "_",
+                                        style: {
+                                            textDecorationLine: "underline"
+                                        },
+                                        onPress: (link) => console.log(link) 
+                                    },
+                                ]
+                            }
+                            >
+                                _тест_ *bold* _test2_ не подчеркнутый текст _test3_ https://vk.com __asf__ asdf asdfasfd
+                            </FormattedText> 
+                        </View> */}
 
                         <View
                         style={{
                             flexDirection: "row",
                             flexWrap: "wrap",
-                            marginTop: 10,
+                            alignItems: "center",
+                            marginVertical: 10
                         }}
                         >
+                            {
+                                animeData?.other?.mpaa && (
+                                    <>
+                                        <View
+                                        style={{
+                                            width: 40,
+                                            height: 20,
+                                            borderRadius: 6,
+                                            backgroundColor: theme.anime.rating_mpaa_background[ratingMPAADecode[animeData?.other?.mpaa]],
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            marginHorizontal: 7,
+                                        }}
+                                        >
+                                            <Text
+                                            style={{
+                                                fontSize: normalizeSize(10),
+                                                color: invertColor(theme.anime.rating_mpaa_background[ratingMPAADecode[animeData?.other?.mpaa]], true),
+                                                fontWeight: "500"
+                                            }}
+                                            >
+                                                {ratingMPAADecode[animeData?.other?.mpaa]}
+                                            </Text>
+                                        </View>
+
+                                        <View
+                                        style={{
+                                            backgroundColor: theme.text_color,
+                                            width: 0.5,
+                                            height: 10,
+                                            marginHorizontal: 5,
+                                            opacity: 0.7
+                                        }}
+                                        />
+                                    </>
+                                )
+                            }
+
                             {
                                 animeData?.genres?.map(renderGenres)
                             }
@@ -1536,19 +1890,50 @@ export const Anime = (props) => {
 
                             {
                                 animeData?.description ? (
-                                    <Text
-                                    selectable
-                                    selectionColor={accent}
-                                    numberOfLines={hideDescription ? 5 : 10000}
-                                    onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
-                                    style={{
-                                        fontStyle: "normal",
-                                        color: theme.text_color,
-                                        fontSize: normalizeSize(12)
-                                    }}
-                                    >
-                                        {animeData?.description ? animeData.description : "Описание не указано"}
-                                    </Text>
+                                    <View>
+                                        <Text
+                                        selectable
+                                        selectionColor={accent}
+                                        numberOfLines={hideDescription ? 5 : 10000}
+                                        onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
+                                        style={{
+                                            fontStyle: "normal",
+                                            color: theme.text_color,
+                                            fontSize: normalizeSize(12)
+                                        }}
+                                        >
+                                            {animeData?.description ? animeData.description : "Описание не указано"}
+                                        </Text>
+
+                                        {
+                                            hideDescription && (
+                                                <TouchableWithoutFeedback
+                                                onPress={() => setHideDescription(!hideDescription)}
+                                                >
+                                                    <LinearGradient
+                                                    style={{
+                                                        position: "absolute",
+                                                        zIndex: 10,
+                                                        width: "100%",
+                                                        height: "100%"
+                                                    }}
+                                                    colors={[
+                                                        "transparent",
+                                                        theme.background_content
+                                                    ]}
+                                                    start={{
+                                                        x: 0,
+                                                        y: 0.5
+                                                    }}
+                                                    end={{
+                                                        x: 0,
+                                                        y: 1
+                                                    }}
+                                                    />
+                                                </TouchableWithoutFeedback>
+                                            )
+                                        }
+                                    </View>
                                 ) : (
                                     <View
                                     style={{
@@ -1580,28 +1965,51 @@ export const Anime = (props) => {
 
                             {
                                 animeData?.description && descriptionLinesCount >= 6 ? (
-                                    <Button
-                                    title={hideDescription ? "Показать весь текст" : "Скрыть лишний текст"}
-                                    upperTitle={false}
-                                    type="overlay"
-                                    containerStyle={{
-                                        marginTop: 0
+                                    <View
+                                    style={{
+                                        borderRadius: 8,
+                                        overflow: "hidden"
                                     }}
-                                    before={
-                                        hideDescription ? (
-                                            <Icon
-                                            name="chevron-down"
-                                            color={theme.icon_color}
-                                            />
-                                        ) : (
-                                            <Icon
-                                            name="chevron-up"
-                                            color={theme.icon_color}
-                                            />
-                                        )
-                                    }
-                                    onPress={() => setHideDescription(!hideDescription)}
-                                    />
+                                    >
+                                        <TouchableNativeFeedback
+                                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                                        onPress={() => setHideDescription(!hideDescription)}
+                                        >
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                paddingBottom: 10,
+                                                justifyContent: "center"
+                                            }}
+                                            >
+                                                <Text
+                                                style={{
+                                                    marginRight: 5,
+                                                    fontWeight: "600",
+                                                    fontSize: normalizeSize(13),
+                                                    color: accent
+                                                }}
+                                                >
+                                                    {hideDescription ? "Показать весь текст" : "Скрыть лишний текст"}
+                                                </Text>
+
+                                                {
+                                                    hideDescription ? (
+                                                        <Icon
+                                                        name="chevron-down"
+                                                        color={accent}
+                                                        />
+                                                    ) : (
+                                                        <Icon
+                                                        name="chevron-up"
+                                                        color={accent}
+                                                        />
+                                                    )
+                                                }
+                                            </View>
+                                        </TouchableNativeFeedback>
+                                    </View>
                                 ) : null
                             }
                         </View>
@@ -1631,6 +2039,82 @@ export const Anime = (props) => {
                             )
                         }
 
+                        {
+                            playlists?.length >= 1 && (
+                                <View
+                                style={{
+                                    marginTop: 15
+                                }}
+                                >
+                                    <ContentHeader
+                                    text="Плейлисты"
+                                    textStyle={{ color: accent }}
+                                    containerStyle={{ marginBottom: 10, marginLeft: 15 }}
+                                    />
+
+                                    <ScrollView
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={{
+                                        alignItems: "center"
+                                    }}
+                                    overScrollMode="never"
+                                    >
+                                        {
+                                            playlists.map(renderPlaylists)
+                                        }
+
+                                        <View
+                                        style={{
+                                            marginHorizontal: 10,
+                                            borderRadius: 10,
+                                            overflow: "hidden"
+                                        }}
+                                        >
+                                            <TouchableNativeFeedback
+                                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                                            >
+                                                <View
+                                                style={{
+                                                    paddingHorizontal: 25,
+                                                    alignItems: "center",
+                                                    paddingVertical: 30
+                                                }}
+                                                >
+                                                    <View
+                                                    style={{
+                                                        width: 50,
+                                                        height: 50,
+                                                        borderRadius: 100,
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        backgroundColor: accent + "10"                                 
+                                                    }}
+                                                    >
+                                                        <Icon
+                                                        name="plus-square"
+                                                        color={accent}
+                                                        />
+                                                    </View>
+
+                                                    <Text
+                                                    style={{
+                                                        marginTop: 5,
+                                                        color: theme.text_color,
+                                                        fontWeight: "500",
+                                                        fontSize: normalizeSize(14)
+                                                    }}
+                                                    >
+                                                        Открыть все видео
+                                                    </Text>
+                                                </View>
+                                            </TouchableNativeFeedback>
+                                        </View>
+                                    </ScrollView>
+                                </View>
+                            )
+                        }
+
                         <View
                         style={{
                             marginTop: 15
@@ -1653,7 +2137,7 @@ export const Anime = (props) => {
                                             fontWeight: "500"
                                         }}
                                         >
-                                            {animeData?.stats?.planned}
+                                            {stats?.planned}
                                         </Text>
 
                                         <Text
@@ -1724,7 +2208,7 @@ export const Anime = (props) => {
                         </View>
 
                         {
-                            animeData?.marks?.total && animeData?.status !== "anons" ? (
+                            marks?.items?.total >= 0 && animeData?.status !== "anons" ? (
                                 <View
                                 style={{
                                     marginTop: 15,
@@ -1737,7 +2221,7 @@ export const Anime = (props) => {
                                     />
 
                                     {
-                                        animeData?.marks?.total ? (
+                                        marks?.items?.total >= 1 ? (
                                             <View
                                             style={{
                                                 flexDirection: "row",
@@ -1749,9 +2233,9 @@ export const Anime = (props) => {
                                                 <View style={{ marginRight: 25 }}>
                                                     <DonutChart
                                                     radius={normalizeSize(45)}
-                                                    percentage={animeData?.marks?.avg || 0}
+                                                    percentage={marks?.items?.avg || 0}
                                                     strokeWidth={8}
-                                                    color={theme.anime_mark[Math.round(animeData?.marks?.avg - 0.1 || 1)]}
+                                                    color={theme.anime_mark[Math.round(marks?.items?.avg - 0.1 || 1)]}
                                                     max={5}
                                                     centerContent={
                                                         <View>
@@ -1763,7 +2247,7 @@ export const Anime = (props) => {
                                                                 textAlign: "center"
                                                             }}
                                                             >
-                                                                {animeData?.marks?.avg}
+                                                                {marks?.items?.avg}
                                                             </Text>
 
                                                             <Text
@@ -1776,7 +2260,7 @@ export const Anime = (props) => {
                                                             }}
                                                             numberOfLines={1}
                                                             >
-                                                                {animeData?.marks?.total} {declOfNum(animeData?.marks?.total, ["голос", "голоса", "голосов"])}
+                                                                {marks?.items?.total} {declOfNum(marks?.items?.total, ["голос", "голоса", "голосов"])}
                                                             </Text>
                                                         </View>
                                                     }
@@ -1790,7 +2274,7 @@ export const Anime = (props) => {
                                                 >
                                                     {
                                                         [5, 4, 3, 2, 1].map((mark, index) => {
-                                                            if(typeof animeData?.marks?.[mark] !== "number") return;
+                                                            if(typeof marks?.items?.[mark] !== "number") return;
 
                                                             return (
                                                                 <View
@@ -1811,8 +2295,8 @@ export const Anime = (props) => {
                                                                     </Text>
 
                                                                     <Progress
-                                                                    step={animeData?.marks?.[mark] || 0}
-                                                                    steps={animeData?.marks?.total || 0}
+                                                                    step={marks?.items[mark] || 0}
+                                                                    steps={marks?.items?.total || 0}
                                                                     />
                                                                 </View>
                                                             )
@@ -1836,11 +2320,13 @@ export const Anime = (props) => {
                                         )
                                     }
 
-                                    <Divider
-                                    dividerStyle={{
-                                        marginTop: 15
+                                    <View
+                                    style={{
+                                        marginVertical: 15
                                     }}
-                                    />
+                                    >
+                                        <Divider/>
+                                    </View>
 
                                     <View
                                     style={{
@@ -1850,9 +2336,10 @@ export const Anime = (props) => {
                                     >
                                         <Rating
                                         length={5}
-                                        select={animeData?.userMark}
+                                        loading={markLoading}
+                                        select={marks?.userMark}
                                         onPress={(v) => markAnime(v)}
-                                        cancelPress={() => markAnime(animeData?.userMark)}
+                                        cancelPress={() => markAnime(marks?.userMark)}
                                         />
                                     </View>
                                 </View>
@@ -1860,7 +2347,7 @@ export const Anime = (props) => {
                         }
 
                         {
-                            linkedAnimes.length >= 1 && (
+                            linkedAnimes?.count >= 1 && (
                                 <View
                                 style={{
                                     marginTop: 15
@@ -1873,11 +2360,11 @@ export const Anime = (props) => {
                                     />
 
                                     {
-                                        linkedAnimes.map(renderLinked)
+                                        linkedAnimes?.items?.map(renderLinked)
                                     }
 
                                     {
-                                        animeData?.linked?.length >= 4 && (
+                                        linkedAnimes?.count >= 4 && (
                                             <Button
                                             title="Открыть все"
                                             upperTitle={false}
@@ -1892,7 +2379,13 @@ export const Anime = (props) => {
                                             containerStyle={{
                                                 marginTop: 0
                                             }}
-                                            onPress={() => navigate("linked_anime", { animeList: animeData?.linked, selectedAnimeId: animeData?.id })}
+                                            onPress={() => 
+                                                navigate("linked_anime", { 
+                                                    animes: linkedAnimes?.items, 
+                                                    animeId: animeData?.id,
+                                                    accent: accent
+                                                })
+                                            }
                                             />
                                         )
                                     }
@@ -1901,7 +2394,13 @@ export const Anime = (props) => {
                         }
                     </View>
 
-                    <Divider dividerStyle={{ marginTop: 15 }} />
+                    <View
+                    style={{
+                        marginTop: 15
+                    }}
+                    >
+                        <Divider />
+                    </View>
 
                     <Cell
                     title="Комментарии"
@@ -1933,7 +2432,7 @@ export const Anime = (props) => {
                             }}
                             >
                                 {
-                                    animeData?.commentsCount
+                                    comments?.count
                                 }
                             </Text>
 
@@ -1946,12 +2445,12 @@ export const Anime = (props) => {
                     />
 
                     {
-                        animeData?.comments?.length < 1 ? (
+                        comments?.items?.length < 1 ? (
                             <Placeholder
                             title="Здесть пусто"
                             subtitle="Ещё никто не комментировал это аниме, будьте первым!"
                             />
-                        ) : animeData?.comments?.map(renderComments)
+                        ) : comments?.items?.map(renderComments)
                     }
 
                     <View style={{ marginBottom: 60 }}/>
