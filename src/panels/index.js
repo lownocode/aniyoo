@@ -26,3 +26,4 @@ export * from "./Anime/ReplyComments";
 export * from "./Anime/SelectTranslation";
 export * from "./Anime/SelectEpisode";
 export * from "./Anime/VideoPlayer";
+export * from "./Anime/Playlists";

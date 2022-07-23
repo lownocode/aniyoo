@@ -86,6 +86,7 @@ export const Anime = (props) => {
     const [ markLoading, setMarkLoading ] = useState(0);
     const [ loadingBackToWatch, setLoadingBackToWatch ] = useState(false);
     const [ playlists, setPlaylists ] = useState([]);
+    const [ addToPlanneLoading, setAddToPlannedLoading ] = useState(false);
 
     const accent = getAnimeAccentColor(posterColors?.dominant || theme.text_color, theme.name);
 
@@ -102,6 +103,8 @@ export const Anime = (props) => {
         "op": ["опенинг", "опенинга", "опенингов"],
         "ed": ["эндинг", "эндинга", "эндингов"],
         "op_ed_clip": ["музыкальный клип", "музыкальных клипа", "музыкальных клипов"],
+        "episode_preview": ["превью", "превью", "превью"],
+        "other": ["другое", "других", "других"]
     };
 
     const getAnimeData = async (id) => {
@@ -194,6 +197,65 @@ export const Anime = (props) => {
         .finally(() => setLoadingBackToWatch(false));
     };
 
+    const setPlannedAnime = async () => {
+        setAddToPlannedLoading(true);
+
+        setAnimeData({
+            ...animeData,
+            inList: animeData?.inList === "planned" ? "none" : "planned"
+        });
+        setStats({
+            ...stats,
+            planned: animeData?.inList === "planned" ? stats?.planned - 1 : stats?.planned + 1
+        });
+
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/lists.add", {
+            animeId: animeData?.id,
+            status: animeData?.inList === "planned" ? "none" : "planned"
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(() => {
+            getAnimeData(animeData?.id);
+        })
+        .catch(({ response: { data } }) => {
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            getAnimeData(animeData?.id);
+        })
+        .finally(() => setAddToPlannedLoading(false));
+    };
+
+    const setIsFavorite = async () => {
+        const newAnimeStatsData = Object.defineProperty(stats, "favorite", { value: animeData?.isFavorite ? stats?.favorite - 1 : stats?.favorite + 1 });
+        setAnimeData({
+            ...animeData,
+            stats: newAnimeStatsData,
+            isFavorite: !animeData?.isFavorite
+        });
+
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        axios.post("/lists.add", {
+            animeId: animeData?.id,
+            status: "favorite"
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(() => {
+            getAnimeData(animeData?.id, false);
+        })
+        .catch(({ response: { data } }) => {
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            getAnimeData(animeData?.id, false);
+        });
+    };
+
     const getAnimeStatusInLocalStorage = async () => {
         const view = await storage.getItem(`ANIME_VIEW__ID=${animeData?.id || 0}`);
 
@@ -220,33 +282,6 @@ export const Anime = (props) => {
             ...animeData,
             inList: list
         });
-    };
-
-    const setIsFavorite = async () => {
-        const newAnimeStatsData = Object.defineProperty(stats, "favorite", { value: animeData?.isFavorite ? stats?.favorite - 1 : stats?.favorite + 1 });
-        setAnimeData({
-            ...animeData,
-            stats: newAnimeStatsData,
-            isFavorite: !animeData?.isFavorite
-        });
-
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-
-        axios.post("/lists.add", {
-            animeId: animeData?.id,
-            status: animeData?.isFavorite ? "noFavorite" : "favorite"
-        }, {
-            headers: {
-                "Authorization": sign,
-            }
-        })
-        .then(() => {
-            getAnimeData(animeData?.id, false);
-        })
-        .catch(({ response: { data } }) => {
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
-            getAnimeData(animeData?.id, false);
-        })
     };
 
     const onRefresh = useCallback(() => {
@@ -421,8 +456,6 @@ export const Anime = (props) => {
     };
 
     const renderPlaylists = (item, index) => {
-        console.log(JSON.stringify(item, null, "\t"))
-
         return (
             <View
             key={"playlist-" + index}
@@ -430,7 +463,7 @@ export const Anime = (props) => {
                 marginRight: index + 1 === playlists?.length ? 15 : 10,
                 marginLeft: index === 0 ? 15 : 0,
                 borderRadius: 8,
-                backgroundColor: theme.divider_color,
+                backgroundColor: accent + "90",
                 overflow: "hidden",
             }}
             >
@@ -438,7 +471,7 @@ export const Anime = (props) => {
                 style={{
                     width: normalizeSize(200),
                     height: normalizeSize(110),
-                    borderRadius: 8
+                    borderRadius: 8,
                 }}
                 resizeMethod="resize"
                 source={{
@@ -447,8 +480,15 @@ export const Anime = (props) => {
                 />
 
                 <TouchableNativeFeedback
-                onPress={() => console.log("test")}
                 background={TouchableNativeFeedback.Ripple("#ffffff20", false)}
+                onPress={() => 
+                    navigate("anime.playlists", { 
+                        animeId: animeData?.id, 
+                        animeTitle: animeData?.title,
+                        animePoster: animeData?.poster,
+                        selectKind: item?.kind
+                    })
+                }
                 >
                     <View
                     style={{
@@ -533,7 +573,7 @@ export const Anime = (props) => {
                         }}
                         >
                             {
-                                declOfNum(item.count, playlistKindDecode[item.kind])
+                                declOfNum(item?.count || 0, playlistKindDecode[item?.kind] || ["", "", ""])
                             }
                         </Text>
                     </View>
@@ -2073,6 +2113,13 @@ export const Anime = (props) => {
                                         >
                                             <TouchableNativeFeedback
                                             background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                                            onPress={() => 
+                                                navigate("anime.playlists", { 
+                                                    animeId: animeData?.id, 
+                                                    animeTitle: animeData?.title,
+                                                    animePoster: animeData?.poster
+                                                })
+                                            }
                                             >
                                                 <View
                                                 style={{
@@ -2085,15 +2132,16 @@ export const Anime = (props) => {
                                                     style={{
                                                         width: 50,
                                                         height: 50,
-                                                        borderRadius: 100,
+                                                        borderRadius: 15,
                                                         justifyContent: "center",
                                                         alignItems: "center",
                                                         backgroundColor: accent + "10"                                 
                                                     }}
                                                     >
                                                         <Icon
-                                                        name="plus-square"
+                                                        name="plus"
                                                         color={accent}
+                                                        size={25}
                                                         />
                                                     </View>
 
@@ -2128,27 +2176,101 @@ export const Anime = (props) => {
 
                             {
                                 animeData?.status === "anons" ? (
-                                    <View>
-                                        <Text 
-                                        style={{ 
-                                            color: theme.anime.planned, 
-                                            fontSize: normalizeSize(21),
-                                            textAlign: "center",
-                                            fontWeight: "500"
+                                    <LinearGradient
+                                    colors={[
+                                        theme.anime.planned + "01",
+                                        theme.anime.planned + "30",
+                                        theme.anime.planned + "01",
+                                    ]}
+                                    start={{
+                                        x: 0.1,
+                                        y: 0
+                                    }}
+                                    end={{
+                                        x: 0.9,
+                                        y: 0
+                                    }}
+                                    style={{
+                                        margin: 10,
+                                        borderRadius: 12,
+                                        backgroundColor: theme.anime.planned + "10",
+                                        padding: 25
+                                    }}
+                                    >
+                                        <Text
+                                        style={{
+                                            color: theme.anime.planned,
+                                            fontWeight: "900",
+                                            fontSize: normalizeSize(42),
+                                            textAlign: "center"
                                         }}
                                         >
-                                            {stats?.planned}
+                                            {
+                                                stats?.planned || 0
+                                            }
                                         </Text>
 
                                         <Text
                                         style={{
                                             textAlign: "center",
-                                            marginTop: 10
+                                            color: theme.text_color,
+                                            fontSize: normalizeSize(14),
+                                            fontWeight: "300",
                                         }}
                                         >
-                                            Столько пользователей планирует смотреть это аниме
+                                            Столько пользователей планируют смотреть это аниме
                                         </Text>
-                                    </View>
+
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            justifyContent: "center",
+                                            marginTop: 15
+                                        }}
+                                        >
+                                            <View
+                                            style={{
+                                                backgroundColor: animeData?.inList === "planned" ? theme.anime.planned : "transparent",
+                                                borderRadius: 100,
+                                                overflow: "hidden",
+                                                borderWidth: animeData?.inList === "planned" ? 0 : 0.5,
+                                                borderColor: theme.text_color
+                                            }}
+                                            >
+                                                <TouchableNativeFeedback
+                                                background={TouchableNativeFeedback.Ripple("#fff5", false)}
+                                                onPress={() => setPlannedAnime()}
+                                                disabled={addToPlanneLoading}
+                                                >
+                                                    <View
+                                                    style={{
+                                                        paddingVertical: 5,
+                                                        paddingHorizontal: 15,
+                                                        flexDirection: "row",
+                                                        alignItems: "center",
+                                                    }}
+                                                    >
+                                                        <Icon
+                                                        name="calendar"
+                                                        size={14}
+                                                        color={theme.text_color}
+                                                        />
+
+                                                        <Text
+                                                        style={{
+                                                            color: theme.text_color,
+                                                            marginLeft: 8
+                                                        }}
+                                                        >
+                                                            {
+                                                                animeData?.inList === "planned" ? "Запланировано" : "Запланировать"
+                                                            }
+                                                        </Text>
+                                                    </View>
+                                                </TouchableNativeFeedback>
+                                            </View>
+                                        </View>
+                                    </LinearGradient>
                                 ) : (
                                     <View 
                                     style={{ 

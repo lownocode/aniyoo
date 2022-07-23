@@ -98,6 +98,7 @@ import Options from "./icons/Options";
 import VkVideoLogo from "./icons/VkVideoLogo";
 import YoutubeLogo from "./icons/YoutubeLogo";
 import SibnetLogo from "./icons/SibnetLogo";
+import Plus from "./icons/Plus";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -201,6 +202,7 @@ export const Icon = (props) => {
         "vk-video-logo": <VkVideoLogo {...props} />,
         "youtube-logo": <YoutubeLogo {...props} />,
         "sibnet-logo": <SibnetLogo {...props} />,
+        "plus": <Plus {...props} />,
     }[name];
 
     return (

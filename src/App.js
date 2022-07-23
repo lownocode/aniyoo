@@ -42,7 +42,8 @@ import {
     AnotherUserProfile,
     SearchAnime,
     SearchUsers,
-    UserFriends
+    UserFriends,
+    AnimePlaylists
 } from "./panels";
 import { Tabs } from './navigation/Tabs';
 
@@ -332,6 +333,12 @@ export default App = () => {
                       name="user.friends" 
                       options={{ animation: "none" }}
                       component={UserFriends}
+                      />
+
+                      <Stack.Screen 
+                      name="anime.playlists" 
+                      options={{ animation: "none" }}
+                      component={AnimePlaylists}
                       />
                     </Stack.Navigator>
                 </NavigationContainer>

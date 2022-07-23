@@ -285,8 +285,9 @@ export const AnimeVideoPlayer = (props) => {
         if(swipeBefore > x) {//swipe to left
             const swipeLeftDistance = (swipeStartPoint - x) / 10;
             
-            if(swipeLeftDistance < uncertainty) return;
+            if(swipeLeftDistance < uncertainty && swipeLeftDistance > 0) return;
 
+            setLoading(false);
             setPaused(true);
             setSwipeMode(true);
             setSwipeOffset(-swipeLeftDistance);
@@ -297,6 +298,7 @@ export const AnimeVideoPlayer = (props) => {
 
             if(swipeRightDistance < uncertainty && swipeRightDistance > 0) return;
             
+            setLoading(false);
             setPaused(true);
             setSwipeMode(true);
             setSwipeOffset(swipeRightDistance);
