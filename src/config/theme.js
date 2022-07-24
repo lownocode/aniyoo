@@ -65,7 +65,7 @@ const theme = {
             subtitle: "gray"
         },
         bottom_tabbar: {
-            background: "#ffffff",
+            background: "#fffffd",
             active_tab_background: palette.accent + "19",
             active_icon_color: palette.accent,
             border_color: palette.accent + "29"

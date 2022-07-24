@@ -19,6 +19,9 @@ import { normalizeSize } from "../functions";
 const Tab = createBottomTabNavigator();
 
 export const Tabs = () => {
+    const theme = useContext(ThemeContext);
+    const user = useContext(UserContext);
+
     const route = useRoute();
 
     const [ hideTabs, setHideTabs ] = useState(false);
@@ -39,102 +42,80 @@ export const Tabs = () => {
         };
     }, []);
 
-    const MyTabBar = ({ state, descriptors, navigation }) => {
-        const theme = useContext(ThemeContext);
-        const user = useContext(UserContext);
+    const CustomTabButton = (props) => {
+        const isFocused = props.accessibilityState.selected;
+        const routeName = props.to.split("/tabs")[1].split("/")[1].split("?")[0];
+
+        const routeNameDecode = {
+            "profile": "Профиль",
+            "notices": "Уведомления",
+            "lists": "Списки",
+            "search": "Поиск",
+            "home": "Главная",
+        }[routeName];
+
+        const iconName = {
+            "notices": "notifications",
+            "lists": "text-bullet-list",
+            "search": "search",
+            "home": "home",
+        }[routeName];
 
         return (
-            <View 
-            style={{
-                backgroundColor: theme.bottom_tabbar.background, 
-                height: normalizeSize(50), 
-                shadowColor: "transparent",
-                flexDirection: "row", 
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: theme.bottom_tabbar.border_color,
-                position: "absolute",
-                bottom: 10,
-                right: 13,
-                left: 13,
-                borderRadius: 12,
-            }}
+            <TouchableNativeFeedback 
+            onPress={() => props.onPress()}
+            delayPressIn={0}
+            background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
+            disabled={isFocused}
             >
-                {
-                    state.routes.map((route, index) => {
-                        const { options } = descriptors[route.key];
-                
-                        const isFocused = state.index === index;
-                
-                        const onPress = () => {
-                            const event = navigation.emit({
-                                type: 'tabPress',
-                                target: route.key,
-                                canPreventDefault: true,
-                            });
-                
-                            if (!isFocused && !event.defaultPrevented) {
-                                navigation.navigate({ name: route.name, merge: true });
-                            }
-                        };
-
-                        return (
-                            <TouchableNativeFeedback 
-                            key={"tab-" + index}
-                            onPress={() => onPress()}
-                            delayPressIn={0}
-                            background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
-                            >
-                                <View  
-                                style={{
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: 12,
-                                    paddingVertical: 7,
-                                    backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
-                                    flex: 1,
-                                    height: "100%"
-                                }}
-                                >
-                                    {
-                                        route.name === "profile" ? (
-                                            <Avatar
-                                            url={user?.photo}
-                                            size={isFocused ? 20 : 25}
-                                            />
-                                        ) : (
-                                            <Icon
-                                            name={options.icon}
-                                            size={isFocused ? 17 : 20}
-                                            color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
-                                            />
-                                        )
-                                    }
-
-                                    {
-                                        isFocused && (
-                                            <Text
-                                            numberOfLines={1}
-                                            style={{
-                                                marginHorizontal: 5,
-                                                color: theme.bottom_tabbar.active_icon_color,
-                                                fontWeight: "500",
-                                                fontSize: 12
-                                            }}
-                                            >
-                                                {
-                                                    options.label
-                                                }
-                                            </Text> 
-                                        )
-                                    }
-                                    
-                                </View>
-                            </TouchableNativeFeedback>
+                <View  
+                style={{
+                    alignItems: "center",
+                    justifyContent: isFocused ? "space-evenly" : "center",
+                    borderRadius: 12,
+                    paddingVertical: 7,
+                    backgroundColor: isFocused ? theme.bottom_tabbar.active_tab_background : "transparent",
+                    flex: 1,
+                    marginVertical: 5,
+                    marginLeft: routeName === "home" && isFocused ? 5 : 0,
+                    marginRight: routeName === "profile" && isFocused ? 5 : 0
+                }}
+                >
+                    {
+                        routeName === "profile" ? (
+                            <Avatar
+                            url={user?.photo}
+                            size={isFocused ? 20 : 25}
+                            />
+                        ) : (
+                            <Icon
+                            name={iconName}
+                            size={isFocused ? 17 : 20}
+                            color={isFocused ? theme.bottom_tabbar.active_icon_color : "gray"}
+                            />
                         )
-                    })
-                }
-            </View>
+                    }
+
+                    {
+                        isFocused && (
+                            <Text
+                            numberOfLines={1}
+                            style={{
+                                marginHorizontal: 5,
+                                color: theme.bottom_tabbar.active_icon_color,
+                                fontWeight: "500",
+                                fontSize: normalizeSize(10)
+                            }}
+                            >
+                                {
+                                    routeNameDecode
+                                }
+                            </Text> 
+                        )
+                    }
+                    
+                </View>
+            </TouchableNativeFeedback>
         )
     };
 
@@ -142,16 +123,19 @@ export const Tabs = () => {
         <Tab.Navigator
         screenOptions={{
             headerShown: false,
+            tabBarButton: (props) => <CustomTabButton {...props} />,
+            tabBarStyle: {
+                backgroundColor: theme.bottom_tabbar.background, 
+                height: normalizeSize(50), 
+                shadowColor: "transparent",
+                borderTopWidth: 0 
+            },
+            tabBarHideOnKeyboard: true
         }}
-        tabBar={props => hideTabs ? null : <MyTabBar {...props} />}
         initialRouteName="profile"
         >
             <Tab.Screen
             name="home"
-            options={{
-                label: "Главная",
-                icon: "home",
-            }}
             >
                 {
                     props => <Home {...props} />
@@ -160,10 +144,6 @@ export const Tabs = () => {
 
             <Tab.Screen
             name="search"
-            options={{
-                label: "Поиск",
-                icon: "search",
-            }}
             >
                 {
                     props => <Search {...props} />
@@ -172,10 +152,6 @@ export const Tabs = () => {
 
             <Tab.Screen
             name="lists"
-            options={{
-                label: "Списки",
-                icon:"text-bullet-list",
-            }}
             >
                 {
                     props => <Lists {...props} />
@@ -184,10 +160,6 @@ export const Tabs = () => {
 
             <Tab.Screen
             name="notices"
-            options={{
-                label: "Уведомления",
-                icon: "notifications",
-            }}
             >
                 {
                     props => <Notices {...props} />
@@ -196,9 +168,6 @@ export const Tabs = () => {
 
             <Tab.Screen
             name="profile"
-            options={{
-                label: "Профиль",
-            }}
             initialParams={{
                 userData: route.params?.userData
             }}

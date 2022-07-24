@@ -69,21 +69,21 @@ export const MyAnimeList = (props) => {
             centered={false}
             maxTitleLines={2}
             before={
-                    <Image
-                    resizeMethod="resize"
-                    source={{
-                        uri: item?.poster
-                    }}
-                    style={{
-                        width: normalizeSize(70),
-                        height: normalizeSize(105),
-                        resizeMode: "cover",
-                        borderRadius: 7,
-                        borderColor: theme.divider_color,
-                        borderWidth: 0.5,
-                        backgroundColor: theme.divider_color,
-                    }}
-                    />
+                <Image
+                resizeMethod="resize"
+                source={{
+                    uri: item?.poster
+                }}
+                style={{
+                    width: normalizeSize(70),
+                    height: normalizeSize(105),
+                    resizeMode: "cover",
+                    borderRadius: 7,
+                    borderColor: theme.divider_color,
+                    borderWidth: 0.5,
+                    backgroundColor: theme.divider_color,
+                }}
+                />
             }
             subtitle={
                 <View>

@@ -99,6 +99,9 @@ import VkVideoLogo from "./icons/VkVideoLogo";
 import YoutubeLogo from "./icons/YoutubeLogo";
 import SibnetLogo from "./icons/SibnetLogo";
 import Plus from "./icons/Plus";
+import RutubeLogo from "./icons/RutubeLogo";
+import VimeoLogo from "./icons/VimeoLogo";
+import Anime365Logo from "./icons/Anime365Logo";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -203,6 +206,9 @@ export const Icon = (props) => {
         "youtube-logo": <YoutubeLogo {...props} />,
         "sibnet-logo": <SibnetLogo {...props} />,
         "plus": <Plus {...props} />,
+        "rutube-logo": <RutubeLogo {...props} />,
+        "vimeo-logo": <VimeoLogo {...props} />,
+        "anime365-logo": <Anime365Logo {...props} />,
     }[name];
 
     return (

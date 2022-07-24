@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useCallback } from "react";
 import { 
     Image, 
     ScrollView, 
@@ -9,7 +9,8 @@ import {
     StatusBar,
     TouchableNativeFeedback,
     Dimensions,
-    Linking
+    Linking,
+    RefreshControl
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -18,7 +19,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, ContentHeader, Header, Icon, Placeholder } from "../../components";
+import { Cell, ContentHeader, Icon, Placeholder } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
 import { normalizeSize, sleep, storage } from "../../functions";
@@ -30,13 +31,12 @@ export const AnimePlaylists = (props) => {
     const { 
         navigation: {
             goBack,
-            navigate
         },
-        navigation
     } = props;
 
+    const [ refreshing, setRefreshing ] = useState(false);
     const [ loading, setLoading ] = useState(true);
-    const [ videos, setVideos ] = useState({});
+    const [ playlists, setPlaylists ] = useState({});
     const [ images, setImages ] = useState([]);
     const [ scrollY, setScrollY ] = useState(0);
     const [ scrolledSelect, setScrolledSelect ] = useState(null);
@@ -44,7 +44,23 @@ export const AnimePlaylists = (props) => {
     const route = useRoute();
     const scrollViewRef = useRef();
 
-    const getVideos = async () => {
+    const playlistKindDecode = {
+        "pv": "трейлеры",
+        "op": "опенинги",
+        "ed": "эндинги",
+        "op_ed_clip": "музыкальные клипы",
+        "episode_preview": "превью",
+        "other": "другие",
+        "clip": "отрывки",
+        "character_trailer": "трейлеры персонажей"
+    };
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        getPlaylists();
+    }, []);
+
+    const getPlaylists = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.getPlaylist", {
@@ -65,7 +81,7 @@ export const AnimePlaylists = (props) => {
                 outputObject[kind].push(...similarities);
             }
 
-            setVideos(outputObject);
+            setPlaylists(outputObject);
 
             const images = data.map((item) => {
                 return item.video.image;
@@ -78,6 +94,7 @@ export const AnimePlaylists = (props) => {
         })
         .finally(() => {
             setLoading(false);
+            setRefreshing(false);
         });
     }; 
 
@@ -89,13 +106,25 @@ export const AnimePlaylists = (props) => {
     }, [scrollY]);
 
     useEffect(() => {
-        getVideos();
+        getPlaylists();
     }, []);
 
     const renderVideos = (item, index) => {
         return (
             <Cell
-            title={item.title}
+            title={
+                item?.title ? item.title : (
+                    <Text
+                    style={{
+                        fontSize: normalizeSize(14),
+                        color: theme.text_secondary_color
+                    }}
+                    >
+                        Название не указано
+                    </Text>
+                )
+            }
+            maxTitleLines={2}
             centered={false}
             key={"video-" + index}
             onPress={() => Linking.openURL(item?.video?.player)}
@@ -107,7 +136,8 @@ export const AnimePlaylists = (props) => {
                 style={{
                     width: normalizeSize(125),
                     height: normalizeSize(75),
-                    borderRadius: 8
+                    borderRadius: 8,
+                    backgroundColor: theme.cell.press_background
                 }}
                 />
             }
@@ -125,6 +155,9 @@ export const AnimePlaylists = (props) => {
                                 "vk": "vk-video-logo",
                                 "youtube": "youtube-logo",
                                 "sibnet": "sibnet-logo",
+                                "rutube": "rutube-logo",
+                                "vimeo": "vimeo-logo",
+                                "smotret_anime": "anime365-logo"
                             }[item.video.hosting]
                         }
                         />
@@ -141,6 +174,9 @@ export const AnimePlaylists = (props) => {
                                     "vk": "VK Video",
                                     "youtube": "YouTube",
                                     "sibnet": "Sibnet",
+                                    "rutube": "Rutube",
+                                    "vimeo": "Vimeo",
+                                    "smotret_anime": "Anime365"
                                 }[item.video.hosting]
                             }
                         </Text>
@@ -173,6 +209,35 @@ export const AnimePlaylists = (props) => {
         )
     };
 
+    const renderPlaylists = (playlistKeys) => playlistKeys.map((key) => {
+        return (
+            <View
+            key={"playlist-" + key}
+            style={{ 
+                marginBottom: 30, 
+                backgroundColor: scrolledSelect === key ? theme.divider_color : "transparent" 
+            }}
+            onLayout={(e) => {
+                if(route.params?.selectKind !== key) return;
+
+                setScrollY(e.nativeEvent.layout.y);
+                setScrolledSelect(key);
+                sleep(2).then(() => setScrolledSelect(false));  
+            }}
+            >
+                <ContentHeader
+                text={playlistKindDecode[key]}
+                indents
+                textStyle={{ color: theme.text_color }}
+                />
+
+                {
+                    playlists?.[key]?.map(renderVideos)
+                }
+            </View>
+        )
+    });
+
     const HeaderImage = ({ style }) => {
         const randomImage = () => {
             const randomIndex = Math.abs(Math.round(0 - 0.5 + Math.random() * ((images.length - 1) - 0 + 1)));
@@ -190,6 +255,7 @@ export const AnimePlaylists = (props) => {
                 marginHorizontal: 2.5,
                 borderRadius: 10,
                 marginBottom: 5,
+                backgroundColor: theme.cell.press_background,
                 ...style
             }}
             />
@@ -386,153 +452,21 @@ export const AnimePlaylists = (props) => {
                     showsVerticalScrollIndicator={false}
                     overScrollMode="never"
                     ref={scrollViewRef}
+                    refreshControl={
+                        <RefreshControl
+                        progressBackgroundColor={theme.refresh_control_background}
+                        colors={[theme.accent]}
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        />
+                    }
                     >
                         {
                             renderHeader()
                         }
 
                         {
-                            videos?.pv?.length >= 1 && (
-                                <View
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "pv" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "pv") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("pv");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="трейлеры"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.pv?.map(renderVideos)
-                                    }
-                                </View>
-                            )
-                        }
-
-                        {
-                            videos?.op?.length >= 1 && (
-                                <View
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "op" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "op") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("op");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="Опенинги"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.op?.map(renderVideos)
-                                    }
-                                </View>
-                            )
-                        }
-
-                        {
-                            videos?.ed?.length >= 1 && (
-                                <View 
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "ed" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "ed") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("ed");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="эндинги"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.ed?.map(renderVideos)
-                                    }
-                                </View>
-                            )
-                        }
-
-                        {
-                            videos?.episode_preview?.length >= 1 && (
-                                <View 
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "episode_preview" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "episode_preview") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("episode_preview");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="Превью"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.episode_preview?.map(renderVideos)
-                                    }
-                                </View>
-                            )
-                        }
-
-                        {
-                            videos?.op_ed_clip?.length >= 1 && (
-                                <View
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "op_ed_clip" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "op_ed_clip") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("op_ed_clip");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="Музыкальные клипы"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.op_ed_clip?.map(renderVideos)
-                                    }
-                                </View>
-                            )
-                        }
-                                
-                        {
-                            videos?.other?.length >= 1 && (
-                                <View 
-                                style={{ marginBottom: 30, backgroundColor: scrolledSelect === "other" ? theme.divider_color : "transparent" }}
-                                onLayout={(e) => {
-                                    if(route.params?.selectKind !== "other") return;
-
-                                    setScrollY(e.nativeEvent.layout.y);
-                                    setScrolledSelect("other");
-                                    sleep(2).then(() => setScrolledSelect(false));  
-                                }}
-                                >
-                                    <ContentHeader
-                                    text="Другие"
-                                    indents
-                                    textStyle={{ color: theme.text_color }}
-                                    />
-                                    {
-                                        videos?.other?.map(renderVideos)
-                                    }
-                                </View>
-                            )
+                            renderPlaylists(Object.keys(playlists))
                         }
                     </ScrollView>
                 )

@@ -8,8 +8,7 @@ import {
     TouchableNativeFeedback, 
     StyleSheet, 
     Dimensions, 
-    ToastAndroid,
-    Image,
+    Image
 } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
@@ -112,9 +111,28 @@ export const Profile = props => {
         });
     }; 
 
+    const getBrowsingHistory = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        
+        axios.post("/lists.get", {
+            status: "history"
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(({ data }) => {
+            setBrowsingHistory(data.list);
+        })
+        .catch(({ response: { data } }) => {
+            console.log(data);
+        });
+    };
+
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
             getUserData();
+            getBrowsingHistory();
         });
     
         return willFocusSubscription;
@@ -626,8 +644,6 @@ export const Profile = props => {
                     )
                 }
             </View>
-
-            <Divider />
         </View>
     );
 
@@ -757,15 +773,207 @@ export const Profile = props => {
         </View>
     );
 
-    const renderBrowsingHistory = () => {
-        if(browsingHistory.length === 0) { 
-            return (
-                <Placeholder
-                title="Пусто"
-                subtitle="Вы ещё ничего не посмотрели"
+    const renderBrowsingHistoryItems = (item) => {
+        return (
+            <Cell
+            key={"anime-" + item.anime.id}
+            centered={false}
+            title={item?.anime?.title}
+            maxTitleLines={2}
+            onPress={() => navigate("anime", { animeData: { id: item.anime.id } })}
+            subtitle={
+                <View
+                style={{
+                    marginTop: 5
+                }}
+                >
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="play"
+                        color={theme.text_secondary_color}
+                        size={9}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                item?.episode
+                            } серия
+                        </Text>
+                    </View>
+
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="clock-outline"
+                        color={theme.text_secondary_color}
+                        size={12}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                dayjs().to(dayjs(item.updatedAt))
+                            }
+                        </Text>
+                    </View>
+
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="mic-outline"
+                        color={theme.text_secondary_color}
+                        size={12}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                item?.translation || "Неизвестна"
+                            }
+                        </Text>
+                    </View>
+                </View>
+            }
+            before={
+                <Image
+                resizeMethod="resize"
+                source={{
+                    uri: item?.anime?.poster
+                }}
+                style={{
+                    width: normalizeSize(60),
+                    height: normalizeSize(80),
+                    resizeMode: "cover",
+                    borderRadius: 7,
+                    borderColor: theme.divider_color,
+                    borderWidth: 0.5,
+                    backgroundColor: theme.divider_color,
+                }}
                 />
-            )
-        }
+            }
+            />
+        )
+    };
+
+    const renderBrowsingHistory = () => {
+        return (
+            <View
+            style={{
+                marginTop: 10,
+            }}
+            >
+                <View
+                style={{
+                    backgroundColor: theme.text_secondary_color + "10",
+                    borderRadius: 100,
+                    marginHorizontal: 10,
+                    marginBottom: 10,
+                    overflow: "hidden"
+                }}
+                >
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                    >
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                        >
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginVertical: 8,
+                                marginHorizontal: 10,
+                            }}
+                            >
+                                <Icon
+                                name="replay"
+                                color={theme.text_secondary_color}
+                                />
+
+                                <Text
+                                style={{
+                                    color: theme.text_secondary_color,
+                                    fontWeight: "500",
+                                    fontSize: normalizeSize(12),
+                                    marginLeft: 8
+                                }}
+                                >
+                                    История просмотров
+                                </Text>
+                            </View>
+
+                            <View
+                            style={{
+                                borderRadius: 100,
+                                overflow: "hidden"
+                            }}
+                            >
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 10
+                                }}
+                                >
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color
+                                    }}
+                                    >
+                                        Все
+                                    </Text>
+
+                                    <Icon
+                                    name="chevron-right"
+                                    color={theme.text_secondary_color}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableNativeFeedback>
+                </View>
+
+                {
+                    browsingHistory.length === 0 ? (
+                        <Placeholder
+                        title="Пусто"
+                        subtitle="Вы ещё ничего не посмотрели"
+                        />
+                    ) : browsingHistory.map(renderBrowsingHistoryItems)
+                }
+            </View>
+        )
     };
 
     return (
@@ -899,13 +1107,7 @@ export const Profile = props => {
                 {userInfoRender()}  
                 {statisticsRender()}
                 {renderBrowsingHistory()}
-
-                <View
-                style={{marginBottom: 100}}
-                />  
             </ScrollView>
-
-            <View style={{ marginBottom: 60 }}/>
         </GestureHandlerRootView>
     )
 };

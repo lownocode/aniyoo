@@ -71,7 +71,7 @@ export default App = () => {
             return setDarkThemeMode(true);
         }
 
-        changeNavigationBarColor(darkMode ? theme.DARK.background_content : theme.LIGHT.background_content, !darkMode, true);
+        changeNavigationBarColor(darkMode ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !darkMode, true);
         setDarkThemeMode(darkMode);
     }; 
 
@@ -93,7 +93,7 @@ export default App = () => {
             if(data.type === "changeTheme") {
                 storage.setItem("DARK_THEME_MODE", data.value);
 
-                changeNavigationBarColor(data.value ? theme.DARK.background_content : theme.LIGHT.background_content, !data.value, true);
+                changeNavigationBarColor(data.value ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !data.value, true);
                 setDarkThemeMode(data.value);
                 return;
             }

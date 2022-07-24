@@ -104,7 +104,9 @@ export const Anime = (props) => {
         "ed": ["эндинг", "эндинга", "эндингов"],
         "op_ed_clip": ["музыкальный клип", "музыкальных клипа", "музыкальных клипов"],
         "episode_preview": ["превью", "превью", "превью"],
-        "other": ["другое", "других", "других"]
+        "other": ["другое", "других", "других"],
+        "clip": ["отрывок", "отрывка", "отрывков"],
+        "character_trailer": ["трейлер персонажей", "трейлера персонажей", "трейлеров персонажей"]
     };
 
     const getAnimeData = async (id) => {
@@ -538,6 +540,30 @@ export const Anime = (props) => {
                                                             size={25}
                                                             />
                                                         </View>
+                                                    ),
+                                                    "rutube": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="rutube-logo"
+                                                            size={25}
+                                                            />
+                                                        </View>
+                                                    ),
+                                                    "vimeo": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="vimeo-logo"
+                                                            size={25}
+                                                            />
+                                                        </View>
+                                                    ),
+                                                    "smotret_anime": (
+                                                        <View style={{ marginHorizontal: 8 }}>
+                                                            <Icon
+                                                            name="anime365-logo"
+                                                            size={25}
+                                                            />
+                                                        </View>
                                                     )
                                                 }[hosting]
                                             }
@@ -573,7 +599,7 @@ export const Anime = (props) => {
                         }}
                         >
                             {
-                                declOfNum(item?.count || 0, playlistKindDecode[item?.kind] || ["", "", ""])
+                                declOfNum(item?.count || 0, playlistKindDecode[item?.kind] || [item?.kind, item?.kind, item?.kind])
                             }
                         </Text>
                     </View>
@@ -1946,7 +1972,7 @@ export const Anime = (props) => {
                                         </Text>
 
                                         {
-                                            hideDescription && (
+                                            (hideDescription && descriptionLinesCount >= 6) && (
                                                 <TouchableWithoutFeedback
                                                 onPress={() => setHideDescription(!hideDescription)}
                                                 >
@@ -1971,7 +1997,7 @@ export const Anime = (props) => {
                                                     }}
                                                     />
                                                 </TouchableWithoutFeedback>
-                                            )
+                                            ) 
                                         }
                                     </View>
                                 ) : (
@@ -2019,7 +2045,7 @@ export const Anime = (props) => {
                                             style={{
                                                 flexDirection: "row",
                                                 alignItems: "center",
-                                                paddingBottom: 10,
+                                                paddingVertical: 10,
                                                 justifyContent: "center"
                                             }}
                                             >
