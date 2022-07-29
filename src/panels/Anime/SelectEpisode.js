@@ -131,7 +131,7 @@ export const AnimeSelectEpisode = (props) => {
                                     paddingHorizontal: 5,
                                     paddingVertical: 2,
                                     borderRadius: 5,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     marginRight: 10,
                                     color: theme.text_secondary_color
                                 }}
@@ -147,7 +147,7 @@ export const AnimeSelectEpisode = (props) => {
                                     paddingHorizontal: 5,
                                     paddingVertical: 2,
                                     borderRadius: 5,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     color: theme.text_secondary_color
                                 }}
                                 >
@@ -189,7 +189,7 @@ export const AnimeSelectEpisode = (props) => {
                             marginRight: 10,
                             fontWeight: "300",
                             color: viewed_up_to >= 1 ? theme.accent : theme.text_secondary_color,
-                            fontSize: normalizeSize(10)
+                            fontSize: 12
                         }}
                         >
                             {

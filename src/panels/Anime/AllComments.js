@@ -283,7 +283,7 @@ export const AnimeAllComments = (props) => {
                                         style={{
                                             textAlign: "center",
                                             color: theme.text_secondary_color,
-                                            fontSize: normalizeSize(10)
+                                            fontSize: 12
                                         }}
                                         >
                                             Автор указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
@@ -358,7 +358,7 @@ export const AnimeAllComments = (props) => {
                                                     style={{
                                                         textAlign: "center",
                                                         color: theme.text_secondary_color,
-                                                        fontSize: normalizeSize(10)
+                                                        fontSize: 12
                                                     }}
                                                     >
                                                         Нажмите, чтобы скрыть
@@ -426,7 +426,7 @@ export const AnimeAllComments = (props) => {
                                     })}
                                     size={30}
                                     textStyle={{
-                                        fontSize: normalizeSize(11.5)
+                                        fontSize: 12
                                     }}
                                     before={
                                         <Icon
@@ -637,7 +637,7 @@ export const AnimeAllComments = (props) => {
                                         style={{ 
                                             marginLeft: 5, 
                                             color: theme.text_secondary_color, 
-                                            fontSize: normalizeSize(8) 
+                                            fontSize: 10
                                         }}>
                                             Загрузка комментариев...
                                         </Text>

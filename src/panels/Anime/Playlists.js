@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState, useCallback } from "react";
+import React, { useContext, useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { 
     Image, 
     ScrollView, 
@@ -45,14 +45,14 @@ export const AnimePlaylists = (props) => {
     const scrollViewRef = useRef();
 
     const playlistKindDecode = {
-        "pv": "трейлеры",
-        "op": "опенинги",
-        "ed": "эндинги",
-        "op_ed_clip": "музыкальные клипы",
-        "episode_preview": "превью",
-        "other": "другие",
-        "clip": "отрывки",
-        "character_trailer": "трейлеры персонажей"
+        "pv": "Трейлеры",
+        "op": "Опенинги",
+        "ed": "Эндинги",
+        "op_ed_clip": "Музыкальные клипы",
+        "episode_preview": "Превью",
+        "other": "Другие",
+        "clip": "Отрывки",
+        "character_trailer": "Трейлеры персонажей"
     };
 
     const onRefresh = useCallback(() => {
@@ -113,10 +113,10 @@ export const AnimePlaylists = (props) => {
         return (
             <Cell
             title={
-                item?.title ? item.title : (
+                item?.title || (
                     <Text
                     style={{
-                        fontSize: normalizeSize(14),
+                        fontSize: 17,
                         color: theme.text_secondary_color
                     }}
                     >
@@ -134,8 +134,8 @@ export const AnimePlaylists = (props) => {
                     uri: item.video.image,
                 }}
                 style={{
-                    width: normalizeSize(125),
-                    height: normalizeSize(75),
+                    width: 185,
+                    height: 105,
                     borderRadius: 8,
                     backgroundColor: theme.cell.press_background
                 }}
@@ -209,7 +209,9 @@ export const AnimePlaylists = (props) => {
         )
     };
 
-    const renderPlaylists = (playlistKeys) => playlistKeys.map((key) => {
+    const renderPlaylists = useMemo(() => Object.keys(playlists).map((key) => {
+        if(!playlistKindDecode[key]) return;
+        
         return (
             <View
             key={"playlist-" + key}
@@ -227,8 +229,13 @@ export const AnimePlaylists = (props) => {
             >
                 <ContentHeader
                 text={playlistKindDecode[key]}
-                indents
-                textStyle={{ color: theme.text_color }}
+                icon={
+                    <Icon
+                    name="playlist-play"
+                    size={12}
+                    color={theme.text_secondary_color}
+                    />
+                }
                 />
 
                 {
@@ -236,7 +243,7 @@ export const AnimePlaylists = (props) => {
                 }
             </View>
         )
-    });
+    }), [playlists]);
 
     const HeaderImage = ({ style }) => {
         const randomImage = () => {
@@ -256,13 +263,13 @@ export const AnimePlaylists = (props) => {
                 borderRadius: 10,
                 marginBottom: 5,
                 backgroundColor: theme.cell.press_background,
-                ...style
+                ...style,
             }}
             />
         )
     };
 
-    const renderHeader = () => {
+    const renderHeader = useMemo(() => {
         return (
             <View
             style={{ 
@@ -340,16 +347,22 @@ export const AnimePlaylists = (props) => {
                     theme.background_content + "50",
                     theme.background_content
                 ]}>
-                    <Image
-                    source={{
-                        uri: route.params?.animePoster
-                    }}
+                    <View
                     style={{
-                        width: normalizeSize(150),
-                        height: normalizeSize(200),
-                        borderRadius: 10
+                        borderRadius: 10,
+                        overflow: "hidden"
                     }}
-                    />
+                    >
+                        <Image
+                        source={{
+                            uri: route.params?.animePoster
+                        }}
+                        style={{
+                            width: 230,
+                            height: 330,
+                        }}
+                        />
+                    </View>
 
                     <View
                     style={{
@@ -362,7 +375,7 @@ export const AnimePlaylists = (props) => {
                         style={{
                             color: theme.text_color,
                             fontWeight: "500",
-                            fontSize: normalizeSize(16),
+                            fontSize: 20,
                             textAlign: "center"
                         }}
                         >
@@ -383,7 +396,7 @@ export const AnimePlaylists = (props) => {
                         style={{
                             color: theme.text_color,
                             fontWeight: "600",
-                            fontSize: normalizeSize(17),
+                            fontSize: 22,
                             marginBottom: 15
                         }}
                         >
@@ -398,7 +411,7 @@ export const AnimePlaylists = (props) => {
                 </LinearGradient>
             </View>
         )
-    };
+    }, [playlists]);
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
@@ -409,8 +422,8 @@ export const AnimePlaylists = (props) => {
                 left: 20,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: normalizeSize(33),
-                height: normalizeSize(33),
+                width: 45,
+                height: 45,
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 100,
@@ -462,11 +475,11 @@ export const AnimePlaylists = (props) => {
                     }
                     >
                         {
-                            renderHeader()
+                            renderHeader
                         }
 
                         {
-                            renderPlaylists(Object.keys(playlists))
+                            renderPlaylists
                         }
                     </ScrollView>
                 )

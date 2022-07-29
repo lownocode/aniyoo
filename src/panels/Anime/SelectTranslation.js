@@ -140,7 +140,7 @@ export const AnimeSelectTranslation = (props) => {
                             marginRight: 10,
                             fontWeight: "300",
                             color: theme.text_secondary_color,
-                            fontSize: normalizeSize(10)
+                            fontSize: 12
                         }}
                         >
                             {

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useContext, useState, useRef, useEffect, useMemo } from "react";
 import { 
     View,
     StatusBar,
@@ -20,6 +20,7 @@ import {
 
 import {
     normalizeSize,
+    removeArrayDuplicates,
     storage,
 } from "../../functions";
 
@@ -60,11 +61,11 @@ const SearchInput = (props) => {
 
             <TextInput
             value={value}
-            placeholder="Поиск аниме-сериалов и фильмов"
+            placeholder="Поиск аниме"
             style={{
                 height: 40,
                 flex: 1,
-                color: theme.text_color
+                color: theme.text_color,
             }}
             placeholderTextColor={theme.text_secondary_color}
             onChangeText={onChangeText}
@@ -138,7 +139,7 @@ export const SearchAnime = (props) => {
             }
         })
         .then(({ data }) => {
-            setFindedAnimes(data.animes);
+            setFindedAnimes(data);
         })
         .catch(({ response }) => {
             console.log(JSON.stringify(response, null, "\t"))
@@ -154,14 +155,24 @@ export const SearchAnime = (props) => {
             order: {
                 season: 0
             },
-            offset: 15,
+            offset: findedAnimes.animes.length,
         }, {
             headers: {
                 "Authorization": sign,
             }
         })
         .then(({ data }) => {
-            setFindedAnimes(findedAnimes.concat(data.animes));
+            console.log(data.animes.length)
+            let all = findedAnimes.animes;
+            all = all.concat(data.animes);
+
+            console.log(`с дубликатами: `, all.length)
+            console.log(`без дубликатов: `, removeArrayDuplicates(findedAnimes.animes.concat(data.animes)).map(a => {return a.id}).length)
+            
+            setFindedAnimes({
+                count: data.count,
+                animes: removeArrayDuplicates(findedAnimes.animes.concat(data.animes))
+            });
         });
     };
 
@@ -326,7 +337,7 @@ export const SearchAnime = (props) => {
                     />
                 ) : (
                     <SearchAnimeList
-                    animes={findedAnimes}
+                    list={findedAnimes}
                     loadMoreAnimes={loadMoreAnimes}
                     navigation={navigation}
                     />

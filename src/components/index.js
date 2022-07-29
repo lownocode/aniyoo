@@ -15,3 +15,4 @@ export * from "./Icon/Icon";
 export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";
 export * from "./FormattedText";
+export * from "./Lists/CommentsList";

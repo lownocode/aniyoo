@@ -7,6 +7,9 @@ export * from "./Authorization/RegistrationConfirmation";
 
 export * from "./AnotherUser/Profile";
 
+export * from "./GeneralUser/BrowsingHostory";
+export * from "./GeneralUser/Comments";
+
 export * from "./Search/Anime";
 export * from "./Search/Users";
 

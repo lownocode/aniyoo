@@ -9,12 +9,14 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
+    Image
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 import { PieChart } from "react-native-svg-charts";
+import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -27,13 +29,14 @@ import {
     Avatar,
     Button,
     Cell,
+    ContentHeader,
     Divider,
     Header,
     Icon,
     Placeholder,
+    PressIcon
 } from "../../components";
 import {
-    FriendActions,
     SocialNetworks
 } from "../../modals";
 
@@ -61,7 +64,9 @@ export const AnotherUserProfile = (props) => {
     const [ refreshing, setRefreshing ] = useState(false);
     const [ userData, setUserData ] = useState({});
     const [ modalContent, setModalContent ] = useState(null);
+    const [ popupVisible, setPopupVisible ] = useState(false);
     const [ friends, setFriends ] = useState([]);
+    const [ browsingHistory, setBrowsingHistory ] = useState([]);
 
     const modalRef = useRef();
 
@@ -85,6 +90,8 @@ export const AnotherUserProfile = (props) => {
             if(data?.friendsCount >= 1) {
                 getFriends();
             }
+            console.log(data.relation)
+            getBrowsingHistory();
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
@@ -99,7 +106,8 @@ export const AnotherUserProfile = (props) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
         axios.post("/friends.get", {
-            userId: route.params?.userId
+            userId: route.params?.userId,
+            order: "online"
         }, {
             headers: {
                 "Authorization": sign,
@@ -107,6 +115,26 @@ export const AnotherUserProfile = (props) => {
         })
         .then(({ data }) => {
             setFriends(data);
+        })
+        .catch(({ response: { data } }) => {
+            console.log(data);
+        });
+    };
+
+    const getBrowsingHistory = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+        
+        axios.post("/lists.get", {
+            status: "history",
+            limit: 5,
+            userId: route.params?.userId
+        }, {
+            headers: {
+                "Authorization": sign,
+            }
+        })
+        .then(({ data }) => {
+            setBrowsingHistory(data.list);
         })
         .catch(({ response: { data } }) => {
             console.log(data);
@@ -212,8 +240,10 @@ export const AnotherUserProfile = (props) => {
             key={"friend-" + item.id}
             style={{
                 overflow: "hidden",
-                borderRadius: 8,
-                marginHorizontal: 3,
+                borderTopLeftRadius: 100,
+                borderTopRightRadius: 100,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20
             }}
             >
                 <TouchableNativeFeedback
@@ -236,7 +266,7 @@ export const AnotherUserProfile = (props) => {
                     }}
                     >
                         <Avatar
-                        size={40}
+                        size={55}
                         url={item.photo}
                         online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
@@ -294,7 +324,7 @@ export const AnotherUserProfile = (props) => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.subscribers >= 1 ? theme.accent : theme.divider_color,
+                    backgroundColor: userData?.subscribersCount >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -307,7 +337,7 @@ export const AnotherUserProfile = (props) => {
                         textAlignVertical: "center"
                     }}
                     >
-                        {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["подписчик","подписчика","подписчиков"])}
+                        {userData?.subscribersCount || 0} {declOfNum(userData?.subscribersCount, ["подписчик","подписчика","подписчиков"])}
                     </Text>
 
                     <Icon
@@ -326,6 +356,8 @@ export const AnotherUserProfile = (props) => {
                     data={friends}
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={friendsListRender}
+                    showsHorizontalScrollIndicator={false}
+                    overScrollMode="never"
                     />
                 ) : (
                     <Placeholder
@@ -391,11 +423,111 @@ export const AnotherUserProfile = (props) => {
             before={
                 <Avatar
                 url={userData?.photo || ""}
-                size={60}
+                size={80}
                 borderRadius={29}
                 />
             }
             />
+
+            {
+                userData?.online?.state === "watching" && (
+                    <View>
+                        <TouchableNativeFeedback
+                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                        onPress={() => navigate("anime", { animeData: userData?.online?.payload?.anime })}
+                        >
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                paddingHorizontal: 15,
+                                paddingVertical: 5,
+                                // alignItems: "center"
+                            }}
+                            >
+                                <View
+                                style={{
+                                    marginRight: 10,
+                                    alignItems: "center"
+                                }}
+                                >
+                                    <Image
+                                    source={{
+                                        uri: userData?.online?.payload?.anime?.poster
+                                    }}
+                                    style={{
+                                        width: 25,
+                                        height: 30,
+                                        borderRadius: 3
+                                    }}
+                                    />
+
+                                    <Text
+                                    style={{
+                                        fontSize: 8,
+                                        textAlign: "center",
+                                        color: theme.text_secondary_color
+                                    }}
+                                    >
+                                        Смотрю
+                                    </Text>
+                                </View>
+
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    flex: 1,
+                                    marginRight: 5
+                                }}
+                                >
+                                    <View>
+                                        <Text
+                                        numberOfLines={1}
+                                        style={{
+                                            color: theme.text_color,
+                                            fontWeight: "500",
+                                            fontSize: 15
+                                        }}
+                                        >
+                                            {
+                                                userData?.online?.payload?.anime?.title
+                                            }  
+                                        </Text>
+
+                                        <Text
+                                        numberOfLines={1}
+                                        style={{
+                                            color: theme.text_secondary_color,
+                                            fontSize: 12,
+                                        }}
+                                        >
+                                            {
+                                                userData?.online?.payload?.episode
+                                            } серия • {
+                                                userData?.online?.payload?.translation?.title
+                                            } • {
+                                                userData?.online?.payload?.source
+                                            }
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                <View
+                                style={{
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}
+                                >
+                                    <Icon
+                                    name="chevron-right"
+                                    color={theme.icon_color}
+                                    />
+                                </View>
+                            </View>
+                        </TouchableNativeFeedback>
+                    </View>   
+                )
+            }
 
             <View
             style={{
@@ -493,42 +625,56 @@ export const AnotherUserProfile = (props) => {
                 }}
                 />
 
-                <Button
-                title={
-                    {
-                        "nobody": "Добавить в друзья",
-                        "friends": "В друзьях",
-                        "sendSubscribe": "Ваш подписчик",
-                        "subscriber": "Вы подписаны"
-                    }[userData?.relation]
-                }
-                upperTitle={false}
-                size={37}
-                textStyle={{
-                    fontWeight: "400"
+                <Popup
+                visible={popupVisible}
+                onRequestClose={() => setPopupVisible(false)}
+                animationDuration={100}
+                style={{
+                    backgroundColor: theme.popup_background,
+                    borderRadius: 10,
+                    overflow: "hidden",
                 }}
-                before={
-                    <Icon
-                    name="chevron-down"
-                    color={theme.button.primary.text_color}
-                    size={19}
+                anchor={
+                    <Button
+                    title={
+                        {
+                            "nobody": "Добавить в друзья",
+                            "friends": "В друзьях",
+                            "sendSubscribe": "Вы подписаны",
+                            "subscriber": "Ваш подписчик"
+                        }[userData?.relation]
+                    }
+                    upperTitle={false}
+                    size={37}
+                    textStyle={{
+                        fontWeight: "400"
+                    }}
+                    before={
+                        <Icon
+                        color={theme.button.primary.text_color}
+                        name={
+                            {
+                                "nobody": "user-check",
+                                "friends": "user-check",
+                                "sendSubscribe": "user-check",
+                                "subscriber": "user-check"
+                            }[userData?.relation]
+                        }
+                        />
+                    }
+                    containerStyle={{
+                        marginBottom: 0
+                    }}
+                    onPress={() => friendActions()}
                     />
                 }
-                containerStyle={{
-                    marginBottom: 0
-                }}
-                onPress={() => {
-                    setModalContent(
-                        <FriendActions 
-                        relation={userData?.relation}
-                        onClose={() => {
-                            modalRef.current?.close();
-                        }}
-                        />
-                    );
-                    modalRef.current?.open();
-                }}
-                />
+                >
+                    <View>
+                        <Text>
+                            test
+                        </Text>
+                    </View>
+                </Popup>
             </View>
 
             <View
@@ -549,6 +695,7 @@ export const AnotherUserProfile = (props) => {
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                    onPress={() => navigate("general_user.comments", { userId: route.params?.userId })}
                     >
                         <View
                         style={{
@@ -653,119 +800,377 @@ export const AnotherUserProfile = (props) => {
             <Divider dividerStyle={{marginTop: 1}}/>
 
             {friendsRender()}
-
-            <Divider dividerStyle={{marginTop: 1}}/>
         </View>
     );
 
     const statisticsRender = () => (
-        <View
-        style={{
-            marginHorizontal: 10,
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-        }}
-        >
-            <View>
-            {
-                lists.map((item, index) => (
+        <View>
+            <ContentHeader
+            text="Статистика"
+            icon={
+                <Icon
+                name="bar-chart"
+                color={theme.text_secondary_color}
+                size={12}
+                />
+            }
+            after={
+                <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 8,
+                    paddingHorizontal: 10
+                }}
+                >
+                    <Text
+                    style={{
+                        color: theme.text_secondary_color
+                    }}
+                    >
+                        Подробно
+                    </Text>
+
+                    <Icon
+                    name="chevron-right"
+                    color={theme.text_secondary_color}
+                    />
+                </View>
+            }
+            />
+
+            <View
+            style={{
+                marginHorizontal: 10,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginVertical: 20
+            }}
+            >
+                <View>
+                    {
+                        lists.map((item, index) => (
+                            <View
+                            key={"list-" + index}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginTop: index !== 0 ? 5 : 0
+                            }}
+                            >
+                                <View
+                                style={{
+                                    paddingVertical: 3,
+                                    paddingLeft: 4,
+                                    paddingRight: 6,
+                                    borderRadius: 100,
+                                    borderWidth: 0.5,
+                                    borderColor: statisticsChartColors[index] + "90",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    height: normalizeSize(15),
+                                    width: normalizeSize(30)
+                                }}
+                                >
+                                    <View
+                                    style={{
+                                        width: normalizeSize(8),
+                                        height: normalizeSize(8),
+                                        borderRadius: 100,
+                                        backgroundColor: statisticsChartColors[index],
+                                        marginRight: 5
+                                    }}
+                                    />
+
+                                    {
+                                        item.icon
+                                    }
+                                </View>
+
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                                >
+                                    <Text
+                                    style={{
+                                        marginLeft: 10,
+                                        fontSize: normalizeSize(12),
+                                        fontWeight: "500",
+                                        color: theme.text_secondary_color + "90"
+                                    }}
+                                    >
+                                        {
+                                            item.name
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        marginLeft: 6,
+                                        fontWeight: "700",
+                                        color: theme.text_secondary_color,
+                                        fontSize: normalizeSize(12.5)
+                                    }}
+                                    > 
+                                        {
+                                            statisticsChartValues[index]
+                                        }
+                                    </Text>
+                                </View>
+                            </View>
+                        ))
+                    }
+                </View>
+                
+                {
+                    statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
+                        <Icon
+                        type="FontAwesome"
+                        name="pie-chart"
+                        color={theme.divider_color}
+                        size={109}
+                        />
+                    ) : (
+                        <PieChart 
+                        data={statisticsChartData}
+                        innerRadius={25}
+                        animate={true}
+                        style={{ height: 120, width: 109 }}
+                        />
+                    )
+                }
+            </View>
+        </View>
+    );
+
+    const renderBrowsingHistoryItems = (item) => {
+        return (
+            <Cell
+            key={"anime-" + item.anime.id}
+            centered={false}
+            title={item?.anime?.title}
+            maxTitleLines={2}
+            onPress={() => navigate("anime", { animeData: { id: item.anime.id } })}
+            after={
+                <PressIcon
+                icon={
+                    <Icon
+                    name="four-dots"
+                    size={12}
+                    color={theme.text_secondary_color}
+                    />
+                }
+                />
+            }
+            subtitle={
+                <View
+                style={{
+                    marginTop: 5
+                }}
+                >
                     <View
-                    key={"list-" + index}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="play"
+                        color={theme.text_secondary_color}
+                        size={9}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                item?.episode
+                            } серия
+                        </Text>
+                    </View>
+
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="clock-outline"
+                        color={theme.text_secondary_color}
+                        size={12}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                dayjs().to(dayjs(item.updatedAt))
+                            }
+                        </Text>
+                    </View>
+
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                    >
+                        <Icon
+                        name="mic-outline"
+                        color={theme.text_secondary_color}
+                        size={14}
+                        />
+
+                        <Text
+                        style={{
+                            marginLeft: 8,
+                            color: theme.text_secondary_color
+                        }}
+                        >
+                            {
+                                item?.translation?.title || "Неизвестна"
+                            }
+                        </Text>
+                    </View>
+                </View>
+            }
+            before={
+                <Image
+                resizeMethod="resize"
+                source={{
+                    uri: item?.anime?.poster
+                }}
+                style={{
+                    width: normalizeSize(60),
+                    height: normalizeSize(80),
+                    resizeMode: "cover",
+                    borderRadius: 7,
+                    borderColor: theme.divider_color,
+                    borderWidth: 0.5,
+                    backgroundColor: theme.divider_color,
+                }}
+                />
+            }
+            />
+        )
+    };
+
+    const renderBrowsingHistory = () => {
+        return (
+            <View>
+                <ContentHeader
+                text="История просмотров"
+                icon={
+                    <Icon
+                    name="replay"
+                    color={theme.text_secondary_color}
+                    />
+                }
+                onPress={() => navigate("general_user.browsing_history", {
+                    initialHistory: browsingHistory,
+                    userId: route.params?.userId,
+                    username: userData?.nickname
+                })}
+                after={
+                    <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        marginTop: index !== 0 ? 5 : 0
+                        paddingVertical: 8,
+                        paddingHorizontal: 10
                     }}
                     >
-                        <View
+                        <Text
                         style={{
-                            paddingVertical: 3,
-                            paddingLeft: 4,
-                            paddingRight: 6,
-                            borderRadius: 100,
-                            borderWidth: 0.5,
-                            borderColor: statisticsChartColors[index] + "90",
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            height: normalizeSize(15),
-                            width: normalizeSize(30)
+                            color: theme.text_secondary_color
                         }}
                         >
-                            <View
-                            style={{
-                                width: normalizeSize(8),
-                                height: normalizeSize(8),
-                                borderRadius: 100,
-                                backgroundColor: statisticsChartColors[index],
-                                marginRight: 5
-                            }}
-                            />
+                            Все
+                        </Text>
 
-                            {
-                                item.icon
-                            }
-                        </View>
-
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Text
-                            style={{
-                                marginLeft: 10,
-                                fontSize: normalizeSize(12),
-                                fontWeight: "500",
-                                color: theme.text_secondary_color + "90"
-                            }}
-                            >
-                                {
-                                    item.name
-                                }
-                            </Text>
-
-                            <Text
-                            style={{
-                                marginLeft: 6,
-                                fontWeight: "700",
-                                color: theme.text_secondary_color,
-                                fontSize: normalizeSize(12.5)
-                            }}
-                            > 
-                                {
-                                    statisticsChartValues[index]
-                                }
-                            </Text>
-                        </View>
+                        <Icon
+                        name="chevron-right"
+                        color={theme.text_secondary_color}
+                        />
                     </View>
-                ))
-            }
+                }
+                />
+
+                <View style={{ marginTop: 10 }} />
+
+                {
+                    browsingHistory.length === 0 ? (
+                        <Placeholder
+                        title="Пусто"
+                        subtitle={`${userData?.nickname} ещё ничего не посмотрел(-а)`}
+                        />
+                    ) : browsingHistory.map(renderBrowsingHistoryItems)
+                }
             </View>
-            
-            {
-                statisticsChartValues.reduce((a, b) => a + b) === 0 ? (
-                    <Icon
-                    type="FontAwesome"
-                    name="pie-chart"
-                    color={theme.divider_color}
-                    size={109}
-                    />
-                ) : (
-                    <PieChart 
-                    data={statisticsChartData}
-                    innerRadius={25}
-                    animate={true}
-                    style={{ height: 120, width: 109 }}
-                    />
-                )
-            }
-        </View>
-    );
+        )
+    };
+
+    const friendActions = async () => {
+        const sign = await storage.getItem("AUTHORIZATION_SIGN");
+
+        if(userData?.relation === "nobody" || userData?.relation === "subscriber") {
+            setUserData({
+                ...userData,
+                relation: "sendSubscribe"
+            });
+        
+            return axios.post("/friends.sendRequest", {
+                userId: route.params?.userId
+            }, {
+                headers: {
+                    "Authorization": sign,
+                }
+            })
+            .then(({ data }) => {
+                getUserData();
+                ToastAndroid.show(data.message, ToastAndroid.LONG);
+            })
+            .catch(({ response: { data } }) => {
+                ToastAndroid.show(data.message, ToastAndroid.LONG);
+            })
+            .finally(() => getUserData());
+        }
+
+        if(userData?.relation === "sendSubscribe" || userData?.relation === "friends") {
+            setUserData({
+                ...userData,
+                relation: "nobody"
+            });
+        
+            return axios.post("/friends.delete", {
+                userId: route.params?.userId
+            }, {
+                headers: {
+                    "Authorization": sign,
+                }
+            })
+            .then(({ data }) => {
+                ToastAndroid.show(data.message, ToastAndroid.LONG);
+            })
+            .catch(({ response: { data } }) => {
+                ToastAndroid.show(data.message, ToastAndroid.LONG);
+            })
+            .finally(() => getUserData());
+        }
+    };
 
     return (
         <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
@@ -798,26 +1203,8 @@ export const AnotherUserProfile = (props) => {
             }
             >
                 {userInfoRender()}
-
-                <Cell
-                title="Статистика"
-                subtitle="Нажмите, чтобы открыть"
-                before={
-                    <Icon
-                    name="text-bullet-list"
-                    color={theme.icon_color}
-                    size={17}
-                    />
-                }
-                after={
-                    <Icon
-                    name="chevron-right"
-                    color={theme.icon_color}
-                    size={17}
-                    />
-                }
-                />
                 {statisticsRender()}
+                {renderBrowsingHistory()}
             </ScrollView>
         </GestureHandlerRootView>
     )

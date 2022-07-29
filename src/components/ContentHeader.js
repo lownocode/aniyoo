@@ -1,48 +1,79 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, TouchableNativeFeedback } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
+import { normalizeSize } from "../functions";
 
 export const ContentHeader = (props) => {
     const theme = useContext(ThemeContext);
 
     const { 
         text, 
-        align = "left", 
-        upper = true, 
-        indents = false, 
-        containerStyle, 
-        textStyle,
+        icon,
+        after,
+        onPress = false,
+        background,
+        textColor
     } = props;
-
-    const localStyles = StyleSheet.create({
-        container: {
-            marginLeft: indents ? 20 : 0, 
-            marginRight: indents ? 20 : 0,
-            marginTop: indents ? 7 : 0,
-            marginBottom: indents ? 7 : 0,
-            ...containerStyle
-        },
-        text: {
-            fontWeight: "600",
-            textAlign: align,
-            fontSize: 13,
-            color: theme.accent,
-            ...textStyle
-        }
-    });
 
     return (
         <View
-        style={localStyles.container}
+        style={{
+            flexDirection: after ? "column" : "row"
+        }}
         >
-            <Text
-            style={localStyles.text}
+            <View
+            style={{
+                backgroundColor: background || theme.text_secondary_color + "10",
+                borderRadius: 100,
+                marginHorizontal: 10,
+                overflow: "hidden"
+            }}
             >
-                {
-                    upper ? String(text).toUpperCase() : text
-                }
-            </Text>
+                <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                disabled={!onPress}
+                onPress={() => onPress()}
+                >
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                    >
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginVertical: 8,
+                            marginHorizontal: 15,
+                        }}
+                        >
+                            {
+                                icon
+                            }
+
+                            <Text
+                            style={{
+                                color: textColor || theme.text_secondary_color,
+                                fontWeight: "500",
+                                fontSize: 14,
+                                marginLeft: icon ? 8 : 0
+                            }}
+                            >
+                                {
+                                    text
+                                }
+                            </Text>
+                        </View>
+
+                        {
+                            after
+                        }
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
         </View>
     )
 };

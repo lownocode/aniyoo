@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { 
     View, 
     ScrollView, 
@@ -37,7 +37,7 @@ import {
     storage, 
     getAnimeAccentColor,
     invertColor,
-    normalizeSize
+    
 } from "../../functions";
 
 import { 
@@ -79,7 +79,7 @@ export const Anime = (props) => {
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
     const [ posterColors, setPosterColors ] = useState({});
     const [ animeStatus, setAnimeStatus ] = useState({ status: "NO_WATCHED" });
-    const [ popupVisible, setPopupVisible ] = useState(false);
+    const [ popup, setPopup ] = useState(null);
     const [ comments, setComments ] = useState({});
     const [ stats, setStats ] = useState({});
     const [ marks, setMarks ] = useState({});
@@ -112,7 +112,7 @@ export const Anime = (props) => {
     const getAnimeData = async (id) => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        axios.post("/animes.get", {
+        return axios.post("/animes.get", {
             animeId: id || route.params?.animeData?.id
         }, {
             headers: {
@@ -125,6 +125,8 @@ export const Anime = (props) => {
             getExtendeds(data.id);
 
             setRefreshing(false);
+            
+            return data;
         })
         .catch(({ response: { data } }) => {
             console.log("err\n", data);
@@ -163,7 +165,8 @@ export const Anime = (props) => {
         });
     };
 
-    const backToWatch = async () => {
+    const backToWatch = async (nextEpisode = false) => {
+        setPopup(null);
         setLoadingBackToWatch(true);
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
@@ -383,48 +386,66 @@ export const Anime = (props) => {
         } = props;
 
         return (
+            <View>
             <View
             style={{
-                borderRadius: 10,
-                borderWidth: 0.5,
-                borderColor: theme.divider_color,
-                paddingVertical: 5,
-                paddingHorizontal: 15,
                 flexDirection: "row",
+                justifyContent: "center",
                 alignItems: "center",
-                marginLeft: 5,
-                marginRight: 5,
-                marginBottom: 10,
-                flexGrow: 1,
-                justifyContent: "center"
+                marginVertical: 11,
+                marginHorizontal: 15
             }}
             >
                 <View
                 style={{
-                    marginRight: 10
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 1,
                 }}
                 >
-                    {icon}
-                </View>
-
-                <View>
-                    <Text
+                    <View
                     style={{
-                        color: theme.cell.title_color,
-                        textAlign: "center"
+                        marginRight: 10
                     }}
                     >
-                        {title}
-                    </Text>
+                        {
+                            icon
+                        }
+                    </View>
 
+                    <View>
+                        <Text
+                        style={{
+                            color: theme.text_color,
+                            fontWeight: "500",
+                            fontSize: 15
+                        }}
+                        >
+                            {
+                                subtitle
+                            }
+                        </Text>
+                    </View>
+                </View>
+
+                <View
+                style={{
+                    flex: 1,
+                }}
+                >
                     <Text
                     style={{
-                        color: theme.cell.subtitle_color
+                        textAlign: "center",
+                        color: theme.text_secondary_color
                     }}
                     >
-                        {subtitle}
+                        {
+                            title
+                        }
                     </Text>
                 </View>
+            </View>
+            <Divider/>
             </View>
         )
     };
@@ -442,17 +463,23 @@ export const Anime = (props) => {
                 backgroundColor: theme.divider_color
             }}
             >
-                <Image
+                <View
                 style={{
-                    width: normalizeSize(200),
-                    height: normalizeSize(110),
-                    borderRadius: 8
+                    borderRadius: 10,
+                    overflow: "hidden"
                 }}
-                resizeMethod="resize"
-                source={{
-                    uri: image
-                }}
-                />
+                >
+                    <Image
+                    style={{
+                        width: 290,
+                        height: 160,
+                    }}
+                    resizeMethod="resize"
+                    source={{
+                        uri: image
+                    }}
+                    />
+                </View>
             </View>
         )
     };
@@ -469,17 +496,24 @@ export const Anime = (props) => {
                 overflow: "hidden",
             }}
             >
-                <Image
+                <View
                 style={{
-                    width: normalizeSize(200),
-                    height: normalizeSize(110),
-                    borderRadius: 8,
+                    borderRadius: 10,
+                    overflow: "hidden"
                 }}
-                resizeMethod="resize"
-                source={{
-                    uri: item.image
-                }}
-                />
+                >
+                    <Image
+                    style={{
+                        width: 290,
+                        height: 160,
+                    }}
+                    resizeMethod="resize"
+                    blurRadius={5}
+                    source={{
+                        uri: item.image
+                    }}
+                    />
+                </View>
 
                 <TouchableNativeFeedback
                 background={TouchableNativeFeedback.Ripple("#ffffff20", false)}
@@ -577,7 +611,7 @@ export const Anime = (props) => {
                         style={{
                             color: "#fff",
                             fontWeight: "600",
-                            fontSize: normalizeSize(20),
+                            fontSize: 30,
                             textTransform: "uppercase",
                             marginHorizontal: 20,
                             textAlign: "center"
@@ -592,7 +626,7 @@ export const Anime = (props) => {
                         style={{
                             color: "#dedede",
                             fontWeight: "500",
-                            fontSize: normalizeSize(14),
+                            fontSize: 18,
                             textTransform: "uppercase",
                             marginHorizontal: 20,
                             textAlign: "center",
@@ -630,8 +664,8 @@ export const Anime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: normalizeSize(60),
-                            height: normalizeSize(85),
+                            width: 90,
+                            height: 125,
                         }}
                         source={{
                             uri: item?.poster
@@ -651,7 +685,7 @@ export const Anime = (props) => {
                                         width: "100%",
                                         textAlign: "center",
                                         color: "#fff",
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         paddingHorizontal: 3,
                                         fontWeight: "500"
                                     }}
@@ -688,7 +722,7 @@ export const Anime = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: (10),
                                     borderColor: theme.divider_color,
                                     backgroundColor: theme.divider_color + "98",
                                     borderWidth: 1,
@@ -707,7 +741,7 @@ export const Anime = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: (10),
                                     borderColor: theme.divider_color,
                                     backgroundColor: theme.divider_color + "98",
                                     borderWidth: 1,
@@ -735,7 +769,7 @@ export const Anime = (props) => {
                         numberOfLines={3}
                         style={{
                             color: theme.text_secondary_color,
-                            fontSize: normalizeSize(11)
+                            fontSize: (11)
                         }}
                         >
                             {   
@@ -911,6 +945,7 @@ export const Anime = (props) => {
                                 marginTop: 0,
                                 marginBottom: 3
                             }}
+                            textStyle={{ fontSize: 12 }}
                             onPress={() => navigate("anime.reply_comments", {
                                 commentId: comment.id,
                                 animeId: animeData?.id,
@@ -941,7 +976,7 @@ export const Anime = (props) => {
                                     })}
                                     size={30}
                                     textStyle={{
-                                        fontSize: normalizeSize(11.5)
+                                        fontSize: (11.5)
                                     }}
                                     before={
                                         <Icon
@@ -1036,7 +1071,6 @@ export const Anime = (props) => {
                 <Avatar 
                 url={comment.user.photo}
                 online={(+new Date() - +new Date(comment?.user?.online?.time)) < 1 * 60 * 1000}
-                size={35}
                 />
             }
             />
@@ -1134,14 +1168,14 @@ export const Anime = (props) => {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    height: normalizeSize(15),
-                    width: normalizeSize(30)
+                    height: 17,
+                    width: 38
                 }}
                 >
                     <View
                     style={{
-                        width: normalizeSize(8),
-                        height: normalizeSize(8),
+                        width: 10,
+                        height: 10,
                         borderRadius: 100,
                         backgroundColor: statisticsChartColors[index],
                         marginRight: 5
@@ -1163,7 +1197,7 @@ export const Anime = (props) => {
                     <Text
                     style={{
                         marginLeft: 10,
-                        fontSize: normalizeSize(12),
+                        fontSize: 15,
                         fontWeight: "500",
                         color: theme.text_secondary_color + "90"
                     }}
@@ -1178,7 +1212,7 @@ export const Anime = (props) => {
                         marginLeft: 6,
                         fontWeight: "700",
                         color: theme.text_secondary_color,
-                        fontSize: normalizeSize(12.5)
+                        fontSize: 15.5
                     }}
                     > 
                         {
@@ -1218,7 +1252,7 @@ export const Anime = (props) => {
         const copyString = DOMAIN + `anime?id=${animeData?.id}`;
         Clipboard.setString(copyString);
         ToastAndroid.show("Ссылка скопирована в буфер обмена", ToastAndroid.CENTER);
-        setPopupVisible(false);
+        setPopup(null);
     };
 
     const styles = StyleSheet.create({
@@ -1244,8 +1278,8 @@ export const Anime = (props) => {
                 left: 20,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: normalizeSize(33),
-                height: normalizeSize(33),
+                width: 45,
+                height: 45,
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 100,
@@ -1278,8 +1312,8 @@ export const Anime = (props) => {
                 right: 20,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: normalizeSize(33),
-                height: normalizeSize(33),
+                width: 45,
+                height: 45,
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 1000,
@@ -1288,8 +1322,8 @@ export const Anime = (props) => {
             }}
             >
                 <Popup
-                visible={popupVisible}
-                onRequestClose={() => setPopupVisible(false)}
+                visible={popup === "animeInfo"}
+                onRequestClose={() => setPopup(null)}
                 animationDuration={100}
                 style={{
                     backgroundColor: theme.popup_background,
@@ -1299,7 +1333,7 @@ export const Anime = (props) => {
                 anchor={
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
-                    onPressIn={() => setPopupVisible(true)}
+                    onPressIn={() => setPopup("animeInfo")}
                     >
                         <View
                         style={{
@@ -1407,7 +1441,7 @@ export const Anime = (props) => {
                             resizeMode="cover"
                             style={{
                                 width: Dimensions.get("window").width,
-                                height: normalizeSize(400),
+                                height: 600,
                                 opacity: 0.5
                             }}
                             blurRadius={10}
@@ -1431,25 +1465,31 @@ export const Anime = (props) => {
 
                         <View
                         style={{
-                            marginTop: normalizeSize(-400),
+                            marginTop: -600,
                         }}
                         >
-                            <Image
-                            source={{
-                                uri: animeData?.poster
-                            }}
-                            resizeMethod="resize"
-                            resizeMode="cover"
+                            <View
                             style={{
-                                width: normalizeSize(170),
-                                height: normalizeSize(240),
-                                marginTop: StatusBar.currentHeight + 70,
                                 borderRadius: 10,
-                                zIndex: 12,
-                                backgroundColor: theme.divider_color,
+                                overflow: "hidden",
+                                marginTop: StatusBar.currentHeight + 70,
                             }}
-                            onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
-                            />
+                            >
+                                <Image
+                                source={{
+                                    uri: animeData?.poster
+                                }}
+                                resizeMethod="resize"
+                                resizeMode="cover"
+                                style={{
+                                    width: 230,
+                                    height: 330,
+                                    zIndex: 12,
+                                    backgroundColor: theme.divider_color,
+                                }}
+                                onError={(e) => ToastAndroid.show(`Возникла ошибка при попытке загрузки постера\n${e.nativeEvent.error}`, ToastAndroid.CENTER)}
+                                />
+                            </View>
                         </View>
                     </View>
 
@@ -1470,7 +1510,7 @@ export const Anime = (props) => {
                             selectionColor={accent}
                             numberOfLines={2}
                             style={{
-                                fontSize: normalizeSize(16),
+                                fontSize: 20,
                                 fontWeight: "500",
                                 marginHorizontal: 15,
                                 color: theme.text_color,
@@ -1647,53 +1687,100 @@ export const Anime = (props) => {
 
                         {
                             animeStatus?.status === "WATCHED_BEFORE" && (
-                                <LinearGradient
+                                <Popup
+                                visible={popup === "watchedBeforeActions"}
+                                onRequestClose={() => setPopup(null)}
+                                animationDuration={100}
                                 style={{
-                                    marginHorizontal: 10,
-                                    marginBottom: 10,
-                                    zIndex: 0,
+                                    backgroundColor: theme.popup_background,
                                     borderRadius: 10,
-                                    overflow: "hidden"
+                                    overflow: "hidden",
                                 }}
-                                colors={
-                                    [
-                                        theme.divider_color + "90",
-                                        "transparent",
-                                    ]
+                                anchor={
+                                    <LinearGradient
+                                    style={{
+                                        marginHorizontal: 10,
+                                        marginBottom: 10,
+                                        zIndex: 0,
+                                        borderRadius: 10,
+                                        overflow: "hidden"
+                                    }}
+                                    colors={
+                                        [
+                                            theme.divider_color + "90",
+                                            "transparent",
+                                        ]
+                                    }
+                                    start={{
+                                        x: 0,
+                                        y: 0
+                                    }}
+                                    end={{
+                                        x: 1,
+                                        y: 0
+                                    }}
+                                    >
+                                        <Cell
+                                        title="Можно вернуться к просмотру"
+                                        onPress={() => setPopup("watchedBeforeActions")}
+                                        after={
+                                            loadingBackToWatch && (
+                                                <ActivityIndicator
+                                                color={accent}
+                                                />
+                                            )
+                                        }
+                                        before={
+                                            <Icon
+                                            color="orangered"
+                                            name="fire"
+                                            size={20}
+                                            />
+                                        }
+                                        subtitle={`Вы остановили на ${
+                                            animeStatus?.data?.viewed_up_to > 3600 ?
+                                            dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('HH:mm:ss') :
+                                            dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('mm:ss')
+                                        } в ${animeStatus?.data?.episode} серии в озвучке от ${animeStatus?.data?.translation}`}
+                                        />
+                                    </LinearGradient>
                                 }
-                                start={{
-                                    x: 0,
-                                    y: 0
-                                }}
-                                end={{
-                                    x: 1,
-                                    y: 0
-                                }}
                                 >
                                     <Cell
-                                    title="Можно вернуться к просмотру"
-                                    onPress={() => backToWatch()}
-                                    after={
-                                        loadingBackToWatch && (
-                                            <ActivityIndicator
-                                            color={accent}
-                                            />
-                                        )
-                                    }
+                                    title="Продолжить просмотр"
                                     before={
                                         <Icon
-                                        color="orangered"
-                                        name="fire"
+                                        name="clock-outline"
+                                        color={theme.icon_color}
+                                        />
+                                    }
+                                    containerStyle={{
+                                        paddingVertical: 15
+                                    }}
+                                    contentStyle={{
+                                        flex: 0
+                                    }}
+                                    onPress={() => backToWatch()}
+                                    />
+
+                                    <Cell
+                                    title="Следующая серия"
+                                    before={
+                                        <Icon
+                                        name="chevron-right-double"
+                                        color={theme.icon_color}
                                         size={20}
                                         />
                                     }
-                                    subtitle={`Вы остановили на ${
-                                        animeStatus?.data?.viewed_up_to > 3600 ?
-                                        dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('HH:mm:ss') :
-                                        dayjs.duration(animeStatus?.data?.viewed_up_to * 1000).format('mm:ss')
-                                    } в ${animeStatus?.data?.episode} серии в озвучке от ${animeStatus?.data?.translation}`}
+                                    containerStyle={{
+                                        paddingVertical: 15
+                                    }}
+                                    contentStyle={{
+                                        flex: 0
+                                    }}
+                                    onPress={() => backToWatch(true)}
                                     />
-                                </LinearGradient>
+                                </Popup>
                             )
                         }
 
@@ -1705,8 +1792,8 @@ export const Anime = (props) => {
                             zIndex: 0,
                             borderRadius: 10,
                             overflow: "hidden",
-                            paddingHorizontal: normalizeSize(15),
-                            paddingVertical: normalizeSize(8)
+                            paddingHorizontal: (15),
+                            paddingVertical: (8)
                         }}
                         >
                             <FormattedText
@@ -1775,7 +1862,7 @@ export const Anime = (props) => {
                                         >
                                             <Text
                                             style={{
-                                                fontSize: normalizeSize(10),
+                                                fontSize: (10),
                                                 color: invertColor(theme.anime.rating_mpaa_background[ratingMPAADecode[animeData?.other?.mpaa]], true),
                                                 fontWeight: "500"
                                             }}
@@ -1803,12 +1890,11 @@ export const Anime = (props) => {
                         </View>
 
                         <View
-                        style={{
-                            flexDirection: "row",
-                            flexWrap: "wrap",
-                            marginTop: 10,
-                        }}
                         >
+
+                        </View>
+
+                        <View>
                             <WrapperAnimeInfo
                             title={
                                 animeData?.other?.kind === "tv" ? "Сериал" :
@@ -1863,8 +1949,8 @@ export const Anime = (props) => {
                                     icon={
                                         <Image
                                         style={{
-                                            width: normalizeSize(20),
-                                            height: normalizeSize(13),
+                                            width: (20),
+                                            height: (13),
                                             borderRadius: 3,
                                             borderWidth: 0.5,
                                             borderColor: theme.divider_color
@@ -1944,19 +2030,30 @@ export const Anime = (props) => {
 
                         <View
                         style={{
-                            marginHorizontal: 15,
                             marginTop: 15
                         }}
                         >
                             <ContentHeader
                             text="Описание"
-                            textStyle={{ color: accent }}
-                            containerStyle={{ marginBottom: 10 }}
+                            textColor={accent}
+                            background={accent + "10"}
+                            icon={
+                                <Icon
+                                color={accent}
+                                name="description"
+                                />
+                            }
                             />
+
+                            <View style={{ marginTop: 10 }} />
 
                             {
                                 animeData?.description ? (
-                                    <View>
+                                    <View
+                                    style={{
+                                        marginHorizontal: 15
+                                    }}
+                                    >
                                         <Text
                                         selectable
                                         selectionColor={accent}
@@ -1965,7 +2062,7 @@ export const Anime = (props) => {
                                         style={{
                                             fontStyle: "normal",
                                             color: theme.text_color,
-                                            fontSize: normalizeSize(12)
+                                            fontSize: 15
                                         }}
                                         >
                                             {animeData?.description ? animeData.description : "Описание не указано"}
@@ -2008,7 +2105,8 @@ export const Anime = (props) => {
                                         borderRadius: 10,
                                         padding: 15,
                                         flexDirection: "row",
-                                        alignItems: "center"
+                                        alignItems: "center",
+                                        marginHorizontal: 10
                                     }}
                                     >
                                         <Icon
@@ -2019,7 +2117,7 @@ export const Anime = (props) => {
                                         <Text
                                         style={{
                                             marginLeft: 15,
-                                            fontSize: normalizeSize(13.5),
+                                            fontSize: (13.5),
                                             color: theme.text_secondary_color
                                         }}
                                         >
@@ -2031,51 +2129,44 @@ export const Anime = (props) => {
 
                             {
                                 animeData?.description && descriptionLinesCount >= 6 ? (
-                                    <View
-                                    style={{
-                                        borderRadius: 8,
-                                        overflow: "hidden"
-                                    }}
+                                    <TouchableNativeFeedback
+                                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                                    onPress={() => setHideDescription(!hideDescription)}
                                     >
-                                        <TouchableNativeFeedback
-                                        background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                                        onPress={() => setHideDescription(!hideDescription)}
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            paddingVertical: 10,
+                                            justifyContent: "center"
+                                        }}
                                         >
-                                            <View
+                                            <Text
                                             style={{
-                                                flexDirection: "row",
-                                                alignItems: "center",
-                                                paddingVertical: 10,
-                                                justifyContent: "center"
+                                                marginRight: 5,
+                                                fontWeight: "600",
+                                                fontSize: 13,
+                                                color: accent
                                             }}
                                             >
-                                                <Text
-                                                style={{
-                                                    marginRight: 5,
-                                                    fontWeight: "600",
-                                                    fontSize: normalizeSize(13),
-                                                    color: accent
-                                                }}
-                                                >
-                                                    {hideDescription ? "Показать весь текст" : "Скрыть лишний текст"}
-                                                </Text>
+                                                {hideDescription ? "Показать весь текст" : "Скрыть лишний текст"}
+                                            </Text>
 
-                                                {
-                                                    hideDescription ? (
-                                                        <Icon
-                                                        name="chevron-down"
-                                                        color={accent}
-                                                        />
-                                                    ) : (
-                                                        <Icon
-                                                        name="chevron-up"
-                                                        color={accent}
-                                                        />
-                                                    )
-                                                }
-                                            </View>
-                                        </TouchableNativeFeedback>
-                                    </View>
+                                            {
+                                                hideDescription ? (
+                                                    <Icon
+                                                    name="chevron-down"
+                                                    color={accent}
+                                                    />
+                                                ) : (
+                                                    <Icon
+                                                    name="chevron-up"
+                                                    color={accent}
+                                                    />
+                                                )
+                                            }
+                                        </View>
+                                    </TouchableNativeFeedback>
                                 ) : null
                             }
                         </View>
@@ -2084,14 +2175,23 @@ export const Anime = (props) => {
                             animeData?.screenshots?.length >= 1 && (
                                 <View
                                 style={{
-                                    marginTop: 15
+                                    marginTop: 25
                                 }}
                                 >
                                     <ContentHeader
                                     text="Кадры из аниме"
-                                    textStyle={{ color: accent }}
-                                    containerStyle={{ marginBottom: 10, marginLeft: 15 }}
+                                    textColor={accent}
+                                    background={accent + "10"}
+                                    icon={
+                                        <Icon
+                                        color={accent}
+                                        name="gallery"
+                                        size={12}
+                                        />
+                                    }
                                     />
+
+                                    <View style={{ marginTop: 10 }} />
 
                                     <ScrollView
                                     horizontal
@@ -2109,14 +2209,23 @@ export const Anime = (props) => {
                             playlists?.length >= 1 && (
                                 <View
                                 style={{
-                                    marginTop: 15
+                                    marginTop: 25
                                 }}
                                 >
                                     <ContentHeader
                                     text="Плейлисты"
-                                    textStyle={{ color: accent }}
-                                    containerStyle={{ marginBottom: 10, marginLeft: 15 }}
+                                    textColor={accent}
+                                    background={accent + "10"}
+                                    icon={
+                                        <Icon
+                                        color={accent}
+                                        name="playlist-play"
+                                        size={12}
+                                        />
+                                    }
                                     />
+
+                                    <View style={{ marginTop: 10 }} />
 
                                     <ScrollView
                                     horizontal
@@ -2176,7 +2285,7 @@ export const Anime = (props) => {
                                                         marginTop: 5,
                                                         color: theme.text_color,
                                                         fontWeight: "500",
-                                                        fontSize: normalizeSize(14)
+                                                        fontSize: (14)
                                                     }}
                                                     >
                                                         Открыть все видео
@@ -2191,14 +2300,23 @@ export const Anime = (props) => {
 
                         <View
                         style={{
-                            marginTop: 15
+                            marginTop: 25
                         }}
                         >
                             <ContentHeader
                             text="Статистика"
-                            textStyle={{ color: accent }}
-                            containerStyle={{ marginBottom: 10, marginLeft: 15  }}
+                            textColor={accent}
+                            background={accent + "10"}
+                            icon={
+                                <Icon
+                                color={accent}
+                                name="bar-chart"
+                                size={12}
+                                />
+                            }
                             />
+
+                            <View style={{ marginTop: 10 }} />
 
                             {
                                 animeData?.status === "anons" ? (
@@ -2227,7 +2345,7 @@ export const Anime = (props) => {
                                         style={{
                                             color: theme.anime.planned,
                                             fontWeight: "900",
-                                            fontSize: normalizeSize(42),
+                                            fontSize: (42),
                                             textAlign: "center"
                                         }}
                                         >
@@ -2240,7 +2358,7 @@ export const Anime = (props) => {
                                         style={{
                                             textAlign: "center",
                                             color: theme.text_color,
-                                            fontSize: normalizeSize(14),
+                                            fontSize: (14),
                                             fontWeight: "300",
                                         }}
                                         >
@@ -2359,14 +2477,23 @@ export const Anime = (props) => {
                             marks?.items?.total >= 0 && animeData?.status !== "anons" ? (
                                 <View
                                 style={{
-                                    marginTop: 15,
+                                    marginTop: 25,
                                 }}
                                 >
                                     <ContentHeader
                                     text="Оценка"
-                                    textStyle={{ color: accent }}
-                                    containerStyle={{ marginBottom: 10, marginLeft: 15  }}
+                                    textColor={accent}
+                                    background={accent + "10"}
+                                    icon={
+                                        <Icon
+                                        color={accent}
+                                        name="star"
+                                        size={12}
+                                        />
+                                    }
                                     />
+
+                                    <View style={{ marginTop: 10 }} />
 
                                     {
                                         marks?.items?.total >= 1 ? (
@@ -2380,7 +2507,7 @@ export const Anime = (props) => {
                                             >
                                                 <View style={{ marginRight: 25 }}>
                                                     <DonutChart
-                                                    radius={normalizeSize(45)}
+                                                    radius={55}
                                                     percentage={marks?.items?.avg || 0}
                                                     strokeWidth={8}
                                                     color={theme.anime_mark[Math.round(marks?.items?.avg - 0.1 || 1)]}
@@ -2389,7 +2516,7 @@ export const Anime = (props) => {
                                                         <View>
                                                             <Text
                                                             style={{
-                                                                fontSize: normalizeSize(37),
+                                                                fontSize: 45,
                                                                 fontWeight: "700",
                                                                 color: theme.text_color,
                                                                 textAlign: "center"
@@ -2402,7 +2529,7 @@ export const Anime = (props) => {
                                                             style={{
                                                                 textAlign: "center",
                                                                 color: theme.text_secondary_color,
-                                                                fontSize: normalizeSize(10),
+                                                                fontSize: 12,
                                                                 marginTop: -7,
                                                                 paddingHorizontal: 15
                                                             }}
@@ -2436,7 +2563,7 @@ export const Anime = (props) => {
                                                                     <Text
                                                                     style={{
                                                                         marginRight: 10,
-                                                                        fontSize: normalizeSize(9)
+                                                                        fontSize: 11
                                                                     }}
                                                                     >
                                                                         {mark}
@@ -2498,14 +2625,23 @@ export const Anime = (props) => {
                             linkedAnimes?.count >= 1 && (
                                 <View
                                 style={{
-                                    marginTop: 15
+                                    marginTop: 35
                                 }}
                                 >
                                     <ContentHeader
                                     text="Связанные"
-                                    textStyle={{ color: accent }}
-                                    containerStyle={{ marginBottom: 10, marginLeft: 15  }}
+                                    textColor={accent}
+                                    background={accent + "10"}
+                                    icon={
+                                        <Icon
+                                        color={accent}
+                                        name="link"
+                                        size={17}
+                                        />
+                                    }
                                     />
+
+                                    <View style={{ marginTop: 10 }} />
 
                                     {
                                         linkedAnimes?.items?.map(renderLinked)
@@ -2595,7 +2731,7 @@ export const Anime = (props) => {
                     {
                         comments?.items?.length < 1 ? (
                             <Placeholder
-                            title="Здесть пусто"
+                            title="Здесь пусто"
                             subtitle="Ещё никто не комментировал это аниме, будьте первым!"
                             />
                         ) : comments?.items?.map(renderComments)

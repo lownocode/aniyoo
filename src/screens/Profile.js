@@ -33,7 +33,8 @@ import {
     Header,
     Placeholder,
     PressIcon,
-    Icon
+    Icon,
+    ContentHeader
 } from "../components";
 import {
     storage,
@@ -44,6 +45,7 @@ import {
     USER_SCHEMA
 } from "../../variables";
 import { SetStatus, SocialNetworks } from "../modals";
+import DeviceInfo from "react-native-device-info";
 
 export const Profile = props => {
     const theme = useContext(ThemeContext);
@@ -54,10 +56,11 @@ export const Profile = props => {
             navigate,
         },
         navigation,
+        cachedUserData
     } = props;
 
     const [ refreshing, setRefreshing ] = useState(false);
-    const [ userData, setUserData ] = useState(route.params?.userData || USER_SCHEMA);
+    const [ userData, setUserData ] = useState(cachedUserData || route.params?.userData || USER_SCHEMA);
     const [ modalContent, setModalContent ] = useState(null);
     const [ friends, setFriends ] = useState([]);
     const [ popupVisible, setPopupVisible ] = useState(false);
@@ -68,6 +71,18 @@ export const Profile = props => {
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         getUserData();
+    }, []);
+
+    const getCachedUserData = async () => {
+        const data = await storage.getItem("cachedUserData");
+        if(!data) return;
+        const a = await DeviceInfo.getDeviceToken();
+        console.log(a)
+        setUserData(data);
+    };
+
+    useEffect(() => {
+        getCachedUserData();
     }, []);
 
     const getUserData = async () => {
@@ -98,7 +113,9 @@ export const Profile = props => {
     const getFriends = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
-        axios.post("/friends.get", null, {
+        axios.post("/friends.get", {
+            order: "online"
+        }, {
             headers: {
                 "Authorization": sign,
             }
@@ -115,7 +132,8 @@ export const Profile = props => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
         
         axios.post("/lists.get", {
-            status: "history"
+            status: "history",
+            limit: 5
         }, {
             headers: {
                 "Authorization": sign,
@@ -289,7 +307,7 @@ export const Profile = props => {
             before={
                 <Avatar
                 url={userData?.photo}
-                size={60}
+                size={80}
                 />
             }
             />
@@ -427,6 +445,7 @@ export const Profile = props => {
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                    onPress={() => navigate("general_user.comments")}
                     >
                         <View
                         style={{
@@ -531,13 +550,45 @@ export const Profile = props => {
             <Divider dividerStyle={{marginTop: 1}}/>
 
             {friendsRender()}
-
-            <Divider dividerStyle={{marginTop: 1}}/>
         </View>
     );
 
     const statisticsRender = () => (
         <View>
+            <ContentHeader
+            text="Статистика"
+            icon={
+                <Icon
+                name="bar-chart"
+                color={theme.text_secondary_color}
+                size={12}
+                />
+            }
+            after={
+                <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 8,
+                    paddingHorizontal: 10
+                }}
+                >
+                    <Text
+                    style={{
+                        color: theme.text_secondary_color
+                    }}
+                    >
+                        Подробно
+                    </Text>
+
+                    <Icon
+                    name="chevron-right"
+                    color={theme.text_secondary_color}
+                    />
+                </View>
+            }
+            />
+
             <View
             style={{
                 marginHorizontal: 10,
@@ -549,82 +600,82 @@ export const Profile = props => {
             }}
             >
                 <View>
-                {
-                    lists.map((item, index) => (
-                        <View
-                        key={"list-" + index}
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            marginTop: index !== 0 ? 5 : 0
-                        }}
-                        >
+                    {
+                        lists.map((item, index) => (
                             <View
+                            key={"list-" + index}
                             style={{
-                                paddingVertical: 3,
-                                paddingLeft: 4,
-                                paddingRight: 6,
-                                borderRadius: 100,
-                                borderWidth: 0.5,
-                                borderColor: statisticsChartColors[index] + "90",
                                 flexDirection: "row",
-                                justifyContent: "space-between",
                                 alignItems: "center",
-                                height: normalizeSize(15),
-                                width: normalizeSize(30)
+                                marginTop: index !== 0 ? 5 : 0
                             }}
                             >
                                 <View
                                 style={{
-                                    width: normalizeSize(8),
-                                    height: normalizeSize(8),
+                                    paddingVertical: 3,
+                                    paddingLeft: 4,
+                                    paddingRight: 6,
                                     borderRadius: 100,
-                                    backgroundColor: statisticsChartColors[index],
-                                    marginRight: 5
-                                }}
-                                />
-
-                                {
-                                    item.icon
-                                }
-                            </View>
-
-                            <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}
-                            >
-                                <Text
-                                style={{
-                                    marginLeft: 10,
-                                    fontSize: normalizeSize(12),
-                                    fontWeight: "500",
-                                    color: theme.text_secondary_color + "90"
+                                    borderWidth: 0.5,
+                                    borderColor: statisticsChartColors[index] + "90",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    height: normalizeSize(15),
+                                    width: normalizeSize(30)
                                 }}
                                 >
-                                    {
-                                        item.name
-                                    }
-                                </Text>
+                                    <View
+                                    style={{
+                                        width: normalizeSize(8),
+                                        height: normalizeSize(8),
+                                        borderRadius: 100,
+                                        backgroundColor: statisticsChartColors[index],
+                                        marginRight: 5
+                                    }}
+                                    />
 
-                                <Text
-                                style={{
-                                    marginLeft: 6,
-                                    fontWeight: "700",
-                                    color: theme.text_secondary_color,
-                                    fontSize: normalizeSize(12.5)
-                                }}
-                                > 
                                     {
-                                        statisticsChartValues[index]
+                                        item.icon
                                     }
-                                </Text>
+                                </View>
+
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                                >
+                                    <Text
+                                    style={{
+                                        marginLeft: 10,
+                                        fontSize: normalizeSize(12),
+                                        fontWeight: "500",
+                                        color: theme.text_secondary_color + "90"
+                                    }}
+                                    >
+                                        {
+                                            item.name
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        marginLeft: 6,
+                                        fontWeight: "700",
+                                        color: theme.text_secondary_color,
+                                        fontSize: normalizeSize(12.5)
+                                    }}
+                                    > 
+                                        {
+                                            statisticsChartValues[index]
+                                        }
+                                    </Text>
+                                </View>
                             </View>
-                        </View>
-                    ))
-                }
+                        ))
+                    }
                 </View>
                 
                 {
@@ -653,8 +704,10 @@ export const Profile = props => {
             key={"friend-" + item.id}
             style={{
                 overflow: "hidden",
-                borderRadius: 8,
-                marginHorizontal: 3,
+                borderTopLeftRadius: 100,
+                borderTopRightRadius: 100,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20
             }}
             >
                 <TouchableNativeFeedback
@@ -671,7 +724,7 @@ export const Profile = props => {
                     }}
                     >
                         <Avatar
-                        size={40}
+                        size={55}
                         url={item.photo}
                         online={(+new Date() - +new Date(item?.online?.time)) < 1 * 60 * 1000}
                         />
@@ -730,7 +783,7 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.subscribers >= 1 ? theme.accent : theme.divider_color,
+                    backgroundColor: userData?.subscribersCount >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -743,7 +796,7 @@ export const Profile = props => {
                         textAlignVertical: "center"
                     }}
                     >
-                        {userData?.subscribers || 0} {declOfNum(userData?.subscribers, ["заявка","заявки","заявок"])}
+                        {userData?.subscribersCount || 0} {declOfNum(userData?.subscribersCount, ["заявка","заявки","заявок"])}
                     </Text>
 
                     <Icon
@@ -762,6 +815,8 @@ export const Profile = props => {
                     data={friends}
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={friendsListRender}
+                    showsHorizontalScrollIndicator={false}
+                    overScrollMode="never"
                     />
                 ) : (
                     <Placeholder
@@ -781,6 +836,17 @@ export const Profile = props => {
             title={item?.anime?.title}
             maxTitleLines={2}
             onPress={() => navigate("anime", { animeData: { id: item.anime.id } })}
+            after={
+                <PressIcon
+                icon={
+                    <Icon
+                    name="four-dots"
+                    size={12}
+                    color={theme.text_secondary_color}
+                    />
+                }
+                />
+            }
             subtitle={
                 <View
                 style={{
@@ -844,7 +910,7 @@ export const Profile = props => {
                         <Icon
                         name="mic-outline"
                         color={theme.text_secondary_color}
-                        size={12}
+                        size={14}
                         />
 
                         <Text
@@ -854,7 +920,7 @@ export const Profile = props => {
                         }}
                         >
                             {
-                                item?.translation || "Неизвестна"
+                                item?.translation?.title || "Неизвестна"
                             }
                         </Text>
                     </View>
@@ -883,86 +949,44 @@ export const Profile = props => {
 
     const renderBrowsingHistory = () => {
         return (
-            <View
-            style={{
-                marginTop: 10,
-            }}
-            >
-                <View
-                style={{
-                    backgroundColor: theme.text_secondary_color + "10",
-                    borderRadius: 100,
-                    marginHorizontal: 10,
-                    marginBottom: 10,
-                    overflow: "hidden"
-                }}
-                >
-                    <TouchableNativeFeedback
-                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+            <View>
+                <ContentHeader
+                text="История просмотров"
+                icon={
+                    <Icon
+                    name="replay"
+                    color={theme.text_secondary_color}
+                    />
+                }
+                onPress={() => navigate("general_user.browsing_history", {
+                    initialHistory: browsingHistory
+                })}
+                after={
+                    <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        paddingVertical: 8,
+                        paddingHorizontal: 10
+                    }}
                     >
-                        <View
+                        <Text
                         style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
+                            color: theme.text_secondary_color
                         }}
                         >
-                            <View
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginVertical: 8,
-                                marginHorizontal: 10,
-                            }}
-                            >
-                                <Icon
-                                name="replay"
-                                color={theme.text_secondary_color}
-                                />
+                            Все
+                        </Text>
 
-                                <Text
-                                style={{
-                                    color: theme.text_secondary_color,
-                                    fontWeight: "500",
-                                    fontSize: normalizeSize(12),
-                                    marginLeft: 8
-                                }}
-                                >
-                                    История просмотров
-                                </Text>
-                            </View>
+                        <Icon
+                        name="chevron-right"
+                        color={theme.text_secondary_color}
+                        />
+                    </View>
+                }
+                />
 
-                            <View
-                            style={{
-                                borderRadius: 100,
-                                overflow: "hidden"
-                            }}
-                            >
-                                <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    paddingVertical: 8,
-                                    paddingHorizontal: 10
-                                }}
-                                >
-                                    <Text
-                                    style={{
-                                        color: theme.text_secondary_color
-                                    }}
-                                    >
-                                        Все
-                                    </Text>
-
-                                    <Icon
-                                    name="chevron-right"
-                                    color={theme.text_secondary_color}
-                                    />
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
+                <View style={{ marginTop: 10 }} />
 
                 {
                     browsingHistory.length === 0 ? (

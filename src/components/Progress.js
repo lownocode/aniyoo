@@ -10,17 +10,21 @@ export const Progress = (props) => {
         step = 0,
         steps = 0,
         height = 10,
+        duration = 300,
+        background = theme.progress.background,
+        selectColor = theme.progress.background + "20",
+        borderRadius = 100
     } = props;
 
     const [ width, setWidth ] = useState(0);
 
-    const animatedValue = useRef(new Animated.Value(-1000)).current;
-    const reactive = useRef(new Animated.Value(-1000)).current;
+    const animatedValue = useRef(new Animated.Value(0)).current;
+    const reactive = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.timing(animatedValue, {
             toValue: reactive,
-            duration: 300,
+            duration: duration,
             useNativeDriver: true
         }).start();
     }, []);
@@ -33,23 +37,21 @@ export const Progress = (props) => {
         <View
         style={{
             height: height,
-            backgroundColor: theme.progress.background + "20",
-            borderRadius: 100,
+            backgroundColor: selectColor,
+            borderRadius: borderRadius,
             overflow: "hidden",
             flex: 1,
         }}
-        onLayout={(e) => {
-            const newWidth = e.nativeEvent.layout.width;
-            setWidth(newWidth);
-        }}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
         >
             <Animated.View
             style={{
+                [!width && "display"]: "none",
                 flex: 1,
                 height: height,
                 width: "100%",
-                borderRadius: 100,
-                backgroundColor: theme.progress.background,
+                borderRadius: borderRadius,
+                backgroundColor: background,
                 position: "absolute",
                 left: 0,
                 top: 0,

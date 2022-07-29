@@ -105,7 +105,7 @@ export const Rating = (props) => {
                     <Text
                     style={{
                         fontWeight: "700",
-                        fontSize: normalizeSize(40),
+                        fontSize: 50,
                         color: theme.text_color
                     }}
                     >

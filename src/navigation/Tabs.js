@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, TouchableNativeFeedback, Dimensions, StatusBar } from "react-native";
-import { EventRegister } from "react-native-event-listeners";
+import { Text, View, TouchableNativeFeedback, Vibration } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import {
@@ -12,39 +11,34 @@ import {
     Profile
 } from "../screens";
 import { Avatar, Icon } from "../components";
+import { normalizeSize, storage } from "../functions";
+
 import ThemeContext from "../config/ThemeContext";
 import UserContext from "../config/UserContext";
-import { normalizeSize } from "../functions";
 
 const Tab = createBottomTabNavigator();
 
 export const Tabs = () => {
     const theme = useContext(ThemeContext);
-    const user = useContext(UserContext);
 
     const route = useRoute();
 
-    const [ hideTabs, setHideTabs ] = useState(false);
+    const [ cachedUserData, setCachedUserData ] = useState({});
+
+    const getCachedUserData = async () => {
+        const data = await storage.getItem("cachedUserData");
+        if(!data) return;
+
+        setCachedUserData(data);
+    };
 
     useEffect(() => {
-        const eventListener = EventRegister.addEventListener("changeTabbar", data => {
-            if(data.type === "hide") {
-                return setHideTabs(true);
-            }
-
-            else if(data.type === "show") {
-                return setHideTabs(false);
-            }
-        });
-
-        return () => {
-            EventRegister.removeEventListener(eventListener);
-        };
+        getCachedUserData();
     }, []);
 
     const CustomTabButton = (props) => {
         const isFocused = props.accessibilityState.selected;
-        const routeName = props.to.split("/tabs")[1].split("/")[1].split("?")[0];
+        const routeName = props.to.split("/")[props.to.split("/").length - 1].split("?")[0];
 
         const routeNameDecode = {
             "profile": "Профиль",
@@ -63,7 +57,10 @@ export const Tabs = () => {
 
         return (
             <TouchableNativeFeedback 
-            onPress={() => props.onPress()}
+            onPress={() => {
+                Vibration.vibrate(20);
+                props.onPress();
+            }}
             delayPressIn={0}
             background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
             disabled={isFocused}
@@ -84,8 +81,8 @@ export const Tabs = () => {
                     {
                         routeName === "profile" ? (
                             <Avatar
-                            url={user?.photo}
-                            size={isFocused ? 20 : 25}
+                            url={cachedUserData?.photo}
+                            size={isFocused ? 25 : 30}
                             />
                         ) : (
                             <Icon
@@ -104,7 +101,7 @@ export const Tabs = () => {
                                 marginHorizontal: 5,
                                 color: theme.bottom_tabbar.active_icon_color,
                                 fontWeight: "500",
-                                fontSize: normalizeSize(10)
+                                fontSize: 12
                             }}
                             >
                                 {
@@ -119,19 +116,23 @@ export const Tabs = () => {
         )
     };
 
-    return (
-        <Tab.Navigator
-        screenOptions={{
+    const navigatorOptions = useMemo(() => {
+        return {
             headerShown: false,
             tabBarButton: (props) => <CustomTabButton {...props} />,
             tabBarStyle: {
                 backgroundColor: theme.bottom_tabbar.background, 
-                height: normalizeSize(50), 
+                height: 65, 
                 shadowColor: "transparent",
                 borderTopWidth: 0 
             },
             tabBarHideOnKeyboard: true
-        }}
+        }
+    }, [theme]); 
+
+    return (
+        <Tab.Navigator
+        screenOptions={navigatorOptions}
         initialRouteName="profile"
         >
             <Tab.Screen
@@ -173,7 +174,7 @@ export const Tabs = () => {
             }}
             >
                 {
-                    props => <Profile {...props} />
+                    props => <Profile {...props} cachedUserData={cachedUserData} />
                 }
             </Tab.Screen>
         </Tab.Navigator>

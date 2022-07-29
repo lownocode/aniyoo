@@ -75,8 +75,8 @@ export const LinkedAnime = (props) => {
                         <Image
                         resizeMethod="resize"
                         style={{
-                            width: normalizeSize(60),
-                            height: normalizeSize(85),
+                            width: 90,
+                            height: 125,
                         }}
                         source={{
                             uri: item?.poster
@@ -96,7 +96,7 @@ export const LinkedAnime = (props) => {
                                         width: "100%",
                                         textAlign: "center",
                                         color: "#fff",
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         paddingHorizontal: 3,
                                         fontWeight: "500"
                                     }}
@@ -140,7 +140,7 @@ export const LinkedAnime = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     borderColor: theme.divider_color,
                                     backgroundColor: theme.divider_color + "98",
                                     borderWidth: 1,
@@ -159,7 +159,7 @@ export const LinkedAnime = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     borderColor: theme.divider_color,
                                     backgroundColor: theme.divider_color + "98",
                                     borderWidth: 1,
@@ -187,7 +187,7 @@ export const LinkedAnime = (props) => {
                         numberOfLines={3}
                         style={{
                             color: theme.text_secondary_color,
-                            fontSize: normalizeSize(11)
+                            fontSize: 13
                         }}
                         >
                             {   

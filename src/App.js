@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { CommonActions, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar, Linking } from 'react-native';
-import Orientation from 'react-native-orientation';
+import React, { useEffect, useState } from "react";
+import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StatusBar, Linking, View } from "react-native";
+import Orientation from "react-native-orientation";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
-import SplashScreen from 'react-native-splash-screen';
+import SplashScreen from "react-native-splash-screen";
 
 // import FBMessaging from "@react-native-firebase/messaging";
 // import Firebase from "@react-native-firebase/app";
@@ -43,13 +43,15 @@ import {
     SearchAnime,
     SearchUsers,
     UserFriends,
-    AnimePlaylists
+    AnimePlaylists,
+    GeneralUserBrowsingHistory,
+    GeneralUserComments
 } from "./panels";
-import { Tabs } from './navigation/Tabs';
+import { Tabs } from "./navigation/Tabs";
 
-import { sleep, storage } from './functions';
-import axios from 'axios';
-import { EventRegister } from 'react-native-event-listeners';
+import { sleep, storage } from "./functions";
+import axios from "axios";
+import { EventRegister } from "react-native-event-listeners";
 
 import theme from "./config/theme";
 import ThemeContext from "./config/ThemeContext";
@@ -61,6 +63,7 @@ Orientation.lockToPortrait();
 export default App = () => {
     const [ darkThemeMode, setDarkThemeMode ] = useState(false);
     const [ UserData, setUserData ] = useState({});
+    const [ isError, setIsError ] = useState(false);
 
     const navigation = useNavigationContainerRef();
 
@@ -99,8 +102,8 @@ export default App = () => {
             }
 
             if(data.type === "changeUser") {
-                setUserData(data.user)
-                return;
+                setUserData(data.user);
+                return storage.setItem("cachedUserData", data.user);
             }
         });
 
@@ -119,9 +122,9 @@ export default App = () => {
 
             let hash;
             let myJson = {};
-            let hashes = url.slice(url.indexOf('?') + 1).split('&');
+            let hashes = url.slice(url.indexOf("?") + 1).split("&");
             for (let i = 0; i < hashes.length; i++) {
-                hash = hashes[i].split('=');
+                hash = hashes[i].split("=");
                 myJson[hash[0]] = hash[1];
             }
             return myJson;
@@ -184,6 +187,18 @@ export default App = () => {
     return (
         <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
             <UserContext.Provider value={UserData}>
+                {
+                    isError ? (
+                        <View
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            backgroundColor: "red"
+                        }}
+                        >
+
+                        </View>
+                    ) :
                 <NavigationContainer 
                 onReady={() => readyHandler()}
                 ref={navigation}
@@ -340,8 +355,20 @@ export default App = () => {
                       options={{ animation: "none" }}
                       component={AnimePlaylists}
                       />
+
+                      <Stack.Screen 
+                      name="general_user.browsing_history" 
+                      options={{ animation: "none" }}
+                      component={GeneralUserBrowsingHistory}
+                      />
+
+                      <Stack.Screen 
+                      name="general_user.comments" 
+                      options={{ animation: "none" }}
+                      component={GeneralUserComments}
+                      />
                     </Stack.Navigator>
-                </NavigationContainer>
+                </NavigationContainer>}
             </UserContext.Provider>
         </ThemeContext.Provider>
     );

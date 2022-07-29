@@ -50,14 +50,14 @@ export const Cell = (props) => {
         },
         title: {
             color: theme.cell.title_color,
-            fontSize: normalizeSize(14),
+            fontSize: 17,
             flex: 1,
             fontWeight: "500",
             ...titleStyle,
         },
         subtitle: {
             color: theme.cell.subtitle_color,
-            fontSize: normalizeSize(11.2),
+            fontSize: 14,
             flex: 1,
             ...subtitleStyle
         },

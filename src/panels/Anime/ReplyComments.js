@@ -280,7 +280,7 @@ export const AnimeReplyComments = (props) => {
                                         style={{
                                             textAlign: "center",
                                             color: theme.text_secondary_color,
-                                            fontSize: normalizeSize(10)
+                                            fontSize: 12
                                         }}
                                         >
                                             Автор указал, что этот комментарий содержит спойлер. Нажмите, чтобы открыть
@@ -355,7 +355,7 @@ export const AnimeReplyComments = (props) => {
                                                     style={{
                                                         textAlign: "center",
                                                         color: theme.text_secondary_color,
-                                                        fontSize: normalizeSize(10)
+                                                        fontSize: 12
                                                     }}
                                                     >
                                                         Нажмите, чтобы скрыть
@@ -831,7 +831,7 @@ export const AnimeReplyComments = (props) => {
                                         upperTitle={false}
                                         textStyle={{
                                             color: theme.anime.dropped,
-                                            fontSize: normalizeSize(9),
+                                            fontSize: 11,
                                             marginLeft: 5
                                         }}
                                         type="outline"
@@ -901,7 +901,7 @@ export const AnimeReplyComments = (props) => {
                                     }}
                                     >
                                         <ActivityIndicator size={8} color={theme.activity_indicator_color}/>
-                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: normalizeSize(8) }}>Загрузка комментариев...</Text>
+                                        <Text style={{ marginLeft: 5, color: theme.text_secondary_color, fontSize: 11 }}>Загрузка комментариев...</Text>
                                     </View>
                                 )
                             }

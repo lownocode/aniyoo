@@ -49,7 +49,7 @@ export const MyAnimeList = (props) => {
                     style={{
                         color: theme.cell.title_color,
                         fontWeight: "500",
-                        fontSize: normalizeSize(13),
+                        fontSize: 15,
                     }}
                     >
                         {
@@ -75,8 +75,8 @@ export const MyAnimeList = (props) => {
                     uri: item?.poster
                 }}
                 style={{
-                    width: normalizeSize(70),
-                    height: normalizeSize(105),
+                    width: 95,
+                    height: 135,
                     resizeMode: "cover",
                     borderRadius: 7,
                     borderColor: theme.divider_color,
@@ -99,7 +99,7 @@ export const MyAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,
@@ -124,7 +124,7 @@ export const MyAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,
@@ -157,7 +157,7 @@ export const MyAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,

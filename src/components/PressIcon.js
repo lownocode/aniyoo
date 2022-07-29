@@ -19,8 +19,8 @@ export const PressIcon = (props) => {
     const localStyles = StyleSheet.create({
         container: {
             borderRadius: 100,
-            width: normalizeSize(26), 
-            height: normalizeSize(26),
+            width: 35, 
+            height: 35,
             justifyContent: "center",
             alignItems: "center",
             ...containerStyle

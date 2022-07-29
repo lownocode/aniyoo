@@ -102,6 +102,13 @@ import Plus from "./icons/Plus";
 import RutubeLogo from "./icons/RutubeLogo";
 import VimeoLogo from "./icons/VimeoLogo";
 import Anime365Logo from "./icons/Anime365Logo";
+import BarChart from "./icons/BarChart";
+import Description from "./icons/Description";
+import PlaylistPlay from "./icons/PlaylistPlay";
+import Link from "./icons/Link";
+import UserCheck from "./icons/UserCheck";
+import ArrowsInward from "./icons/ArrowsInward";
+import ArrowsFromInside from "./icons/ArrowsFromInside";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -209,6 +216,13 @@ export const Icon = (props) => {
         "rutube-logo": <RutubeLogo {...props} />,
         "vimeo-logo": <VimeoLogo {...props} />,
         "anime365-logo": <Anime365Logo {...props} />,
+        "bar-chart": <BarChart {...props} />,
+        "description": <Description {...props} />,
+        "playlist-play": <PlaylistPlay {...props} />,
+        "link": <Link {...props} />,
+        "user-check": <UserCheck {...props} />,
+        "arrows-inward": <ArrowsInward {...props} />,
+        "arrows-from-inside": <ArrowsFromInside {...props} />,
     }[name];
 
     return (

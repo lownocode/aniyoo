@@ -8,7 +8,8 @@ import {
     Dimensions,
     StyleSheet,
     PanResponder,
-    ToastAndroid
+    ToastAndroid,
+    TouchableWithoutFeedback,
 } from "react-native";
 import Video from "react-native-video";
 import { useRoute } from "@react-navigation/native";
@@ -18,20 +19,19 @@ import axios from "axios";
 import { hideNavigationBar } from "react-native-navigation-bar-color";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
+import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Icon } from "../../components";
+import { Cell, Icon, Progress } from "../../components";
 import { 
     AnimeWatchedBefore, 
-    ChangeVideoQuality, 
-    ChangeVideoRate 
 } from "../../modals";
 
 import ThemeContext from "../../config/ThemeContext";
-import { declOfNum, normalizeSize, storage } from "../../functions";
+import { declOfNum, storage } from "../../functions";
 
 export const AnimeVideoPlayer = (props) => {
     const theme = useContext(ThemeContext);
@@ -48,10 +48,8 @@ export const AnimeVideoPlayer = (props) => {
     const [ paused, setPaused ] = useState(false);
     const [ progress, setProgress ] = useState({ currentTime: 0, seekableDuration: 0 });
     const [ lockedControls, setLockedControls ] = useState(false);
-    const [ rate, setRate ] = useState(1);
     const [ videoUrls, setVideoUrls ] = useState(route.params?.videos || {});
     const [ animeData, setAnimeData ] = useState(route.params?.data);
-    const [ quality, setQuality ] = useState(Object.keys(route.params?.videos || {})[Object.keys(route.params?.videos || {}).length - 1]);
     const [ loading, setLoading ] = useState(true);
     const [ modalContent, setModalContent ] = useState(null);
     const [ lastProgressCurrent, setLastProgressCurrent ] = useState(0);
@@ -59,6 +57,11 @@ export const AnimeVideoPlayer = (props) => {
     const [ swipeStartPoint, setSwipeStartPoint ] = useState(null);
     const [ swipeMode, setSwipeMode ] = useState(false);
     const [ swipeOffset, setSwipeOffset ] = useState(0);
+    const [ popupOpen, setPopupOpen ] = useState(null);
+    const [ videoPlayerSettings, setVideoPlayerSettings ] = useState({});
+    const [ stretched, setStretched ] = useState(false);
+    const [ skipToMoment, setSkipToMoment ] = useState(false);
+    const [ videoPlayableUrl, setVideoPlayableUrl ] = useState("");
 
     const modalRef = useRef();
     const videoRef = useRef();
@@ -135,6 +138,29 @@ export const AnimeVideoPlayer = (props) => {
         storage.setItem(`ANIME_VIEW__ID=${route.params?.animeId || 0}`, newAnimeViewData);
     };
 
+    const getVideoPlayerSetting = async () => {
+        const settings = await storage.getItem("VIDEOPLAYER_SETTINGS");
+
+        const defaultSettingsScheme = {
+            rate: 1,
+            quality: 720
+        };
+
+        if(!settings) {
+            setVideoPlayerSettings(defaultSettingsScheme);
+            getVideoPlayableUrl(720);
+            return storage.setItem("VIDEOPLAYER_SETTINGS", defaultSettingsScheme);
+        }
+
+        setVideoPlayerSettings(settings);
+
+        videoRef.current?.setNativeProps({
+            rate: settings?.rate,
+        });
+
+        getVideoPlayableUrl(settings?.quality);
+    };
+
     useEffect(() => {
         saveAnimeViewData();
     }, [progress]);
@@ -158,6 +184,7 @@ export const AnimeVideoPlayer = (props) => {
     };
 
     useEffect(() => {
+        getVideoPlayerSetting();
         settingVideoSpace();
     }, []);
 
@@ -201,6 +228,7 @@ export const AnimeVideoPlayer = (props) => {
     }; 
 
     const prevEpisode = async () => {
+        setPaused(true);
         setLoading(true);
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
@@ -216,7 +244,6 @@ export const AnimeVideoPlayer = (props) => {
             }
         })
         .then(({ data }) => {
-            setPaused(true);
             setVideoUrls(data.links);
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
@@ -235,7 +262,9 @@ export const AnimeVideoPlayer = (props) => {
     };
 
     const nextEpisode = async () => {
+        setPaused(true);
         setLoading(true);
+
         if(animeData.playedEpisode === animeData.episodesCount) return goBack();
 
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
@@ -251,7 +280,6 @@ export const AnimeVideoPlayer = (props) => {
             }
         })
         .then(({ data }) => {
-            setPaused(true);
             setVideoUrls(data.links);
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
@@ -268,11 +296,6 @@ export const AnimeVideoPlayer = (props) => {
             console.log(data)
         });
     };
-
-    const changeQuality = async (quality) => {
-        // setPaused(true);
-        setQuality(quality);
-    };
     
     const swipeHandler = (x) => {
         const uncertainty = 2;
@@ -283,26 +306,47 @@ export const AnimeVideoPlayer = (props) => {
         } 
 
         if(swipeBefore > x) {//swipe to left
-            const swipeLeftDistance = (swipeStartPoint - x) / 10;
+            const swipeLeftDistance = (swipeStartPoint - x) / 5;
             
             if(swipeLeftDistance < uncertainty && swipeLeftDistance > 0) return;
 
             setLoading(false);
             setPaused(true);
             setSwipeMode(true);
-            setSwipeOffset(-swipeLeftDistance);
+            setSwipeOffset(-(swipeLeftDistance - uncertainty));
         }
 
         if(swipeBefore < x) {
-            const swipeRightDistance = (x - swipeStartPoint) / 10;
+            const swipeRightDistance = (x - swipeStartPoint) / 5;
 
             if(swipeRightDistance < uncertainty && swipeRightDistance > 0) return;
             
             setLoading(false);
             setPaused(true);
             setSwipeMode(true);
-            setSwipeOffset(swipeRightDistance);
+            setSwipeOffset(swipeRightDistance - uncertainty);
         } 
+    };
+
+    const getVideoPlayableUrl = (quality) => {
+        const qualityList = Object.keys(videoUrls);
+
+        if(qualityList.length === 0) {
+            ToastAndroid.show("Запрашиваемое видео не найдено", ToastAndroid.LONG);
+            return goBack();
+        }
+
+        if(!qualityList.find(q => q === quality)) {
+            ToastAndroid.show("Выбранное качество не найдено, будет воспроизведено максимально возможное", ToastAndroid.LONG);
+
+            setVideoPlayerSettings({
+                ...videoPlayerSettings,
+                quality: qualityList[qualityList.length - 1]
+            });
+            return setVideoPlayableUrl(videoUrls[qualityList[qualityList.length - 1]]);
+        }
+
+        return setVideoPlayableUrl(videoUrls[quality]);
     };
 
     const styles = StyleSheet.create({
@@ -320,15 +364,16 @@ export const AnimeVideoPlayer = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: "#000", flex: 1 }}>
+        <GestureHandlerRootView style={{ backgroundColor: "#000", flex: 1, }}>
             <Video
             source={{
-                uri: videoUrls[quality]
+                uri: videoPlayableUrl
             }}
             style={{
                 flex: 1,
+                height: "100%"
             }}
-            resizeMode="contain"
+            resizeMode={stretched ? "cover" : "contain"}
             controls={false}
             ref={videoRef}
             onTouchMove={(e) => {
@@ -351,10 +396,15 @@ export const AnimeVideoPlayer = (props) => {
                 setLastProgressCurrent(e.currentTime);
             }}
             progressUpdateInterval={1000}
-            rate={rate}
             onError={(e) => {
-                ToastAndroid.show(`Произошла ошибка при загрузке видео, попробуйте позже.\n${e.error.errorString}`, ToastAndroid.LONG);
+                ToastAndroid.show(`Произошла ошибка при загрузке видео, попробуйте позже.\n${e.error.errorString || ""}`, ToastAndroid.LONG);
                 goBack();
+            }}
+            onLoad={() => {
+                if(skipToMoment && lastProgressCurrent > 0) {
+                    videoRef.current?.seek(lastProgressCurrent);
+                    setSkipToMoment(false);
+                }
             }}
             />
 
@@ -387,27 +437,30 @@ export const AnimeVideoPlayer = (props) => {
                             style={{
                                 justifyContent: "space-between",
                                 alignItems: "center",
-                                marginTop: 25,
                                 flexDirection: "row",
-                                marginHorizontal: 10, 
                                 marginRight: 50,
                             }}
                             >
-                                <TouchableNativeFeedback
+                                <TouchableWithoutFeedback
                                 onPress={() => {
                                     saveAnimeViewData();
                                     goBack();
                                 }}
-                                background={TouchableNativeFeedback.Ripple("rgba(0, 0, 0, .1)", true)}
                                 >
-                                    <View>
+                                    <View
+                                    style={{
+                                        paddingLeft: 30,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 30,
+                                    }}
+                                    >
                                         <Icon
                                         name="arrow-back"
                                         color="#fff"
                                         size={22}
                                         />
                                     </View>
-                                </TouchableNativeFeedback>
+                                </TouchableWithoutFeedback>
 
                                 <View
                                 style={{
@@ -418,7 +471,7 @@ export const AnimeVideoPlayer = (props) => {
                                     numberOfLines={1}
                                     style={{
                                         fontWeight: "600",
-                                        fontSize: normalizeSize(14),
+                                        fontSize: 17,
                                         color: "#fff",
                                         textAlign: "center",
                                     }}
@@ -439,18 +492,26 @@ export const AnimeVideoPlayer = (props) => {
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <View style={{ marginRight: 20 }} />
 
-                                    <TouchableNativeFeedback
-                                    onPress={() => setLockedControls(!lockedControls)}
-                                    background={TouchableNativeFeedback.Ripple("rgba(0, 0, 0, .1)", true)}
+                                    <TouchableWithoutFeedback
+                                    onPress={() => {
+                                        setLockedControls(!lockedControls);
+                                        setControlsOpen(false);
+                                    }}
                                     >
-                                        <View>
+                                        <View
+                                        style={{
+                                            paddingRight: 30,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 30,
+                                        }}
+                                        >
                                             <Icon
                                             name={lockedControls ? "lock" : "lock-open"}
                                             size={25}
                                             color="#fff"
                                             />
                                         </View>
-                                    </TouchableNativeFeedback>
+                                    </TouchableWithoutFeedback>
                                 </View>
                             </View>
 
@@ -479,7 +540,12 @@ export const AnimeVideoPlayer = (props) => {
                                             background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
                                             disabled={Number(animeData?.playedEpisode) === 1}
                                             >
-                                                <View style={{ opacity: Number(animeData?.playedEpisode) === 1 ? 0.3 : 1 }}>
+                                                <View 
+                                                style={{ 
+                                                    opacity: Number(animeData?.playedEpisode) === 1 ? 0.3 : 1,
+                                                    padding: 10
+                                                }}
+                                                >
                                                     <Icon
                                                     name="skip-previous"
                                                     size={30}
@@ -490,7 +556,7 @@ export const AnimeVideoPlayer = (props) => {
 
                                             <View
                                             style={{
-                                                marginHorizontal: 120
+                                                marginHorizontal: 100
                                             }}
                                             >
                                                 <TouchableNativeFeedback
@@ -502,7 +568,11 @@ export const AnimeVideoPlayer = (props) => {
                                                 }}
                                                 background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
                                                 >
-                                                    <View>
+                                                    <View
+                                                    style={{
+                                                        padding: 10
+                                                    }}
+                                                    >
                                                         <Icon
                                                         name={paused ? "play" : "pause"}
                                                         size={45}
@@ -517,7 +587,12 @@ export const AnimeVideoPlayer = (props) => {
                                             background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
                                             disabled={animeData?.playedEpisode === animeData?.episodesCount}
                                             >
-                                                <View style={{ opacity: Number(animeData?.playedEpisode) === animeData?.episodesCount ? 0.3 : 1 }}>
+                                                <View 
+                                                style={{ 
+                                                    opacity: Number(animeData?.playedEpisode) === animeData?.episodesCount ? 0.3 : 1,
+                                                    padding: 10
+                                                }}
+                                                >
                                                     <Icon
                                                     type="Ionicons"
                                                     name="skip-next"
@@ -531,66 +606,114 @@ export const AnimeVideoPlayer = (props) => {
                                 }
                             </View>
 
-                            {
-                                animeData?.opening?.start && (progress.currentTime > animeData?.opening?.start && progress.currentTime < animeData?.opening?.end) ? (
-                                    <View
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "flex-end",
-                                        marginBottom: 10,
-                                        marginRight: 25,
-                                        backgroundColor: theme.accent,
-                                        borderRadius: 100,
-                                        position: "absolute",
-                                        bottom: 70,
-                                        right: 15
-                                    }}
-                                    >
-                                        <TouchableNativeFeedback
-                                        onPress={() => videoRef.current?.seek(animeData?.opening?.end)}
-                                        background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                            <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                marginBottom: 10,
+                                marginHorizontal: 15,
+                            }}
+                            >
+                                {
+                                    animeData?.opening?.start && (progress.currentTime > animeData?.opening?.start && progress.currentTime < animeData?.opening?.end) ? (
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            justifyContent: "flex-end",
+                                            backgroundColor: theme.accent,
+                                            borderRadius: 100,
+                                        }}
                                         >
-                                            <View
-                                            style={{
-                                                flexDirection: "row",
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                                paddingVertical: 7,
-                                                paddingHorizontal: 9,
-                                            }}
+                                            <TouchableNativeFeedback
+                                            onPress={() => videoRef.current?.seek(animeData?.opening?.end)}
+                                            background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
                                             >
-                                                <Icon
-                                                type="Feather"
-                                                name="chevrons-right"
-                                                size={15}
-                                                color="#fff"
-                                                />
-
-                                                <Text
+                                                <View
                                                 style={{
-                                                    marginLeft: 5,
-                                                    fontWeight: "700",
-                                                    fontSize: normalizeSize(10.5)
+                                                    flexDirection: "row",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    paddingVertical: 7,
+                                                    paddingHorizontal: 9,
                                                 }}
                                                 >
-                                                    Пропустить опенинг
-                                                </Text>
-                                            </View>
-                                        </TouchableNativeFeedback>
-                                    </View>
-                                ) : null
-                            }
+                                                    <Icon
+                                                    type="Feather"
+                                                    name="chevrons-right"
+                                                    size={15}
+                                                    color="#fff"
+                                                    />
+
+                                                    <Text
+                                                    style={{
+                                                        marginLeft: 5,
+                                                        fontWeight: "700",
+                                                    }}
+                                                    >
+                                                        Пропустить опенинг
+                                                    </Text>
+                                                </View>
+                                            </TouchableNativeFeedback>
+                                        </View>
+                                    ) : (
+                                        <View
+                                        style={{
+                                            borderRadius: 100,
+                                            borderColor: theme.text_secondary_color,
+                                            borderWidth: 1,
+                                        }}
+                                        >
+                                            <TouchableNativeFeedback
+                                            onPress={() => videoRef.current?.seek(progress.currentTime + 85)}
+                                            background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                                            >
+                                                <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    width: 80,
+                                                    height: 30
+                                                }}
+                                                >
+                                                    <Icon
+                                                    name="chevron-right-double"
+                                                    size={20}
+                                                    color="#fff"
+                                                    />
+
+                                                    <Text
+                                                    style={{
+                                                        marginLeft: 5,
+                                                        fontWeight: "700",
+                                                        fontSize: 12,
+                                                        color: "#fff"
+                                                    }}
+                                                    >
+                                                        +1:25
+                                                    </Text>
+                                                </View>
+                                            </TouchableNativeFeedback>
+                                        </View>
+                                    )
+                                }
+                            </View>
 
                             <View
                             style={{
-                                marginBottom: 5,
+                                marginBottom: 10,
                                 flexDirection: "row",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                width: "100%"
+                                marginHorizontal: 15,
                             }}
                             >
-                                <Text>
+                                <Text
+                                style={{
+                                    color: "#fff",
+                                }}
+                                >
                                     {
                                         progress.currentTime > 3600 ?
                                         dayjs.duration(progress.currentTime * 1000).format('HH:mm:ss') :
@@ -598,7 +721,7 @@ export const AnimeVideoPlayer = (props) => {
                                     }
                                 </Text>
 
-                                <View style={{ width: "85%" }}>
+                                <View style={{ flex: 1 }}>
                                     <Slider
                                     value={lastProgressCurrent}
                                     minimumValue={0}
@@ -618,7 +741,11 @@ export const AnimeVideoPlayer = (props) => {
                                     />
                                 </View>
 
-                                <Text>
+                                <Text
+                                style={{
+                                    color: "#fff"
+                                }}
+                                >
                                     {
                                         progress.seekableDuration > 3600 ?
                                         dayjs.duration(progress.seekableDuration * 1000).format('HH:mm:ss') :
@@ -633,16 +760,19 @@ export const AnimeVideoPlayer = (props) => {
                                 justifyContent: "flex-end",
                                 marginBottom: 12,
                                 alignItems: "center",
-                                marginHorizontal: 10, 
-                                marginRight: 40
+                                marginHorizontal: 15,
                             }}
                             >
                                 <View
                                 style={{
-                                    borderRadius: 100,
+                                    borderRadius: 10,
                                     borderColor: theme.text_secondary_color,
                                     borderWidth: 1,
-                                    marginRight: 10
+                                    marginRight: 10,
+                                    width: 35,
+                                    height: 35,
+                                    justifyContent: "center",
+                                    alignItems: "center"
                                 }}
                                 >
                                     <TouchableNativeFeedback
@@ -653,14 +783,14 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: normalizeSize(25),
-                                            height: normalizeSize(25)
+                                            width: 35,
+                                            height: 35
                                         }}
                                         >
                                             <Icon
                                             type="MaterialCommunityIcons"
                                             name="screenshot"
-                                            size={15}
+                                            size={17}
                                             color="#fff"
                                             />
                                         </View>
@@ -669,9 +799,13 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View
                                 style={{
-                                    borderRadius: 100,
+                                    borderRadius: 10,
                                     borderColor: theme.text_secondary_color,
                                     borderWidth: 1,
+                                    width: 35,
+                                    height: 35,
+                                    justifyContent: "center",
+                                    alignItems: "center"
                                 }}
                                 >
                                     <TouchableNativeFeedback
@@ -682,13 +816,13 @@ export const AnimeVideoPlayer = (props) => {
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: normalizeSize(25),
-                                            height: normalizeSize(25)
+                                            width: 35,
+                                            height: 35
                                         }}
                                         >
                                             <Icon
                                             name="picture-in-picture"
-                                            size={15}
+                                            size={17}
                                             color="#fff"
                                             />
                                         </View>
@@ -697,8 +831,254 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View
                                 style={{
-                                    width: normalizeSize(2),
-                                    height: normalizeSize(8),
+                                    width: 1,
+                                    height: 10,
+                                    backgroundColor: "#fff",
+                                    borderRadius: 100,
+                                    marginHorizontal: 15,
+                                    opacity: 0.5
+                                }}
+                                />
+
+                                <Popup
+                                visible={popupOpen === "changeRate"}
+                                onRequestClose={() => setPopupOpen(null)}
+                                animationDuration={0}
+                                style={{
+                                    backgroundColor: theme.popup_background,
+                                    borderRadius: 10,
+                                    overflow: "hidden",
+                                }}
+                                anchor={
+                                    <View
+                                    style={{
+                                        borderRadius: 100,
+                                        borderColor: theme.text_secondary_color,
+                                        borderWidth: 1,
+                                        marginRight: 10
+                                    }}
+                                    >
+                                        <TouchableNativeFeedback
+                                        onPress={() => setPopupOpen("changeRate")}
+                                        background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                                        >
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                width: 80,
+                                                height: 30
+                                            }}
+                                            >
+                                                <Icon
+                                                name="speedometer"
+                                                size={15}
+                                                color="#fff"
+                                                />
+
+                                                <Text
+                                                style={{
+                                                    marginLeft: 7,
+                                                    fontWeight: "700",
+                                                    fontSize: 13,
+                                                    color: "#fff"
+                                                }}
+                                                >
+                                                    {videoPlayerSettings?.rate}x
+                                                </Text>
+                                            </View>
+                                        </TouchableNativeFeedback>
+                                    </View>
+                                }
+                                >
+                                    {
+                                        [
+                                            { rate: 0.25, name: "Очень медленно" },
+                                            { rate: 0.75, name: "Умеренно" },
+                                            { rate: 1, name: "По умолчанию" },
+                                            { rate: 1.25, name: "Быстрее обычного" },
+                                            { rate: 1.75, name: "Быстро" },
+                                            { rate: 2, name: "Очень быстро" },
+                                        ].map((item) => {
+                                            return (
+                                                <Cell
+                                                key={"rate-x" + item.rate}
+                                                title={item.name}
+                                                onPress={async () => {
+                                                    setPopupOpen(null);
+                                                    videoRef.current?.setNativeProps({
+                                                        rate: item.rate
+                                                    });
+                                                    setVideoPlayerSettings({
+                                                        ...videoPlayerSettings,
+                                                        rate: item.rate
+                                                    });
+
+                                                    const playerSettings = await storage.getItem("VIDEOPLAYER_SETTINGS");
+                                                    storage.setItem("VIDEOPLAYER_SETTINGS", {
+                                                        ...playerSettings,
+                                                        rate: item.rate
+                                                    });
+                                                }}
+                                                before={
+                                                    <View
+                                                    style={{
+                                                        width: 45,
+                                                        height: 20,
+                                                        backgroundColor: videoPlayerSettings?.rate === item.rate ? theme.accent : theme.text_secondary_color + "20",
+                                                        borderRadius: 8
+                                                    }}
+                                                    >
+                                                        <Text
+                                                        style={{
+                                                            fontWeight: "700",
+                                                            textAlign: "center",
+                                                            color: videoPlayerSettings?.rate === item.rate ? "#fff" : theme.text_secondary_color
+                                                        }}
+                                                        >
+                                                            {item.rate}x
+                                                        </Text>
+                                                    </View>
+                                                }
+                                                containerStyle={{
+                                                    paddingVertical: 15,
+                                                    backgroundColor: videoPlayerSettings?.rate === item.rate && theme.accent + "10"
+                                                }}
+                                                contentStyle={{
+                                                    flex: 0
+                                                }}
+                                                disabled={videoPlayerSettings?.rate === item.rate}
+                                                />
+                                            )
+                                        })
+                                    }
+                                </Popup>
+
+                                <Popup
+                                visible={popupOpen === "changeQuality"}
+                                onRequestClose={() => setPopupOpen(null)}
+                                animationDuration={0}
+                                style={{
+                                    backgroundColor: theme.popup_background,
+                                    borderRadius: 10,
+                                    overflow: "hidden",
+                                }}
+                                anchor={
+                                    <View
+                                    style={{
+                                        borderRadius: 100,
+                                        borderColor: theme.text_secondary_color,
+                                        borderWidth: 1,
+                                    }}
+                                    >
+                                        <TouchableNativeFeedback
+                                        onPress={() => setPopupOpen("changeQuality")}
+                                        background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                                        >
+                                            <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                width: 80,
+                                                height: 30
+                                            }}
+                                            >
+                                                <Icon
+                                                name="hd"
+                                                size={15}
+                                                color="#fff"
+                                                />
+
+                                                <Text
+                                                style={{
+                                                    marginLeft: 5,
+                                                    fontWeight: "700",
+                                                    fontSize: 12,
+                                                    color: "#fff"
+                                                }}
+                                                >
+                                                    {videoPlayerSettings?.quality}p
+                                                </Text>
+                                            </View>
+                                        </TouchableNativeFeedback>
+                                    </View>
+                                }
+                                >
+                                    {
+                                        Object.keys(videoUrls || {}).map((key) => {
+                                            if(!videoUrls[key]) return;
+
+                                            const qualityDecode = {
+                                                "360": "Плохое",
+                                                "480": "Среднее",
+                                                "720": "Хорошее",
+                                                "1080": "Отличное",
+                                            };
+
+                                            return (
+                                                <Cell
+                                                key={"quality-p" + key}
+                                                title={qualityDecode[key]}
+                                                onPress={async () => {
+                                                    setPopupOpen(null);
+                                                    setPaused(true);
+                                                    setLoading(true);
+
+                                                    setVideoPlayerSettings({
+                                                        ...videoPlayerSettings,
+                                                        quality: key
+                                                    });
+
+                                                    setSkipToMoment(true);
+
+                                                    const playerSettings = await storage.getItem("VIDEOPLAYER_SETTINGS");
+                                                    storage.setItem("VIDEOPLAYER_SETTINGS", {
+                                                        ...playerSettings,
+                                                        quality: key
+                                                    });
+
+                                                    setPaused(false);
+                                                }}
+                                                before={
+                                                    <View
+                                                    style={{
+                                                        width: 50,
+                                                        height: 20,
+                                                        backgroundColor: videoPlayerSettings?.quality === key ? theme.accent : theme.text_secondary_color + "20",
+                                                        borderRadius: 8
+                                                    }}
+                                                    >
+                                                        <Text
+                                                        style={{
+                                                            fontWeight: "700",
+                                                            textAlign: "center",
+                                                            color: videoPlayerSettings?.quality === key ? "#fff" : theme.text_secondary_color
+                                                        }}
+                                                        >
+                                                            {key}P
+                                                        </Text>
+                                                    </View>
+                                                }
+                                                containerStyle={{
+                                                    paddingVertical: 15,
+                                                    backgroundColor: videoPlayerSettings?.quality === key && theme.accent + "10"
+                                                }}
+                                                contentStyle={{
+                                                    flex: 0
+                                                }}
+                                                disabled={videoPlayerSettings?.quality === key}
+                                                />
+                                            )
+                                        })
+                                    }
+                                </Popup>
+
+                                <View
+                                style={{
+                                    width: 1,
+                                    height: 10,
                                     backgroundColor: "#fff",
                                     borderRadius: 100,
                                     marginHorizontal: 15,
@@ -708,151 +1088,34 @@ export const AnimeVideoPlayer = (props) => {
 
                                 <View
                                 style={{
-                                    borderRadius: 100,
+                                    borderRadius: 10,
                                     borderColor: theme.text_secondary_color,
                                     borderWidth: 1,
-                                    marginRight: 10
+                                    // marginRight: 10,
+                                    width: 35,
+                                    height: 35,
+                                    justifyContent: "center",
+                                    alignItems: "center"
                                 }}
                                 >
                                     <TouchableNativeFeedback
-                                    onPress={() => {
-                                        setModalContent(
-                                            <ChangeVideoRate 
-                                            selectedRate={rate} 
-                                            setRate={setRate} 
-                                            onClose={() => modalRef.current?.close()}
-                                            />
-                                        );
-                                        modalRef.current?.open();
-                                    }}
                                     background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
+                                    onPress={() => setStretched(!stretched)}
                                     >
                                         <View
                                         style={{
                                             flexDirection: "row",
                                             justifyContent: "center",
                                             alignItems: "center",
-                                            width: 80,
-                                            height: 30
+                                            width: 35,
+                                            height: 35
                                         }}
                                         >
                                             <Icon
-                                            name="speedometer"
-                                            size={15}
+                                            name={stretched ? "arrows-inward" : "arrows-from-inside"}
+                                            size={17}
                                             color="#fff"
                                             />
-
-                                            <Text
-                                            style={{
-                                                marginLeft: 7,
-                                                fontWeight: "700",
-                                                fontSize: normalizeSize(10.5),
-                                                color: "#fff"
-                                            }}
-                                            >
-                                                x{rate}
-                                            </Text>
-                                        </View>
-                                    </TouchableNativeFeedback>
-                                </View>
-
-                                <View
-                                style={{
-                                    borderRadius: 100,
-                                    borderColor: theme.text_secondary_color,
-                                    borderWidth: 1,
-                                }}
-                                >
-                                    <TouchableNativeFeedback
-                                    onPress={() => {
-                                        setModalContent(
-                                            <ChangeVideoQuality 
-                                            selectedQuality={quality} 
-                                            changeQuality={changeQuality} 
-                                            qualityList={videoUrls} 
-                                            onClose={() => modalRef.current?.close()}
-                                            />
-                                        );
-                                        modalRef.current?.open();
-                                    }}
-                                    background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
-                                    >
-                                        <View
-                                        style={{
-                                            flexDirection: "row",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            width: 80,
-                                            height: 30
-                                        }}
-                                        >
-                                            <Icon
-                                            name="hd"
-                                            size={15}
-                                            color="#fff"
-                                            />
-
-                                            <Text
-                                            style={{
-                                                marginLeft: 5,
-                                                fontWeight: "700",
-                                                fontSize: normalizeSize(10.5),
-                                                color: "#fff"
-                                            }}
-                                            >
-                                                {quality}p
-                                            </Text>
-                                        </View>
-                                    </TouchableNativeFeedback>
-                                </View>
-
-                                <View
-                                style={{
-                                    width: normalizeSize(2),
-                                    height: normalizeSize(8),
-                                    backgroundColor: "#fff",
-                                    borderRadius: 100,
-                                    marginHorizontal: 15,
-                                    opacity: 0.5
-                                }}
-                                />
-
-                                <View
-                                style={{
-                                    borderRadius: 100,
-                                    borderColor: theme.text_secondary_color,
-                                    borderWidth: 1,
-                                }}
-                                >
-                                    <TouchableNativeFeedback
-                                    onPress={() => videoRef.current?.seek(progress.currentTime + 85)}
-                                    background={TouchableNativeFeedback.Ripple("rgba(255, 255, 255, .1)", true)}
-                                    >
-                                        <View
-                                        style={{
-                                            flexDirection: "row",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            width: 80,
-                                            height: 30
-                                        }}
-                                        >
-                                            <Icon
-                                            name="chevron-right-double"
-                                            size={20}
-                                            color="#fff"
-                                            />
-
-                                            <Text
-                                            style={{
-                                                marginLeft: 5,
-                                                fontWeight: "700",
-                                                fontSize: normalizeSize(10.5),
-                                                color: "#fff"
-                                            }}
-                                            >
-                                                +1:25
-                                            </Text>
                                         </View>
                                     </TouchableNativeFeedback>
                                 </View>
@@ -939,7 +1202,7 @@ export const AnimeVideoPlayer = (props) => {
                                 style={{
                                     backgroundColor: "rgba(0, 0, 0, .3)",
                                     fontWeight: "500",
-                                    fontSize: normalizeSize(28),
+                                    fontSize: 35,
                                     color: "#fff",
                                     paddingHorizontal: 15,
                                     paddingVertical: 2,
@@ -951,28 +1214,48 @@ export const AnimeVideoPlayer = (props) => {
                                 </Text>
                             </View>
 
-                            <Text
-                            style={{
-                                backgroundColor: "rgba(0, 0, 0, .3)",
-                                fontWeight: "500",
-                                fontSize: normalizeSize(14),
-                                color: "#fff",
-                                paddingHorizontal: 15,
-                                paddingVertical: 2,
-                                borderRadius: 8,
-                                marginTop: 10
-                            }}
-                            >
-                                {
-                                    progress.currentTime + swipeOffset > 3600 ?
-                                    dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('HH:mm:ss') :
-                                    dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('mm:ss')
-                                } из {
-                                    progress.seekableDuration > 3600 ?
-                                    dayjs.duration(progress.seekableDuration * 1000).format('HH:mm:ss') :
-                                    dayjs.duration(progress.seekableDuration * 1000).format('mm:ss')
-                                }
-                            </Text>
+                            <View>
+                                <View
+                                style={{
+                                    width: 200,
+                                    height: 30,
+                                    marginTop: 10,
+                                    textAlign: "center",
+                                    flexDirection: "row",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                                >
+                                    <Progress
+                                    step={progress.currentTime + swipeOffset}
+                                    steps={progress.seekableDuration}
+                                    duration={0}
+                                    background={theme.accent}
+                                    height={30}
+                                    borderRadius={10}
+                                    selectColor="rgba(0, 0, 0, .3)"
+                                    />
+
+                                        <Text
+                                        style={{
+                                            fontWeight: "500",
+                                            fontSize: 17,
+                                            color: "#fff",
+                                            position: "absolute",
+                                        }}
+                                        >
+                                            {
+                                                progress.currentTime + swipeOffset > 3600 ?
+                                                dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('HH:mm:ss') :
+                                                dayjs.duration((progress.currentTime + swipeOffset) * 1000).format('mm:ss')
+                                            } из {
+                                                progress.seekableDuration > 3600 ?
+                                                dayjs.duration(progress.seekableDuration * 1000).format('HH:mm:ss') :
+                                                dayjs.duration(progress.seekableDuration * 1000).format('mm:ss')
+                                            }
+                                        </Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
                 )

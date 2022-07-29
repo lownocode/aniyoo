@@ -6,7 +6,7 @@ import {
     FlatList,
 } from "react-native";
 
-import { Cell, Icon } from "../";
+import { Cell, Icon, ContentHeader } from "../";
 
 import ThemeContext from "../../config/ThemeContext";
 import { normalizeSize, declOfNum } from "../../functions";
@@ -15,7 +15,7 @@ export const SearchAnimeList = (props) => {
     const theme = useContext(ThemeContext);
 
     const {
-        animes,
+        list,
         loadMoreAnimes,
         navigation
     } = props;
@@ -49,7 +49,7 @@ export const SearchAnimeList = (props) => {
                     style={{
                         color: theme.cell.title_color,
                         fontWeight: "500",
-                        fontSize: normalizeSize(13),
+                        fontSize: 15,
                     }}
                     >
                         {
@@ -64,10 +64,24 @@ export const SearchAnimeList = (props) => {
                             item?.title
                         }
                     </Text>
+                    {
+                        item.origTitle && (
+                            <Text
+                            numberOfLines={2}
+                            style={{
+                                fontSize: 12,
+                                color: theme.text_secondary_color
+                            }}
+                            >
+                                {
+                                    item.origTitle
+                                }
+                            </Text>
+                        )
+                    }
                 </View>
             }
             centered={false}
-            maxTitleLines={2}
             before={
                 <View
                 style={{
@@ -83,8 +97,8 @@ export const SearchAnimeList = (props) => {
                         uri: item?.poster
                     }}
                     style={{
-                        width: normalizeSize(70),
-                        height: normalizeSize(105),
+                        width: 95,
+                        height: 135,
                         resizeMode: "cover",
                         borderRadius: 7,
                     }}
@@ -103,7 +117,7 @@ export const SearchAnimeList = (props) => {
                                     width: "100%",
                                     textAlign: "center",
                                     color: "#fff",
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     paddingVertical: 1,
                                     paddingHorizontal: 3,
                                     fontWeight: "500"
@@ -125,7 +139,7 @@ export const SearchAnimeList = (props) => {
                 </View>
             }
             subtitle={
-                <View>
+                <View style={{ marginTop: 5 }}>
                     <View
                     style={{
                         flexDirection: "row",
@@ -138,7 +152,7 @@ export const SearchAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,
@@ -163,7 +177,7 @@ export const SearchAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,
@@ -186,7 +200,7 @@ export const SearchAnimeList = (props) => {
                             <Text
                             style={{
                                 color: theme.text_color,
-                                fontSize: normalizeSize(10),
+                                fontSize: 12,
                                 borderColor: theme.divider_color,
                                 backgroundColor: theme.divider_color + "98",
                                 borderWidth: 1,
@@ -219,7 +233,7 @@ export const SearchAnimeList = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(10),
+                                        fontSize: 12,
                                         borderColor: theme.divider_color,
                                         backgroundColor: theme.divider_color + "98",
                                         borderWidth: 1,
@@ -242,7 +256,7 @@ export const SearchAnimeList = (props) => {
                     style={{
                         color: theme.cell.subtitle_color,
                         fontStyle: item.description ? "normal" : "italic",
-                        fontSize: normalizeSize(10)
+                        fontSize: 12
                     }}
                     >
                         {
@@ -256,30 +270,46 @@ export const SearchAnimeList = (props) => {
         )
     };
 
-    const renderFooter = () => {
-        return (
-            <Text
-            style={{
-                color: theme.text_secondary_color,
-                textAlign: "center",
-                marginHorizontal: 10,
-                marginBottom: 15
-            }}
-            >
-                Всего найдено {animes.length} аниме
-            </Text>
-        )
-    };
-
     return (
         <FlatList
-        data={animes}
+        data={list.animes}
         renderItem={renderList}
         keyExtractor={(item) => "anime-" + item.id}
         onEndReached={loadMoreAnimes}
         scrollEnabled
         keyboardShouldPersistTaps="always"
-        ListFooterComponent={renderFooter}
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
+        ListHeaderComponent={
+            <View
+            style={{
+                marginTop: 15,
+                marginBottom: 5
+            }}
+            >
+                <ContentHeader
+                icon={
+                    <Icon
+                    name="description"
+                    color={theme.text_secondary_color}
+                    />
+                }
+                text={`Найдено ${list.count} аниме`}
+                after={
+                    <View
+                    style={{
+                        marginRight: 10
+                    }}
+                    >
+                        <Icon
+                        name="chevron-down"
+                        color={theme.text_color}
+                        />
+                    </View>
+                }
+                />
+            </View>
+        }
         />
     );
 };

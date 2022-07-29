@@ -9,3 +9,4 @@ export * from "./detectColorLuma";
 export * from "./lightenDarkenColor";
 export * from "./getAnimeAccentColor";
 export * from "./normalizeSize";
+export * from "./removeArrayDuplicates";

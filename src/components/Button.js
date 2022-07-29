@@ -56,7 +56,7 @@ export const Button = (props) => {
         },
         text: {
             textAlign: "center",
-            fontSize: normalizeSize(13),
+            fontSize: 17,
             fontWeight: "600",
             letterSpacing: 0.5,
             color: textColor ? textColor : theme.button[type][`text_color`],
