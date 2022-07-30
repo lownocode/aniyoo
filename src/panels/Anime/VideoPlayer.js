@@ -17,7 +17,6 @@ import Slider from "@react-native-community/slider";
 import Orientation from "react-native-orientation";
 import axios from "axios";
 import { hideNavigationBar } from "react-native-navigation-bar-color";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 import { Menu as Popup } from "react-native-material-menu";
 
@@ -143,20 +142,22 @@ export const AnimeVideoPlayer = (props) => {
 
         const defaultSettingsScheme = {
             rate: 1,
-            quality: 720
+            quality: "720"
         };
+
+        console.log(settings)
 
         if(!settings) {
             setVideoPlayerSettings(defaultSettingsScheme);
-            getVideoPlayableUrl(720);
+            getVideoPlayableUrl("720");
             return storage.setItem("VIDEOPLAYER_SETTINGS", defaultSettingsScheme);
         }
-
-        setVideoPlayerSettings(settings);
 
         videoRef.current?.setNativeProps({
             rate: settings?.rate,
         });
+
+        setVideoPlayerSettings(settings);
 
         getVideoPlayableUrl(settings?.quality);
     };
@@ -245,6 +246,8 @@ export const AnimeVideoPlayer = (props) => {
         })
         .then(({ data }) => {
             setVideoUrls(data.links);
+            getVideoPlayableUrl(videoPlayerSettings?.quality);
+            
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
@@ -281,6 +284,8 @@ export const AnimeVideoPlayer = (props) => {
         })
         .then(({ data }) => {
             setVideoUrls(data.links);
+            getVideoPlayableUrl(videoPlayerSettings?.quality);
+
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
 
@@ -328,8 +333,9 @@ export const AnimeVideoPlayer = (props) => {
         } 
     };
 
-    const getVideoPlayableUrl = (quality) => {
+    const getVideoPlayableUrl = async (quality) => {
         const qualityList = Object.keys(videoUrls);
+        console.log(qualityList)
 
         if(qualityList.length === 0) {
             ToastAndroid.show("Запрашиваемое видео не найдено", ToastAndroid.LONG);
@@ -338,6 +344,12 @@ export const AnimeVideoPlayer = (props) => {
 
         if(!qualityList.find(q => q === quality)) {
             ToastAndroid.show("Выбранное качество не найдено, будет воспроизведено максимально возможное", ToastAndroid.LONG);
+
+            const settings = await storage.getItem("VIDEOPLAYER_SETTINGS");
+            storage.setItem("VIDEOPLAYER_SETTINGNS", {
+                ...settings,
+                quality: qualityList[qualityList.length - 1]
+            });
 
             setVideoPlayerSettings({
                 ...videoPlayerSettings,
@@ -364,7 +376,7 @@ export const AnimeVideoPlayer = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: "#000", flex: 1, }}>
+        <View style={{ backgroundColor: "#000", flex: 1, }}>
             <Video
             source={{
                 uri: videoPlayableUrl
@@ -1011,6 +1023,7 @@ export const AnimeVideoPlayer = (props) => {
                                             if(!videoUrls[key]) return;
 
                                             const qualityDecode = {
+                                                "240": "Ужасное",
                                                 "360": "Плохое",
                                                 "480": "Среднее",
                                                 "720": "Хорошее",
@@ -1026,9 +1039,11 @@ export const AnimeVideoPlayer = (props) => {
                                                     setPaused(true);
                                                     setLoading(true);
 
+                                                    getVideoPlayableUrl(String(key));
+
                                                     setVideoPlayerSettings({
                                                         ...videoPlayerSettings,
-                                                        quality: key
+                                                        quality: String(key)
                                                     });
 
                                                     setSkipToMoment(true);
@@ -1036,7 +1051,7 @@ export const AnimeVideoPlayer = (props) => {
                                                     const playerSettings = await storage.getItem("VIDEOPLAYER_SETTINGS");
                                                     storage.setItem("VIDEOPLAYER_SETTINGS", {
                                                         ...playerSettings,
-                                                        quality: key
+                                                        quality: String(key)
                                                     });
 
                                                     setPaused(false);
@@ -1260,6 +1275,6 @@ export const AnimeVideoPlayer = (props) => {
                     </View>
                 )
             }
-        </GestureHandlerRootView>
+        </View>
     )
 };

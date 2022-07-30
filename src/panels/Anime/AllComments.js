@@ -15,7 +15,6 @@ import {
 
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
@@ -542,7 +541,7 @@ export const AnimeAllComments = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1}}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1}}>
             <Header
             title="Комментарии"
             backButton
@@ -671,6 +670,6 @@ export const AnimeAllComments = (props) => {
                     </View>
                 ) 
             }
-        </GestureHandlerRootView>
+        </View>
     )
 };

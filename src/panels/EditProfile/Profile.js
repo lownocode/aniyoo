@@ -2,7 +2,6 @@ import React, { useState, useRef, useContext } from "react";
 import { ScrollView, View, StyleSheet, Dimensions, ToastAndroid } from "react-native";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -82,7 +81,7 @@ export const EditProfileProfile = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
             subtitle="Профиль"
@@ -185,6 +184,6 @@ export const EditProfileProfile = (props) => {
                 }}
                 />
             </ScrollView>
-        </GestureHandlerRootView>
+        </View>
     )
 };

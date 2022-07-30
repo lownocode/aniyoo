@@ -1,6 +1,5 @@
 import React, { useState, useRef, useContext } from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -45,7 +44,7 @@ export const Settings = props => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Настройки"
             height={30}
@@ -172,6 +171,6 @@ export const Settings = props => {
                 subtitle="Появился вопрос? Задайте его поддержке прямо сейчас!"
                 />
             </ScrollView>
-        </GestureHandlerRootView>
+        </View>
     )
 };

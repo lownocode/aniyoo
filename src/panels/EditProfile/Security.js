@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import ThemeContext from "../../config/ThemeContext";
 
@@ -17,7 +16,7 @@ export const EditProfileSecurity = (props) => {
     } = props;
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Редактировать профиль"
             subtitle="Безопасность"
@@ -25,6 +24,6 @@ export const EditProfileSecurity = (props) => {
             backButtonOnPress={() => goBack()}
             backButton
             />
-        </GestureHandlerRootView>
+        </View>
     )
 };

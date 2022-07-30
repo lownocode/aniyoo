@@ -14,7 +14,6 @@ import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 import { EventRegister } from "react-native-event-listeners";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 import { Menu as Popup } from "react-native-material-menu";
 
@@ -45,7 +44,6 @@ import {
     USER_SCHEMA
 } from "../../variables";
 import { SetStatus, SocialNetworks } from "../modals";
-import DeviceInfo from "react-native-device-info";
 
 export const Profile = props => {
     const theme = useContext(ThemeContext);
@@ -76,8 +74,6 @@ export const Profile = props => {
     const getCachedUserData = async () => {
         const data = await storage.getItem("cachedUserData");
         if(!data) return;
-        const a = await DeviceInfo.getDeviceToken();
-        console.log(a)
         setUserData(data);
     };
 
@@ -230,7 +226,7 @@ export const Profile = props => {
         modalContainer: {
             left: 10,
             width: Dimensions.get("window").width - 20,
-            bottom: 80,
+            bottom: 10,
             borderRadius: 15,
             backgroundColor: theme.bottom_modal.background,
             borderColor: theme.bottom_modal.border,
@@ -927,21 +923,27 @@ export const Profile = props => {
                 </View>
             }
             before={
-                <Image
-                resizeMethod="resize"
-                source={{
-                    uri: item?.anime?.poster
-                }}
+                <View
                 style={{
-                    width: normalizeSize(60),
-                    height: normalizeSize(80),
-                    resizeMode: "cover",
-                    borderRadius: 7,
-                    borderColor: theme.divider_color,
-                    borderWidth: 0.5,
-                    backgroundColor: theme.divider_color,
+                    borderRadius: 8,
+                    overflow: "hidden"
                 }}
-                />
+                >
+                    <Image
+                    resizeMethod="resize"
+                    source={{
+                        uri: item?.anime?.poster
+                    }}
+                    style={{
+                        width: 85,
+                        height: 110,
+                        resizeMode: "cover",
+                        borderColor: theme.divider_color,
+                        borderWidth: 0.5,
+                        backgroundColor: theme.divider_color,
+                    }}
+                    />
+                </View>
             }
             />
         )
@@ -1001,7 +1003,7 @@ export const Profile = props => {
     };
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             divider={false}
             title="Профиль"
@@ -1132,6 +1134,6 @@ export const Profile = props => {
                 {statisticsRender()}
                 {renderBrowsingHistory()}
             </ScrollView>
-        </GestureHandlerRootView>
+        </View>
     )
 };

@@ -10,8 +10,8 @@ const Icon = (props) => {
     return (
         <Svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 32 32"
-        width={size}
+        viewBox="0 0 27 32"
+        width={size + 1}
         height={size}
         fill={color}
         >

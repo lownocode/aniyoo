@@ -187,18 +187,6 @@ export default App = () => {
     return (
         <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
             <UserContext.Provider value={UserData}>
-                {
-                    isError ? (
-                        <View
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            backgroundColor: "red"
-                        }}
-                        >
-
-                        </View>
-                    ) :
                 <NavigationContainer 
                 onReady={() => readyHandler()}
                 ref={navigation}
@@ -368,7 +356,7 @@ export default App = () => {
                       component={GeneralUserComments}
                       />
                     </Stack.Navigator>
-                </NavigationContainer>}
+                </NavigationContainer>
             </UserContext.Provider>
         </ThemeContext.Provider>
     );

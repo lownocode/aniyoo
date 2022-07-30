@@ -12,12 +12,11 @@ import {
     RefreshControl,
     Linking,
     ActivityIndicator,
-    TouchableWithoutFeedback
+    TouchableWithoutFeedback,
 } from "react-native";
 import { PieChart } from "react-native-svg-charts";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 import LinearGradient from "react-native-linear-gradient";
 import ImageColors from "react-native-image-colors";
@@ -37,6 +36,7 @@ import {
     storage, 
     getAnimeAccentColor,
     invertColor,
+    lightenDarkenColor,
     
 } from "../../functions";
 
@@ -134,6 +134,7 @@ export const Anime = (props) => {
     };
 
     const getExtendeds = async (id) => {
+        console.log(lightenDarkenColor(accent, -80))
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.get", {
@@ -365,17 +366,17 @@ export const Anime = (props) => {
         if(minutes === null || minutes === NaN) return null;
 
         if(minutes <= 60) {
-            return minutes + " " + declOfNum(minutes, ["минута", "минуты", "минут"]);
+            return minutes + " " + "мин.";
         }
         
         const hours = Math.trunc(minutes / 60);
         const mins = minutes % 60;
 
         if(mins === 0) {
-            return `${hours} ${declOfNum(hours, ["час", "часа", "часов"])}`;
+            return `${hours} ч.`;
         }
 
-        return `${hours} ${declOfNum(hours, ["час", "часа", "часов"])} ${mins} ${declOfNum(mins, ["минута", "минуты", "минут"])}`;
+        return `${hours} ч. ${mins} мин.`;
     };
 
     const WrapperAnimeInfo = (props) => {
@@ -383,69 +384,91 @@ export const Anime = (props) => {
             title,
             subtitle,
             icon,
+            divider = true
         } = props;
 
         return (
             <View>
-            <View
-            style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginVertical: 11,
-                marginHorizontal: 15
-            }}
-            >
                 <View
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    flex: 1,
+                    marginVertical: 11,
+                    paddingHorizontal: 15,
                 }}
                 >
                     <View
                     style={{
-                        marginRight: 10
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "50%"
                     }}
                     >
-                        {
-                            icon
-                        }
-                    </View>
-
-                    <View>
-                        <Text
+                        <View
                         style={{
-                            color: theme.text_color,
-                            fontWeight: "500",
-                            fontSize: 15
+                            marginRight: 10
                         }}
                         >
                             {
-                                subtitle
+                                icon
                             }
-                        </Text>
-                    </View>
-                </View>
+                        </View>
 
-                <View
-                style={{
-                    flex: 1,
-                }}
-                >
-                    <Text
+                        <View>
+                            {
+                                typeof subtitle !== "string" ? subtitle : (
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontWeight: "500",
+                                        fontSize: 15,
+                                    }}
+                                    >
+                                        {
+                                            subtitle
+                                        }
+                                    </Text>
+                                )
+                            }
+                        </View>
+                    </View>
+
+                    <View
                     style={{
-                        textAlign: "center",
-                        color: theme.text_secondary_color
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "50%",
+                        flexWrap: "wrap"
                     }}
                     >
                         {
-                            title
+                            typeof subtitle !== "string" ? subtitle : (
+                                <Text
+                                style={{
+                                    color: theme.text_secondary_color
+                                }}
+                                >
+                                    {
+                                        title
+                                    }
+                                </Text>
+                            )
                         }
-                    </Text>
+                    </View>
                 </View>
-            </View>
-            <Divider/>
+                
+                {
+                    divider && (
+                        <View
+                        style={{
+                            height: 0.5,
+                            marginHorizontal: 15,
+                            backgroundColor: theme.divider_color
+                        }}
+                        />
+                    )
+                }
             </View>
         )
     };
@@ -459,7 +482,7 @@ export const Anime = (props) => {
             style={{
                 marginRight: index + 1 === animeData?.screenshots?.length ? 15 : 10,
                 marginLeft: index === 0 ? 15 : 0,
-                borderRadius: 8,
+                borderRadius: 10,
                 backgroundColor: theme.divider_color
             }}
             >
@@ -491,7 +514,7 @@ export const Anime = (props) => {
             style={{
                 marginRight: index + 1 === playlists?.length ? 15 : 10,
                 marginLeft: index === 0 ? 15 : 0,
-                borderRadius: 8,
+                borderRadius: 10,
                 backgroundColor: accent + "90",
                 overflow: "hidden",
             }}
@@ -1270,7 +1293,7 @@ export const Anime = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <View
             style={{
                 position: "absolute",
@@ -1511,7 +1534,7 @@ export const Anime = (props) => {
                             numberOfLines={2}
                             style={{
                                 fontSize: 20,
-                                fontWeight: "500",
+                                fontWeight: "700",
                                 marginHorizontal: 15,
                                 color: theme.text_color,
                                 textAlign: "center"
@@ -1539,41 +1562,64 @@ export const Anime = (props) => {
                             </Text>
                         </View>
 
-                        <Button
-                        title={
-                            {
-                                "NO_WATCHED": "Начать просмотр",
-                                "WATCHED_BEFORE": "Продолжить просмотр"
-                            }[animeStatus.status]
-                        }
-                        upperTitle={false}
-                        backgroundColor={accent}
-                        textColor={invertColor(accent, true)}
-                        before={
-                            {
-                                "NO_WATCHED": (
-                                    <Icon
-                                    name="play"
-                                    size={12}
-                                    color={invertColor(accent, true)}
-                                    />
-                                ),
-                                "WATCHED_BEFORE": (
-                                    <Icon
-                                    name="pause"
-                                    size={12}
-                                    color={invertColor(accent, true)}
-                                    />
-                                )
-                            }[animeStatus.status]
-                        }
-                        size={45}
-                        disabled={!animeData?.id || animeData?.status === "anons"}
-                        onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
-                        containerStyle={{
-                            marginBottom: 0
+                        <View
+                        style={{
+                            marginHorizontal: 10,
+                            borderRadius: 12,
+                            overflow: "hidden",
+                            backgroundColor: accent
                         }}
-                        />
+                        >
+                            <TouchableNativeFeedback
+                            disabled={!animeData?.id || animeData?.status === "anons"}
+                            onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
+                            >
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    height: 47
+                                }}
+                                >
+                                    {
+                                        {
+                                            "NO_WATCHED": (
+                                                <Icon
+                                                name="play"
+                                                size={12}
+                                                color={invertColor(accent, true)}
+                                                />
+                                            ),
+                                            "WATCHED_BEFORE": (
+                                                <Icon
+                                                name="pause"
+                                                size={12}
+                                                color={invertColor(accent, true)}
+                                                />
+                                            )
+                                        }[animeStatus.status]
+                                    }
+
+                                    <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        marginLeft: 8,
+                                        fontSize: 18,
+                                        fontWeight: "500",
+                                        color: invertColor(accent, true)
+                                    }}
+                                    >
+                                        {
+                                            {
+                                                "NO_WATCHED": "Начать просмотр",
+                                                "WATCHED_BEFORE": "Продолжить просмотр"
+                                            }[animeStatus.status]
+                                        }
+                                    </Text>
+                                </View>
+                            </TouchableNativeFeedback>
+                        </View>
 
                         <View
                         style={{
@@ -1897,33 +1943,82 @@ export const Anime = (props) => {
                         <View>
                             <WrapperAnimeInfo
                             title={
-                                animeData?.other?.kind === "tv" ? "Сериал" :
-                                animeData?.other?.kind === "ona" ? "ONA" :
-                                animeData?.other?.kind === "ova" ? "OVA" :
-                                animeData?.other?.kind === "special" ? "Спешл" :
-                                animeData?.other?.kind === "movie" ? "Фильм" : "Неизвестно"
+                                <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                }}
+                                >
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color
+                                    }}
+                                    >
+                                        {
+                                            {
+                                                "none": "Неизвестно",
+                                                "tv": "Сериал",
+                                                "ona": "ONA",
+                                                "ova": "OVA",
+                                                "special": "Спешл",
+                                                "movie": "Фильм", 
+                                            }[animeData?.other?.kind || "none"]
+                                        }
+                                    </Text>
+
+                                    <View
+                                    style={{
+                                        backgroundColor: {
+                                            "none": theme.divider_color,
+                                            "ongoing": theme.anime.watching,
+                                            "released": theme.accent,
+                                            "anons": theme.anime.planned
+                                        }[animeData?.status || "none"],
+                                        paddingVertical: 1,
+                                        paddingHorizontal: 7,
+                                        borderRadius: 5,
+                                        marginHorizontal: 10
+                                    }}
+                                    >
+                                        <Text
+                                        style={{
+                                            color: "#fff",
+                                            fontSize: 12
+                                        }}
+                                        >
+                                            {
+                                                {
+                                                    "none": "Неизвестно",
+                                                    "ongoing": "Выходит",
+                                                    "released": "Вышел",
+                                                    "anons": "Анонс"
+                                                }[animeData?.status || "none"]
+                                            }
+                                        </Text>
+                                    </View>
+
+                                    <View
+                                    style={{
+                                        width: Dimensions.get("window").width / 4.5,
+                                    }}
+                                    >
+                                        <Text
+                                        style={{
+                                            color: theme.text_secondary_color,
+                                        }}
+                                        >
+                                            {
+                                                `≈ ` + totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration)
+                                            } 
+                                        </Text>
+                                    </View>
+                                </View>
                             }
-                            subtitle="Формат"
+                            subtitle="Тип"
                             icon={
                                 <Icon
                                 name="director"
-                                size={17}
-                                color={theme.cell.subtitle_color}
-                                />
-                            }
-                            />
-
-                            <WrapperAnimeInfo
-                            title={
-                                animeData?.status === "ongoing" ? "Выходит" :
-                                animeData?.status === "released" ? "Вышел" :
-                                animeData?.status === "anons" ? "Анонс" : "Неизвестно"
-                            }
-                            subtitle="Статус"
-                            icon={
-                                <Icon
-                                name="status-ai"
-                                size={17}
+                                size={16}
                                 color={theme.cell.subtitle_color}
                                 />
                             }
@@ -1931,11 +2026,11 @@ export const Anime = (props) => {
 
                             <WrapperAnimeInfo
                             title={animeData?.studios?.join(", ") || "Неизвестна"}
-                            subtitle="Студия"
+                            subtitle={animeData?.studios?.length > 1 ? "Студии" : "Студия"}
                             icon={
                                 <Icon
                                 name="play-gear"
-                                size={17}
+                                size={16}
                                 color={theme.cell.subtitle_color}
                                 />
                             }
@@ -1944,25 +2039,49 @@ export const Anime = (props) => {
                             {
                                 animeData?.country && (
                                     <WrapperAnimeInfo
-                                    title={animeData?.country}
                                     subtitle="Страна"
                                     icon={
-                                        <Image
-                                        style={{
-                                            width: (20),
-                                            height: (13),
-                                            borderRadius: 3,
-                                            borderWidth: 0.5,
-                                            borderColor: theme.divider_color
-                                        }}
-                                        resizeMethod="resize"
-                                        source={{
-                                            uri: (
-                                                String(animeData?.country).toLowerCase() === "япония" ? FLAGS.Japan :
-                                                String(animeData?.country).toLowerCase() === "китай" ? FLAGS.China : null
-                                            )
-                                        }}
+                                        <Icon
+                                        name="globe"
+                                        color={theme.cell.subtitle_color}
+                                        size={17}
                                         />
+                                    }
+                                    title={
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center"
+                                        }}
+                                        >
+                                            <Image
+                                            style={{
+                                                width: (20),
+                                                height: (13),
+                                                borderRadius: 3,
+                                                borderWidth: 0.5,
+                                                borderColor: theme.divider_color
+                                            }}
+                                            resizeMethod="resize"
+                                            source={{
+                                                uri: (
+                                                    String(animeData?.country).toLowerCase() === "япония" ? FLAGS.Japan :
+                                                    String(animeData?.country).toLowerCase() === "китай" ? FLAGS.China : null
+                                                )
+                                            }}
+                                            />
+                                            
+                                            <Text
+                                            style={{
+                                                color: theme.text_secondary_color,
+                                                marginLeft: 10
+                                            }}
+                                            >
+                                                {
+                                                    animeData?.country
+                                                }
+                                            </Text>
+                                        </View>
                                     }
                                     />
                                 )
@@ -1982,49 +2101,50 @@ export const Anime = (props) => {
                             {
                                 animeData?.type === "anime-serial" && (
                                     <WrapperAnimeInfo
-                                    title={seriesCount(animeData?.episodesTotal, animeData?.episodesAired, animeData.status)}
+                                    divider={false}
+                                    title={
+                                        <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center"
+                                        }}
+                                        >
+                                            <Text
+                                            style={{
+                                                color: theme.text_secondary_color,
+                                                marginRight: 5,
+                                                backgroundColor: theme.text_secondary_color + "25",
+                                                paddingHorizontal: 5,
+                                                borderRadius: 4,
+                                                fontSize: 13
+                                            }}
+                                            >
+                                                {
+                                                    seriesCount(animeData?.episodesTotal, animeData?.episodesAired, animeData.status)
+                                                } 
+                                            </Text>
+
+                                            <Text
+                                            style={{
+                                                color: theme.text_secondary_color,
+                                            }}
+                                            > 
+                                                ≈ {
+                                                    durationFormatter(animeData?.other?.duration)
+                                                }
+                                            </Text>
+                                        </View>
+                                    }
                                     subtitle="Серий"
                                     icon={
                                         <Icon
                                         name="round-bar"
-                                        size={17}
+                                        size={16}
                                         color={theme.cell.subtitle_color}
                                         />
                                     }
                                     />
                                 )
-                            }
-
-                            {
-                                durationFormatter(animeData?.other?.duration) && (
-                                    <WrapperAnimeInfo
-                                    title={`≈ ` + durationFormatter(animeData?.other?.duration)}
-                                    subtitle={animeData?.other?.kind === "movie" ? "Время фильма" : "Время серии"}
-                                    icon={
-                                        <Icon
-                                        name="time-progress"
-                                        size={18}
-                                        color={theme.cell.subtitle_color}
-                                        />
-                                    }
-                                    />
-                                )
-                            }
-
-                            {
-                                animeData?.other?.kind !== "movie" && totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration) !== null ? (
-                                    <WrapperAnimeInfo
-                                    title={`≈ ` + totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration)}
-                                    subtitle={"Время просмотра"}
-                                    icon={
-                                        <Icon
-                                        name="clock"
-                                        size={17}
-                                        color={theme.cell.subtitle_color}
-                                        />
-                                    }
-                                    />
-                                ) : null
                             }
                         </View>
 
@@ -2060,12 +2180,11 @@ export const Anime = (props) => {
                                         numberOfLines={hideDescription ? 5 : 10000}
                                         onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
                                         style={{
-                                            fontStyle: "normal",
                                             color: theme.text_color,
                                             fontSize: 15
                                         }}
                                         >
-                                            {animeData?.description ? animeData.description : "Описание не указано"}
+                                            {animeData?.description}
                                         </Text>
 
                                         {
@@ -2740,6 +2859,6 @@ export const Anime = (props) => {
                     <View style={{ marginBottom: 60 }}/>
                 </ScrollView>
             </View>
-        </GestureHandlerRootView>
+        </View>
     )
 };

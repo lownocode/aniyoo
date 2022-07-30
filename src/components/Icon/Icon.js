@@ -109,6 +109,7 @@ import Link from "./icons/Link";
 import UserCheck from "./icons/UserCheck";
 import ArrowsInward from "./icons/ArrowsInward";
 import ArrowsFromInside from "./icons/ArrowsFromInside";
+import Globe from "./icons/Globe";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -223,6 +224,7 @@ export const Icon = (props) => {
         "user-check": <UserCheck {...props} />,
         "arrows-inward": <ArrowsInward {...props} />,
         "arrows-from-inside": <ArrowsFromInside {...props} />,
+        "globe": <Globe {...props} />,
     }[name];
 
     return (

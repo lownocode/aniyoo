@@ -11,7 +11,6 @@ import {
     ToastAndroid,
     Image
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
@@ -1173,7 +1172,7 @@ export const AnotherUserProfile = (props) => {
     };
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Профиль"
             backButton
@@ -1206,6 +1205,6 @@ export const AnotherUserProfile = (props) => {
                 {statisticsRender()}
                 {renderBrowsingHistory()}
             </ScrollView>
-        </GestureHandlerRootView>
+        </View>
     )
 };

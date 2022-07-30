@@ -37,6 +37,7 @@
 import { AppRegistry, LogBox } from "react-native";
 import axios from "axios";
 import { showNavigationBar } from "react-native-navigation-bar-color";
+import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
 import App from "./src/App";
 import { REQUEST_DOMAIN } from "./variables";
@@ -50,4 +51,4 @@ showNavigationBar();
 
 axios.defaults.baseURL = REQUEST_DOMAIN;
 
-AppRegistry.registerComponent("aniyoo", () => App);
+AppRegistry.registerComponent("aniyoo", () => gestureHandlerRootHOC(App));

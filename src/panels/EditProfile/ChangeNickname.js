@@ -1,6 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { Text, View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import axios from "axios";
 
 import dayjs from "dayjs";
@@ -205,7 +204,7 @@ export const EditProfileChangeNickname = (props) => {
     };
     
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Смена никнейма"
             height={30}
@@ -290,6 +289,6 @@ export const EditProfileChangeNickname = (props) => {
                 </View>
             )}
             />
-        </GestureHandlerRootView>
+        </View>
     )
 };

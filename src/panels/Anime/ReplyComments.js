@@ -9,11 +9,11 @@ import {
     RefreshControl,
     TouchableNativeFeedback,
     StyleSheet,
-    Dimensions
+    Dimensions,
+    FlatList
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
@@ -536,7 +536,7 @@ export const AnimeReplyComments = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1}}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1}}>
             <Header
             title="Ответы на комментарий"
             backButton
@@ -933,6 +933,6 @@ export const AnimeReplyComments = (props) => {
                     </View>
                 )
             }
-        </GestureHandlerRootView>
+        </View>
     )
 };

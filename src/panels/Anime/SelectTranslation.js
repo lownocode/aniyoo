@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { View, FlatList, Text, ActivityIndicator, Dimensions, StyleSheet } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Modalize } from "react-native-modalize";
 
 import { Cell, Icon, Header } from "../../components";
@@ -182,7 +181,7 @@ export const AnimeSelectTranslation = (props) => {
     });
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="Выбор озвучки"
             backButton
@@ -204,6 +203,6 @@ export const AnimeSelectTranslation = (props) => {
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderTranslations}
             />
-        </GestureHandlerRootView>
+        </View>
     )
 };

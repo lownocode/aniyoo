@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, Vibration, Text, TextInput, TouchableWithoutFeedback, ToastAndroid } from "react-native";
 import axios from "axios";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 
 import { 
@@ -252,7 +251,7 @@ export const EditSocialNetworks = (props) => {
     };
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content }}>
+        <View style={{ backgroundColor: theme.background_content }}>
             <Header
             title="Редактировать социальные сети"
             height={30}
@@ -318,6 +317,6 @@ export const EditSocialNetworks = (props) => {
             }
             ListFooterComponent={<View style={{ marginBottom: 200 }}/>}
             />
-        </GestureHandlerRootView>
+        </View>
     )
 };

@@ -411,7 +411,7 @@ export const AnimePlaylists = (props) => {
                 </LinearGradient>
             </View>
         )
-    }, [playlists]);
+    }, [images]);
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>

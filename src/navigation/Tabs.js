@@ -124,7 +124,7 @@ export const Tabs = () => {
                 backgroundColor: theme.bottom_tabbar.background, 
                 height: 65, 
                 shadowColor: "transparent",
-                borderTopWidth: 0 
+                borderTopWidth: 0
             },
             tabBarHideOnKeyboard: true
         }
@@ -174,7 +174,7 @@ export const Tabs = () => {
             }}
             >
                 {
-                    props => <Profile {...props} cachedUserData={cachedUserData} />
+                    props => <Profile {...props} />
                 }
             </Tab.Screen>
         </Tab.Navigator>

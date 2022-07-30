@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { Image, View, Text, FlatList, RefreshControl } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -168,21 +167,27 @@ export const GeneralUserBrowsingHistory = (props) => {
                 </View>
             }
             before={
-                <Image
-                resizeMethod="resize"
-                source={{
-                    uri: item?.anime?.poster
-                }}
+                <View
                 style={{
-                    width: normalizeSize(60),
-                    height: normalizeSize(80),
-                    resizeMode: "cover",
-                    borderRadius: 7,
-                    borderColor: theme.divider_color,
-                    borderWidth: 0.5,
-                    backgroundColor: theme.divider_color,
+                    borderRadius: 8,
+                    overflow: "hidden"
                 }}
-                />
+                >
+                    <Image
+                    resizeMethod="resize"
+                    source={{
+                        uri: item?.anime?.poster
+                    }}
+                    style={{
+                        width: 85,
+                        height: 110,
+                        resizeMode: "cover",
+                        borderColor: theme.divider_color,
+                        borderWidth: 0.5,
+                        backgroundColor: theme.divider_color,
+                    }}
+                    />
+                </View>
             }
             />
         )
@@ -213,7 +218,7 @@ export const GeneralUserBrowsingHistory = (props) => {
     };
 
     return (
-        <GestureHandlerRootView style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
             <Header
             title="История просмотров"
             subtitle={route.params?.username || null}
@@ -292,6 +297,6 @@ export const GeneralUserBrowsingHistory = (props) => {
                     />
                 )
             }
-        </GestureHandlerRootView>
+        </View>
     )
 };
