@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from "react";
-import { View, Animated, Text, StyleSheet } from "react-native";
+import { View, Animated, StyleSheet } from "react-native";
 import Svg, { G, Circle } from "react-native-svg";
 
 import ThemeContext from "../config/ThemeContext";

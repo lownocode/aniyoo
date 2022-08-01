@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState, useCallback, useRef } from "rea
 import { 
     View, 
     FlatList, 
-    Text, 
     ToastAndroid, 
     Switch, 
     ActivityIndicator, 
@@ -31,14 +30,14 @@ import {
     Avatar,
     Button,
     WriteBar,
-    Placeholder
+    Placeholder,
+    Text
 } from "../../components";
 import { CommentActions } from "../../modals";
 
 import { 
     declOfNum, 
     storage,
-    normalizeSize
 } from "../../functions";
 
 export const AnimeAllComments = (props) => {

@@ -6,7 +6,6 @@ import {
     Image, 
     TouchableNativeFeedback,
     Dimensions,
-    Text,
     StyleSheet,
     ToastAndroid,
     RefreshControl,
@@ -37,7 +36,6 @@ import {
     getAnimeAccentColor,
     invertColor,
     lightenDarkenColor,
-    
 } from "../../functions";
 
 import { 
@@ -51,7 +49,7 @@ import {
     Progress,
     DonutChart,
     Rating,
-    FormattedText,
+    Text,
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS, DOMAIN } from "../../../variables";
@@ -394,7 +392,7 @@ export const Anime = (props) => {
                     flexDirection: "row",
                     alignItems: "center",
                     marginVertical: 11,
-                    paddingHorizontal: 15,
+                    paddingHorizontal: 5
                 }}
                 >
                     <View
@@ -402,17 +400,18 @@ export const Anime = (props) => {
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "flex-start",
-                        width: "50%"
+                        width: "55%"
                     }}
                     >
                         <View
                         style={{
-                            marginRight: 10
+                            width: 30,
+                            alignItems: "center"
                         }}
                         >
-                            {
-                                icon
-                            }
+                        {
+                            icon
+                        }
                         </View>
 
                         <View>
@@ -633,7 +632,7 @@ export const Anime = (props) => {
                         <Text
                         style={{
                             color: "#fff",
-                            fontWeight: "600",
+                            fontWeight: "900",
                             fontSize: 30,
                             textTransform: "uppercase",
                             marginHorizontal: 20,
@@ -648,7 +647,7 @@ export const Anime = (props) => {
                         <Text
                         style={{
                             color: "#dedede",
-                            fontWeight: "500",
+                            fontWeight: "700",
                             fontSize: 18,
                             textTransform: "uppercase",
                             marginHorizontal: 20,
@@ -1524,7 +1523,7 @@ export const Anime = (props) => {
                     >
                         <View
                         style={{
-                            marginBottom: 10,
+                            marginBottom: 30,
                             alignItems: "center"
                         }}
                         >
@@ -1996,22 +1995,6 @@ export const Anime = (props) => {
                                             }
                                         </Text>
                                     </View>
-
-                                    <View
-                                    style={{
-                                        width: Dimensions.get("window").width / 4.5,
-                                    }}
-                                    >
-                                        <Text
-                                        style={{
-                                            color: theme.text_secondary_color,
-                                        }}
-                                        >
-                                            {
-                                                `≈ ` + totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration)
-                                            } 
-                                        </Text>
-                                    </View>
                                 </View>
                             }
                             subtitle="Тип"
@@ -2101,7 +2084,6 @@ export const Anime = (props) => {
                             {
                                 animeData?.type === "anime-serial" && (
                                     <WrapperAnimeInfo
-                                    divider={false}
                                     title={
                                         <View
                                         style={{
@@ -2113,7 +2095,7 @@ export const Anime = (props) => {
                                             style={{
                                                 color: theme.text_secondary_color,
                                                 marginRight: 5,
-                                                backgroundColor: theme.text_secondary_color + "25",
+                                                backgroundColor: theme.text_secondary_color + "15",
                                                 paddingHorizontal: 5,
                                                 borderRadius: 4,
                                                 fontSize: 13
@@ -2122,16 +2104,6 @@ export const Anime = (props) => {
                                                 {
                                                     seriesCount(animeData?.episodesTotal, animeData?.episodesAired, animeData.status)
                                                 } 
-                                            </Text>
-
-                                            <Text
-                                            style={{
-                                                color: theme.text_secondary_color,
-                                            }}
-                                            > 
-                                                ≈ {
-                                                    durationFormatter(animeData?.other?.duration)
-                                                }
                                             </Text>
                                         </View>
                                     }
@@ -2146,6 +2118,41 @@ export const Anime = (props) => {
                                     />
                                 )
                             }
+
+                            <WrapperAnimeInfo
+                            divider={false}
+                            title={
+                                <View>
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                    }}
+                                    >
+                                        Серия ≈ {
+                                            durationFormatter(animeData?.other?.duration)
+                                        }
+                                    </Text>
+
+                                    <Text
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                    }}
+                                    > 
+                                        Общее ≈ {
+                                            totalWatchingTime(animeData?.type, animeData?.episodesTotal, animeData?.episodesAired, animeData?.other?.duration)
+                                        }
+                                    </Text>
+                                </View>
+                            }
+                            subtitle="Время просмотра"
+                            icon={
+                                <Icon
+                                name="clock-outline"
+                                size={16}
+                                color={theme.cell.subtitle_color}
+                                />
+                            }
+                            />
                         </View>
 
                         <View
@@ -2181,7 +2188,7 @@ export const Anime = (props) => {
                                         onTextLayout={(e) => setDescriptionLinesCount(e?.nativeEvent?.lines?.length || 0)}
                                         style={{
                                             color: theme.text_color,
-                                            fontSize: 15
+                                            fontSize: 15,
                                         }}
                                         >
                                             {animeData?.description}

@@ -5,8 +5,6 @@ import {
     ToastAndroid, 
     View,
     TouchableNativeFeedback,
-    Text,
-    Image
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
@@ -20,13 +18,13 @@ import {
     Cell,
     Header,
     Icon,
-    Button,
+    Text,
     Divider,
     Placeholder
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize, storage } from "../functions";
+import { storage } from "../functions";
 
 export const Home = (props) => {
     const theme = useContext(ThemeContext);
@@ -50,11 +48,24 @@ export const Home = (props) => {
                 "Authorization": sign
             }
         })
-        .then(({ data }) =>  setPopularComments(data[0]))
+        .then(({ data }) =>  {
+            storage.setItem("cachedPopularComments", data[0]);
+            setPopularComments(data[0]);
+        })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
         });
     };
+
+    const getCachedData = async () => {
+        const comments = await storage.getItem("cachedPopularComments");
+
+        setPopularComments(comments || []);
+    };
+
+    useEffect(() => {
+        getCachedData();
+    }, []);
     
     useEffect(() => {
         const willFocusSubscription = navigation.addListener('focus', () => {
@@ -77,7 +88,7 @@ export const Home = (props) => {
                         numberOfLines={1}
                         style={{
                             color: theme.text_color,
-                            fontSize: normalizeSize(14),
+                            fontSize: 16,
                             fontWeight: "500",
                         }}
                         >
@@ -138,7 +149,7 @@ export const Home = (props) => {
                     selectionColor={theme.accent}
                     style={{
                         color: theme.text_color,
-                        fontSize: normalizeSize(12)
+                        fontSize: 15
                     }}
                     >
                         {item.text}

@@ -1,10 +1,9 @@
 import React, { Fragment, useContext } from 'react';
-import { View, Text, StyleSheet, StatusBar, } from 'react-native';
+import { View, StyleSheet, StatusBar, } from 'react-native';
 
-import { Icon, PressIcon, Divider } from '.';
+import { Icon, PressIcon, Divider, Text } from ".";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize } from "../functions";
 
 export const Header = (props) => {
     const theme = useContext(ThemeContext);
@@ -61,7 +60,7 @@ export const Header = (props) => {
         return (
             <View>
                 <Text 
-                style={[styles.title, titleStyle]}
+                style={{...styles.title, ...titleStyle}}
                 numberOfLines={1}
                 >
                     {title}

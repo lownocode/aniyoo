@@ -7,7 +7,7 @@ export * from "./Authorization/RegistrationConfirmation";
 
 export * from "./AnotherUser/Profile";
 
-export * from "./GeneralUser/BrowsingHostory";
+export * from "./GeneralUser/BrowsingHistory";
 export * from "./GeneralUser/Comments";
 
 export * from "./Search/Anime";

@@ -1,12 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { TouchableNativeFeedback, View, Text } from "react-native";
+import { TouchableNativeFeedback, View } from "react-native";
 
 import { 
     Icon,
-    Header
+    Header,
+    Text
 } from "../components";
-
-import { normalizeSize } from "../functions";
 
 import ThemeContext from "../config/ThemeContext";
 
@@ -56,7 +55,7 @@ export const Search = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(13),
+                                    fontSize: 16,
                                     fontWeight: "500"
                                 }}
                                 >
@@ -119,7 +118,7 @@ export const Search = (props) => {
                                 <Text
                                 style={{
                                     color: theme.text_color,
-                                    fontSize: normalizeSize(13),
+                                    fontSize: 16,
                                     fontWeight: "500"
                                 }}
                                 >

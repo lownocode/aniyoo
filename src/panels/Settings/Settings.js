@@ -3,7 +3,6 @@ import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import { Modalize } from "react-native-modalize";
 
 import ThemeContext from "../../config/ThemeContext";
-import { normalizeSize } from "../../functions";
 
 import {
     Header,
@@ -74,8 +73,8 @@ export const Settings = props => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: "#f54545" + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -102,8 +101,8 @@ export const Settings = props => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -126,8 +125,8 @@ export const Settings = props => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -153,8 +152,8 @@ export const Settings = props => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: "#03fc41" + "10",
                         borderRadius: 100,
                         justifyContent: "center",

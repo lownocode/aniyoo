@@ -38,8 +38,8 @@
             android:scheme="aniyoo"
             android:host="anime"
             />
-            <data android:scheme="http" android:host="aniyoo.localhostov.ru" />
-            <data android:scheme="https" android:host="aniyoo.localhostov.ru" />
+            <data android:scheme="http" android:host="aniyoo.ru" />
+            <data android:scheme="https" android:host="aniyoo.ru" />
         </intent-filter>
 
         <!-- <meta-data

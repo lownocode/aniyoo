@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import axios from "axios";
 
 import {
     Button,
     Cell,
     Input,
-    Icon
+    Icon,
+    Text
 } from "../components";
 import { storage, EventEmit } from "../functions";
 import ThemeContext from "../config/ThemeContext";

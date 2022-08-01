@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { Text, View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
+import { View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
 import axios from "axios";
 
 import dayjs from "dayjs";
@@ -15,11 +15,11 @@ import {
     Icon,
     PressIcon,
     Cell,
+    Text
 } from "../../components";
 
 import {
     storage,
-    normalizeSize
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -185,8 +185,8 @@ export const EditProfileChangeNickname = (props) => {
             before={
                 <View
                 style={{
-                    width: normalizeSize(33),
-                    height: normalizeSize(33),
+                    width: 43,
+                    height: 43,
                     borderRadius: 10,
                     backgroundColor: theme.accent + "20",
                     justifyContent: "center",
@@ -242,7 +242,7 @@ export const EditProfileChangeNickname = (props) => {
                         style={{
                             textAlign: "center",
                             color: theme.text_color,
-                            fontSize: normalizeSize(20),
+                            fontSize: 25,
                             fontWeight: "700",
                             marginHorizontal: 15
                         }}
@@ -254,7 +254,7 @@ export const EditProfileChangeNickname = (props) => {
 
                         <Text
                         style={{
-                            fontSize: normalizeSize(10.5),
+                            fontSize: 12,
                             color: theme.text_secondary_color,
                             textAlign: "center"
                         }}
@@ -283,7 +283,12 @@ export const EditProfileChangeNickname = (props) => {
                     </View>
 
                     <ContentHeader
-                    indents
+                    icon={
+                        <Icon
+                        name="clock-history"
+                        color={theme.text_secondary_color}
+                        />
+                    }
                     text="История изменений"
                     />
                 </View>

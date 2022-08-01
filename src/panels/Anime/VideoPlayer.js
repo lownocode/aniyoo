@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { 
     StatusBar, 
     TouchableNativeFeedback, 
-    Text, 
     View, 
     ActivityIndicator,
     Dimensions,
@@ -24,7 +23,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, Icon, Progress } from "../../components";
+import { Cell, Icon, Progress, Text } from "../../components";
 import { 
     AnimeWatchedBefore, 
 } from "../../modals";
@@ -246,7 +245,7 @@ export const AnimeVideoPlayer = (props) => {
         })
         .then(({ data }) => {
             setVideoUrls(data.links);
-            getVideoPlayableUrl(videoPlayerSettings?.quality);
+            getVideoPlayableUrl(videoPlayerSettings?.quality, data.links);
             
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
@@ -284,7 +283,7 @@ export const AnimeVideoPlayer = (props) => {
         })
         .then(({ data }) => {
             setVideoUrls(data.links);
-            getVideoPlayableUrl(videoPlayerSettings?.quality);
+            getVideoPlayableUrl(videoPlayerSettings?.quality, data.links);
 
             videoRef.current?.seek(0);
             setProgress({ currentTime: 0, seekableDuration: 0, playableDuration: 0 });
@@ -333,9 +332,8 @@ export const AnimeVideoPlayer = (props) => {
         } 
     };
 
-    const getVideoPlayableUrl = async (quality) => {
-        const qualityList = Object.keys(videoUrls);
-        console.log(qualityList)
+    const getVideoPlayableUrl = async (quality, urls) => {
+        const qualityList = Object.keys(urls || videoUrls);
 
         if(qualityList.length === 0) {
             ToastAndroid.show("Запрашиваемое видео не найдено", ToastAndroid.LONG);
@@ -355,10 +353,16 @@ export const AnimeVideoPlayer = (props) => {
                 ...videoPlayerSettings,
                 quality: qualityList[qualityList.length - 1]
             });
-            return setVideoPlayableUrl(videoUrls[qualityList[qualityList.length - 1]]);
+
+            return setVideoPlayableUrl(
+                urls 
+                ? urls[qualityList[qualityList.length - 1]] 
+                : videoUrls[qualityList[qualityList.length - 1]]
+            );
         }
 
-        return setVideoPlayableUrl(videoUrls[quality]);
+        console.log(urls ? urls[quality] : videoUrls[quality])
+        return setVideoPlayableUrl(urls ? urls[quality] : videoUrls[quality]);
     };
 
     const styles = StyleSheet.create({
@@ -597,7 +601,7 @@ export const AnimeVideoPlayer = (props) => {
                                             <TouchableNativeFeedback
                                             onPress={() => nextEpisode()}
                                             background={TouchableNativeFeedback.Ripple("rgba(1, 1, 1, .1)", true)}
-                                            disabled={animeData?.playedEpisode === animeData?.episodesCount}
+                                            disabled={Number(animeData?.playedEpisode) === Number(animeData?.episodesCount)}
                                             >
                                                 <View 
                                                 style={{ 

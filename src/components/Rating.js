@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
-import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 
 import {
     Icon,
     PressIcon,
     Button,
-    Cell
+    Cell,
+    Text
 } from ".";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize } from "../functions";
 
 export const Rating = (props) => {
     const theme = useContext(ThemeContext);

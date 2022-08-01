@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, FlatList, StatusBar, Text, Vibration, ToastAndroid } from "react-native";
+import { View, FlatList, StatusBar, Vibration, ToastAndroid } from "react-native";
 import { useRoute, useTheme } from "@react-navigation/native";
 import axios from "axios";
 import Orientation from "react-native-orientation";
@@ -8,10 +8,10 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, Header, Icon } from "../../components";
+import { Cell, Header, Icon, Text } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { formatViews, normalizeSize, storage } from "../../functions";
+import { formatViews, storage } from "../../functions";
 import { showNavigationBar } from "react-native-navigation-bar-color";
 
 export const AnimeSelectEpisode = (props) => {

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useMemo } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, TouchableNativeFeedback, Vibration } from "react-native";
+import { View, TouchableNativeFeedback, Vibration } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import {
@@ -8,10 +8,10 @@ import {
     Home,
     Notices,
     Search,
-    Profile
+    Profile,
 } from "../screens";
-import { Avatar, Icon } from "../components";
-import { normalizeSize, storage } from "../functions";
+import { Avatar, Icon, Text } from "../components";
+import { storage } from "../functions";
 
 import ThemeContext from "../config/ThemeContext";
 import UserContext from "../config/UserContext";

@@ -1,27 +1,5 @@
-export const REQUEST_DOMAIN = "https://aniyoo.localhostov.ru/api";
-export const DOMAIN = "https://aniyoo.localhostov.ru/"
-
-export const USER_SCHEMA = {
-    "id": 1,
-    "nickname": "...",
-    "photo": "https://i.ibb.co/9tkkf5B/Avitar-Image-Placeholder.png",
-    "status": "...",
-    "admin": false,
-    "comments": [],
-    "assembly": [],
-    "friends": [],
-    "social_networks": [],
-    "rated": [],
-    "watched": [],
-    "watch": [],
-    "rewatching": [],
-    "in_plans": [],
-    "postponed": [],
-    "abandoned": [],
-    "all_watched": [],
-    "tags": [],
-    "friend_requests": []
-};
+export const REQUEST_DOMAIN = "https://aniyoo.ru/api";
+export const DOMAIN = "https://aniyoo.ru/"
 
 export const FLAGS = {
     Japan: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Flag_of_Japan.svg/1024px-Flag_of_Japan.svg.png",

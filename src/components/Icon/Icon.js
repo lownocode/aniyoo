@@ -1,4 +1,5 @@
 import React from "react";
+import { View } from "react-native";
 
 import Logo from "./icons/Logo";
 import GoogleLogo from "./icons/GoogleLogo";
@@ -110,6 +111,9 @@ import UserCheck from "./icons/UserCheck";
 import ArrowsInward from "./icons/ArrowsInward";
 import ArrowsFromInside from "./icons/ArrowsFromInside";
 import Globe from "./icons/Globe";
+import ClockHistory from "./icons/ClockHistory";
+import PlaySquare from "./icons/PlaySquare";
+import Sun from "./icons/Sun";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -225,13 +229,18 @@ export const Icon = (props) => {
         "arrows-inward": <ArrowsInward {...props} />,
         "arrows-from-inside": <ArrowsFromInside {...props} />,
         "globe": <Globe {...props} />,
+        "clock-history": <ClockHistory {...props} />,
+        "play-square": <PlaySquare {...props} />,
+        "sun": <Sun {...props} />,
     }[name];
 
     return (
-        <>
+        <View
+        style={{ ...props.style }}
+        >
             {
                 icon
             }
-        </>
+        </View>
     );
 };

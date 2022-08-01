@@ -1,8 +1,9 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableNativeFeedback } from "react-native";
+import { View, TouchableNativeFeedback } from "react-native";
+
+import { Text } from ".";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize } from "../functions";
 
 export const ContentHeader = (props) => {
     const theme = useContext(ThemeContext);

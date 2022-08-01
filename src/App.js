@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar, Linking, View } from "react-native";
+import { StatusBar, Linking, Text } from "react-native";
 import Orientation from "react-native-orientation";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import SplashScreen from "react-native-splash-screen";

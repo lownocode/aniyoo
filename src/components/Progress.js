@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Animated, View, Text } from "react-native";
+import { Animated, View } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 

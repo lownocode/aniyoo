@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback, useRef } from "react";
 import { 
     View, 
-    Text, 
     ToastAndroid, 
     Switch, 
     ActivityIndicator, 
@@ -29,11 +28,12 @@ import {
     Avatar,
     Button,
     WriteBar,
-    Placeholder
+    Placeholder,
+    Text
 } from "../../components";
 import { CommentActions } from "../../modals";
 
-import { declOfNum, storage, normalizeSize } from "../../functions";
+import { declOfNum, storage } from "../../functions";
 import ThemeContext from "../../config/ThemeContext";
 
 export const AnimeReplyComments = (props) => {

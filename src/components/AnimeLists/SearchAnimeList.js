@@ -2,14 +2,13 @@ import React, { useContext } from "react";
 import { 
     View, 
     Image, 
-    Text, 
     FlatList,
 } from "react-native";
 
-import { Cell, Icon, ContentHeader } from "../";
+import { Cell, Icon, ContentHeader, Text } from "../";
 
 import ThemeContext from "../../config/ThemeContext";
-import { normalizeSize, declOfNum } from "../../functions";
+import { declOfNum } from "../../functions";
 
 export const SearchAnimeList = (props) => {
     const theme = useContext(ThemeContext);
@@ -48,7 +47,7 @@ export const SearchAnimeList = (props) => {
                     numberOfLines={2}
                     style={{
                         color: theme.cell.title_color,
-                        fontWeight: "500",
+                        fontWeight: "700",
                         fontSize: 15,
                     }}
                     >

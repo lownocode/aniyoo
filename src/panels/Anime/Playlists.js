@@ -3,7 +3,6 @@ import {
     Image, 
     ScrollView, 
     View, 
-    Text, 
     ToastAndroid, 
     ActivityIndicator,
     StatusBar,
@@ -19,10 +18,16 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, ContentHeader, Icon, Placeholder } from "../../components";
+import { 
+    Cell, 
+    ContentHeader, 
+    Icon, 
+    Placeholder,
+    Text 
+} from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { normalizeSize, sleep, storage } from "../../functions";
+import { sleep, storage } from "../../functions";
 import LinearGradient from "react-native-linear-gradient";
 
 export const AnimePlaylists = (props) => {

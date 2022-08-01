@@ -1,16 +1,17 @@
 import React, { useContext, useRef, useState } from "react";
-import { View, Text, TextInput, Keyboard, ToastAndroid } from "react-native";
+import { View, TextInput, Keyboard, ToastAndroid } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
 import {
     Header, 
     Icon,
-    Button
+    Button,
+    Text
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage, normalizeSize } from "../../functions";
+import { storage } from "../../functions";
 
 export const AuthorizationRegistrationConfirmation = (props) => {
     const theme = useContext(ThemeContext);
@@ -52,8 +53,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 ref={value1Ref}
                 textAlign="center"
                 style={{
-                    width: normalizeSize(30),
-                    height: normalizeSize(40),
+                    width: 43,
+                    height: 50,
                     borderRadius: 8,
                     borderColor: selectInput === 1 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -78,8 +79,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[2]}
                 ref={value2Ref}
                 style={{
-                    width: normalizeSize(30),
-                    height: normalizeSize(40),
+                    width: 43,
+                    height: 50,
                     borderRadius: 8,
                     borderColor: selectInput === 2 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -106,8 +107,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[3]}
                 ref={value3Ref}
                 style={{
-                    width: normalizeSize(30),
-                    height: normalizeSize(40),
+                    width: 43,
+                    height: 50,
                     borderRadius: 8,
                     borderColor: selectInput === 3 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -134,8 +135,8 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 value={values[4]}
                 ref={value4Ref}
                 style={{
-                    width: normalizeSize(30),
-                    height: normalizeSize(40),
+                    width: 43,
+                    height: 50,
                     borderRadius: 8,
                     borderColor: selectInput === 4 ? selectColor : unselectColor,
                     borderWidth: 1.3,
@@ -202,7 +203,7 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 <Text
                 style={{
                     color: theme.text_color,
-                    fontSize: normalizeSize(20),
+                    fontSize: 25,
                     fontWeight: "500",
                     marginHorizontal: 15,
                     textAlign: "center"

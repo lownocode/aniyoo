@@ -1,17 +1,19 @@
-import React, { useContext } from "react";
-import { View, ScrollView } from "react-native";
+import React, { useContext, useState } from "react";
+import { View, ScrollView, Linking } from "react-native";
+import { useRoute } from "@react-navigation/native";
 
 import {
     Header,
     Cell,
     Icon,
+    Accordion,
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { normalizeSize } from "../../functions";
 
 export const EditProfile = props => {
     const theme = useContext(ThemeContext);
+    const route = useRoute();
 
     const { 
         navigation: {
@@ -19,6 +21,8 @@ export const EditProfile = props => {
             navigate
         },
     } = props;
+
+    const [ userData ] = useState(route.params?.userData || {});
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
@@ -35,82 +39,381 @@ export const EditProfile = props => {
             >
                 <View style={{  marginTop: 10 }}/>
 
-                <Cell
-                title="Профиль"
-                subtitle="Аватарка, никнейм, статус"
-                onPress={() => navigate("edit_profile.profile")}
-                before={
-                    <View
-                    style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
-                        backgroundColor: theme.accent + "10",
-                        borderRadius: 100,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    >
+                <Accordion
+                trigger={
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    disabled
+                    after={
                         <Icon
-                        name="user-profile"
-                        size={18}
-                        color={theme.accent}
+                        name="chevron-down"
+                        color={theme.text_secondary_color}
                         />
-                    </View>
+                    }
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
                 }
-                />
+                >
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
 
-                <View style={{marginTop: 5}} />
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
 
-                <Cell
-                title="Безопасность"
-                subtitle="Пароль, почта"
-                onPress={() => navigate("edit_profile.security")}
-                before={
-                    <View
-                    style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
-                        backgroundColor: theme.accent + "10",
-                        borderRadius: 100,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    >
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+                </Accordion>
+
+                <Accordion
+                trigger={
+                    <Cell
+                    title="Безопасность"
+                    subtitle="Пароль, почта"
+                    disabled
+                    after={
                         <Icon
-                        name="shield-security"
-                        size={20}
-                        color={theme.accent}
+                        name="chevron-down"
+                        color={theme.text_secondary_color}
                         />
-                    </View>
+                    }
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="shield-security"
+                            size={20}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
                 }
-                />
+                >
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
 
-                <View style={{marginTop: 5}} />
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
 
-                <Cell
-                title="Приватность"
-                subtitle="Закрытый профиль, настройки приватности"
-                onPress={() => navigate("edit_profile.privacy")}
-                before={
-                    <View
-                    style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
-                        backgroundColor: theme.accent + "10",
-                        borderRadius: 100,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}
-                    >
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+                </Accordion>
+
+                <Accordion
+                trigger={
+                    <Cell
+                    title="Приватность"
+                    subtitle="Закрытый профиль, настройки приватности"
+                    disabled
+                    after={
                         <Icon
-                        name="key"
-                        size={20}
-                        color={theme.accent}
+                        name="chevron-down"
+                        color={theme.text_secondary_color}
                         />
-                    </View>
+                    }
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="key"
+                            size={20}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
                 }
-                />
-                <View style={{paddingBottom: 50}}/>
+                >
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+
+                    <Cell
+                    title="Профиль"
+                    subtitle="Аватарка, никнейм, статус"
+                    onPress={() => navigate("edit_profile.profile")}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="user-profile"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+                </Accordion>
+
+                <Accordion
+                trigger={
+                    <Cell
+                    title="Привязка к сервисам"
+                    subtitle="Telegram"
+                    disabled
+                    after={
+                        <Icon
+                        name="chevron-down"
+                        color={theme.text_secondary_color}
+                        />
+                    }
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor: theme.accent + "10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="link"
+                            size={18}
+                            color={theme.accent}
+                            />
+                        </View>
+                    }
+                    />
+                }
+                >
+                    <Cell
+                    title="Telergam"
+                    subtitle="Привязка аккаунта через бота"
+                    onPress={() => Linking.openURL("https://t.me/aniyoobot?start=" + userData?.sign)}
+                    before={
+                        <View
+                        style={{
+                            width: 43,
+                            height: 43,
+                            backgroundColor:  "#00a6ff10",
+                            borderRadius: 100,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="telegram"
+                            size={18}
+                            color="#00a6ff"
+                            />
+                        </View>
+                    }
+                    />
+                </Accordion>
             </ScrollView>
         </View>
     )

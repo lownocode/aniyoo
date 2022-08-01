@@ -3,7 +3,6 @@ import {
     View, 
     RefreshControl, 
     ScrollView, 
-    Text, 
     FlatList, 
     TouchableNativeFeedback, 
     StyleSheet, 
@@ -33,7 +32,8 @@ import {
     Header,
     Icon,
     Placeholder,
-    PressIcon
+    PressIcon,
+    Text
 } from "../../components";
 import {
     SocialNetworks
@@ -42,7 +42,6 @@ import {
 import {
     storage,
     declOfNum,
-    normalizeSize
 } from "../../functions";
 import UserContext from "../../config/UserContext";
 
@@ -233,16 +232,15 @@ export const AnotherUserProfile = (props) => {
         },
     });
 
-    const friendsListRender = ({ item }) => {
+    const friendsListRender = ({ item, index }) => {
         return (
             <View
             key={"friend-" + item.id}
             style={{
                 overflow: "hidden",
-                borderTopLeftRadius: 100,
-                borderTopRightRadius: 100,
-                borderBottomLeftRadius: 20,
-                borderBottomRightRadius: 20
+                borderRadius: 15,
+                marginLeft: index === 0 ? 10 : 0,
+                marginRight: index + 1 === friends.length ? 10 : 0
             }}
             >
                 <TouchableNativeFeedback
@@ -274,7 +272,7 @@ export const AnotherUserProfile = (props) => {
                         numberOfLines={2}
                         style={{
                             color: theme.text_color,
-                            fontSize: normalizeSize(10),
+                            fontSize: 12,
                             textAlign: "center"
                         }}
                         >
@@ -332,7 +330,7 @@ export const AnotherUserProfile = (props) => {
                     <Text
                     style={{
                         color: "#fff",
-                        fontSize: normalizeSize(10),
+                        fontSize: 12,
                         textAlignVertical: "center"
                     }}
                     >
@@ -380,7 +378,7 @@ export const AnotherUserProfile = (props) => {
                 <Text
                 style={{
                     color: theme.text_color,
-                    fontSize: normalizeSize(16),
+                    fontSize: 19,
                     fontWeight: "600"
                 }}
                 >
@@ -392,7 +390,8 @@ export const AnotherUserProfile = (props) => {
                     <Text 
                     style={{
                         color: theme.text_secondary_color,
-                        fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic"
+                        fontStyle: userData?.status?.trim()?.length >= 1 ? "normal" : "italic",
+                        fontSize: 13
                     }}
                     numberOfLines={3}
                     >
@@ -409,7 +408,7 @@ export const AnotherUserProfile = (props) => {
                         name="radio" 
                         color="gray"
                         />
-                        <Text style={{ color: "gray", fontSize: normalizeSize(11), marginLeft: 4 }}>
+                        <Text style={{ color: "gray", fontSize: 12, marginLeft: 4 }}>
                             {
                                 (+new Date() - +new Date(userData?.online?.time || new Date())) < 1 * 60 * 1000 ? "Онлайн" : 
                                 `Был(-а) ${dayjs().to(userData?.online?.time || new Date())}`
@@ -706,7 +705,7 @@ export const AnotherUserProfile = (props) => {
                         >
                             <Text
                             style={{
-                                fontSize: normalizeSize(17),
+                                fontSize: 22,
                                 color: theme.accent,
                                 fontWeight: "700",
                             }}
@@ -729,7 +728,7 @@ export const AnotherUserProfile = (props) => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -760,7 +759,7 @@ export const AnotherUserProfile = (props) => {
                         >
                             <Text
                             style={{
-                                fontSize: normalizeSize(17),
+                                fontSize: 22,
                                 color: theme.accent,
                                 fontWeight: "700"
                             }}
@@ -783,7 +782,7 @@ export const AnotherUserProfile = (props) => {
                                 <Text
                                 style={{
                                     color: theme.accent,
-                                    fontSize: normalizeSize(10),
+                                    fontSize: 12,
                                     fontWeight: "500",
                                     marginLeft: 5
                                 }}
@@ -870,14 +869,14 @@ export const AnotherUserProfile = (props) => {
                                     flexDirection: "row",
                                     justifyContent: "space-between",
                                     alignItems: "center",
-                                    height: normalizeSize(15),
-                                    width: normalizeSize(30)
+                                    height: 17,
+                                    width: 38
                                 }}
                                 >
                                     <View
                                     style={{
-                                        width: normalizeSize(8),
-                                        height: normalizeSize(8),
+                                        width: 10,
+                                        height: 10,
                                         borderRadius: 100,
                                         backgroundColor: statisticsChartColors[index],
                                         marginRight: 5
@@ -899,7 +898,7 @@ export const AnotherUserProfile = (props) => {
                                     <Text
                                     style={{
                                         marginLeft: 10,
-                                        fontSize: normalizeSize(12),
+                                        fontSize: 15,
                                         fontWeight: "500",
                                         color: theme.text_secondary_color + "90"
                                     }}
@@ -914,7 +913,7 @@ export const AnotherUserProfile = (props) => {
                                         marginLeft: 6,
                                         fontWeight: "700",
                                         color: theme.text_secondary_color,
-                                        fontSize: normalizeSize(12.5)
+                                        fontSize: 15.5
                                     }}
                                     > 
                                         {
@@ -953,7 +952,20 @@ export const AnotherUserProfile = (props) => {
             <Cell
             key={"anime-" + item.anime.id}
             centered={false}
-            title={item?.anime?.title}
+            title={
+                <Text
+                numberOfLines={2}
+                style={{
+                    color: theme.text_color,
+                    fontWeight: "700",
+                    fontSize: 16
+                }}
+                >
+                    {
+                        item?.anime?.title
+                    }
+                </Text>
+            }
             maxTitleLines={2}
             onPress={() => navigate("anime", { animeData: { id: item.anime.id } })}
             after={
@@ -980,9 +992,13 @@ export const AnotherUserProfile = (props) => {
                     }}
                     >
                         <Icon
-                        name="play"
+                        name="play-square"
                         color={theme.text_secondary_color}
-                        size={9}
+                        size={12}
+                        style={{
+                            width: 13,
+                            alignItems: "center"
+                        }}
                         />
 
                         <Text
@@ -1006,7 +1022,11 @@ export const AnotherUserProfile = (props) => {
                         <Icon
                         name="clock-outline"
                         color={theme.text_secondary_color}
-                        size={12}
+                        size={11}
+                        style={{
+                            width: 13,
+                            alignItems: "center"
+                        }}
                         />
 
                         <Text
@@ -1030,7 +1050,11 @@ export const AnotherUserProfile = (props) => {
                         <Icon
                         name="mic-outline"
                         color={theme.text_secondary_color}
-                        size={14}
+                        size={12}
+                        style={{
+                            width: 13,
+                            alignItems: "center"
+                        }}
                         />
 
                         <Text
@@ -1053,8 +1077,8 @@ export const AnotherUserProfile = (props) => {
                     uri: item?.anime?.poster
                 }}
                 style={{
-                    width: normalizeSize(60),
-                    height: normalizeSize(80),
+                    width: 85,
+                    height: 110,
                     resizeMode: "cover",
                     borderRadius: 7,
                     borderColor: theme.divider_color,

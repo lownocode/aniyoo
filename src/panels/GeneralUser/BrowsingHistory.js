@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { Image, View, Text, FlatList, RefreshControl } from "react-native";
+import { Image, View, FlatList, RefreshControl } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -9,7 +9,7 @@ import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage, normalizeSize } from "../../functions";
+import { storage } from "../../functions";
 
 import { 
     Header,
@@ -17,7 +17,8 @@ import {
     Cell,
     PressIcon,
     Placeholder,
-    ContentHeader
+    ContentHeader,
+    Text
 } from "../../components";
 
 export const GeneralUserBrowsingHistory = (props) => {
@@ -37,6 +38,21 @@ export const GeneralUserBrowsingHistory = (props) => {
         count: route.params?.initialHistory?.length || 0
     });
 
+    const getCachedData = async () => {
+        const browsingHistory = await storage.getItem("cachedBrowsingHistory");
+
+        if(!route.params?.userId) {
+            setBrowsingHistory({
+                count: browsingHistory?.length,
+                items: browsingHistory || []
+            });
+        }
+    };
+
+    useEffect(() => {
+        getCachedData();
+    }, []);
+
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         getBrowsingHistory();
@@ -54,6 +70,7 @@ export const GeneralUserBrowsingHistory = (props) => {
             }
         })
         .then(({ data }) => {
+            storage.setItem("cachedBrowsingHistory", data.list);
             setBrowsingHistory({
                 count: data.count,
                 items: data.list
@@ -73,7 +90,20 @@ export const GeneralUserBrowsingHistory = (props) => {
         return (
             <Cell
             centered={false}
-            title={item?.anime?.title}
+            title={
+                <Text
+                numberOfLines={2}
+                style={{
+                    color: theme.text_color,
+                    fontWeight: "700",
+                    fontSize: 16
+                }}
+                >
+                    {
+                        item?.anime?.title
+                    }
+                </Text>
+            }
             maxTitleLines={2}
             onPress={() => navigate("anime", { animeData: { id: item.anime.id } })}
             after={
@@ -100,9 +130,13 @@ export const GeneralUserBrowsingHistory = (props) => {
                     }}
                     >
                         <Icon
-                        name="play"
+                        name="play-square"
                         color={theme.text_secondary_color}
-                        size={9}
+                        size={12}
+                        style={{
+                            width: 13,
+                            alignItems: "center"
+                        }}
                         />
 
                         <Text
@@ -126,13 +160,17 @@ export const GeneralUserBrowsingHistory = (props) => {
                         <Icon
                         name="clock-outline"
                         color={theme.text_secondary_color}
-                        size={12}
+                        size={11}
+                        style={{
+                            width: 13,
+                            alignItems: "center",
+                        }}
                         />
 
                         <Text
                         style={{
                             marginLeft: 8,
-                            color: theme.text_secondary_color
+                            color: theme.text_secondary_color,
                         }}
                         >
                             {
@@ -150,7 +188,11 @@ export const GeneralUserBrowsingHistory = (props) => {
                         <Icon
                         name="mic-outline"
                         color={theme.text_secondary_color}
-                        size={14}
+                        size={12}
+                        style={{
+                            width: 13,
+                            alignItems: "center"
+                        }}
                         />
 
                         <Text
@@ -206,6 +248,7 @@ export const GeneralUserBrowsingHistory = (props) => {
             }
         })
         .then(({ data }) => {
+            storage.setItem("cachedBrowsingHistory", browsingHistory.items.concat(data.list));
             setBrowsingHistory({
                 count: browsingHistory.count + data.count,
                 items: browsingHistory.items.concat(data.list)

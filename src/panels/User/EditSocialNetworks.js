@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Vibration, Text, TextInput, TouchableWithoutFeedback, ToastAndroid } from "react-native";
+import { View, Vibration, TextInput, TouchableWithoutFeedback, ToastAndroid } from "react-native";
 import axios from "axios";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import { useRoute } from "@react-navigation/native";
@@ -7,11 +7,12 @@ import { useRoute } from "@react-navigation/native";
 import { 
     Header,
     Button,
-    Icon
+    Icon,
+    Text
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage, normalizeSize } from "../../functions";
+import { storage } from "../../functions";
 
 export const EditSocialNetworks = (props) => {
     const theme = useContext(ThemeContext);
@@ -150,7 +151,7 @@ export const EditSocialNetworks = (props) => {
                                 <Text
                                 style={{
                                     color: "#fff",
-                                    fontSize: normalizeSize(16),
+                                    fontSize: 20,
                                     fontWeight: "500",
                                     marginLeft: 8
                                 }}
@@ -296,7 +297,7 @@ export const EditSocialNetworks = (props) => {
                         />
                         <Text
                         style={{
-                            fontSize: normalizeSize(13),
+                            fontSize: 15,
                             fontWeight: "500",
                             color: theme.text_color,
                             marginLeft: 5

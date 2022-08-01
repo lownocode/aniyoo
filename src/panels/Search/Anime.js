@@ -4,7 +4,6 @@ import {
     StatusBar,
     ActivityIndicator,
     TextInput,
-    Text,
     TouchableNativeFeedback
 } from "react-native";
 import axios from "axios";
@@ -15,11 +14,10 @@ import {
     PressIcon,
     SearchAnimeList,
     Placeholder,
-    Cell
+    Text
 } from "../../components";
 
 import {
-    normalizeSize,
     removeArrayDuplicates,
     storage,
 } from "../../functions";
@@ -130,9 +128,6 @@ export const SearchAnime = (props) => {
 
         axios.post("/animes.search", {
             title: text,
-            order: {
-                season: 0
-            }
         }, {
             headers: {
                 "Authorization": sign,
@@ -152,9 +147,6 @@ export const SearchAnime = (props) => {
 
         axios.post("/animes.search", {
             title: text,
-            order: {
-                season: 0
-            },
             offset: findedAnimes.animes.length,
         }, {
             headers: {
@@ -274,7 +266,7 @@ export const SearchAnime = (props) => {
                                     style={{
                                         fontWeight: "500",
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(12)
+                                        fontSize: 15
                                     }}
                                     >
                                         {clipboardText}
@@ -282,7 +274,7 @@ export const SearchAnime = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_secondary_color,
-                                        fontSize: normalizeSize(11)
+                                        fontSize: 13
                                     }}
                                     >
                                         Возможно, вы скопировали название аниме

@@ -19,6 +19,7 @@ const theme = {
         //components
 
         press_icon_background: "rgba(0, 0, 0, 0.1)",
+        accordion_background: "rgba(0, 0, 0, .05)",
         snackbar_background: "#0077ff",
         header_background: "#ffffff",
         profile_header_background: "#f0f6ff",
@@ -125,6 +126,7 @@ const theme = {
         //components
 
         press_icon_background: "rgba(255, 255, 255, 0.1)",
+        accordion_background: "rgba(255, 255, 255, .05)",
         snackbar_background: "#383838",
         header_background: "#141414",
         profile_header_background: "#1a1a1a",

@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { StyleSheet, TouchableNativeFeedback, View } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize } from "../functions";
 
 export const PressIcon = (props) => {
     const theme = useContext(ThemeContext);

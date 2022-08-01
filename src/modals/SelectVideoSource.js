@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 
 import {
     Icon,
-    Cell
+    Cell,
+    Text
 } from "../components";
 
 import { formatViews } from "../functions";

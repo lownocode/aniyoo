@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { 
     View, 
-    Text, 
     ToastAndroid, 
     TextInput, 
     StatusBar, 
@@ -13,10 +12,10 @@ import {
     Button,
     Icon,
     PressIcon,
+    Text
 } from "../../components";
 import {
     storage,
-    normalizeSize
 } from "../../functions";
 
 import ThemeContext from "../../config/ThemeContext";
@@ -139,7 +138,7 @@ export const Authorization = (props) => {
 
     const registrationNextStep = () => {
         setLoading(true);
-
+        
         axios.post("/users.registration", {
             nickname: nickname,
             email: email,
@@ -212,7 +211,7 @@ export const Authorization = (props) => {
                             style={{
                                 textAlign: "center",
                                 fontWeight: "500",
-                                fontSize: normalizeSize(13),
+                                fontSize: 15,
                                 color: mode === "signIn" ? theme.accent : theme.text_secondary_color,
                             }}
                             >
@@ -246,7 +245,7 @@ export const Authorization = (props) => {
                             style={{
                                 textAlign: "center",
                                 fontWeight: "500",
-                                fontSize: normalizeSize(13),
+                                fontSize: 15,
                                 color: mode === "registration" ? theme.accent : theme.text_secondary_color,
                             }}
                             >

@@ -1,6 +1,13 @@
 import axios from "axios";
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { TextInput, View, StatusBar, ActivityIndicator, FlatList, Text, TouchableNativeFeedback } from "react-native";
+import { 
+    TextInput, 
+    View, 
+    StatusBar, 
+    ActivityIndicator, 
+    FlatList, 
+    TouchableNativeFeedback 
+} from "react-native";
 import Clipboard from "@react-native-community/clipboard";
 
 import { 
@@ -9,10 +16,11 @@ import {
     Icon,
     Placeholder,
     PressIcon,
+    Text
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
-import { storage, normalizeSize } from "../../functions";
+import { storage } from "../../functions";
 
 const SearchInput = (props) => {
     const theme = useContext(ThemeContext);
@@ -153,7 +161,6 @@ export const SearchUsers = (props) => {
     };
 
     const renderUsers = ({ item }) => {
-        console.log(item)
         return (
             <Cell
             title={
@@ -176,7 +183,7 @@ export const SearchUsers = (props) => {
                     numberOfLines={1}
                     style={{
                         fontWeight: "500",
-                        fontSize: normalizeSize(13.5),
+                        fontSize: 15.5,
                         color: theme.text_color,
                         marginLeft: item.relation === "friends" ? 5 : 0,
                         width: "90%"
@@ -297,7 +304,7 @@ export const SearchUsers = (props) => {
                                     style={{
                                         fontWeight: "500",
                                         color: theme.text_color,
-                                        fontSize: normalizeSize(12)
+                                        fontSize: 15
                                     }}
                                     >
                                         {clipboardText}
@@ -305,7 +312,7 @@ export const SearchUsers = (props) => {
                                     <Text
                                     style={{
                                         color: theme.text_secondary_color,
-                                        fontSize: normalizeSize(11)
+                                        fontSize: 13
                                     }}
                                     >
                                         Возможно, вы скопировали имя пользователя

@@ -1,8 +1,9 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableNativeFeedback, StyleSheet, ActivityIndicator } from "react-native";
+import { View, TouchableNativeFeedback, StyleSheet, ActivityIndicator } from "react-native";
+
+import { Text } from ".";
 
 import ThemeContext from "../config/ThemeContext";
-import { normalizeSize } from "../functions";
 
 export const Button = (props) => {
     const theme = useContext(ThemeContext);

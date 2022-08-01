@@ -16,3 +16,5 @@ export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";
 export * from "./FormattedText";
 export * from "./Lists/CommentsList";
+export * from "./Text";
+export * from "./Accordion";

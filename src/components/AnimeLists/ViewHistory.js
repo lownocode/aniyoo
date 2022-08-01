@@ -2,15 +2,14 @@ import React, { useContext } from "react";
 import { 
     View, 
     Image, 
-    Text, 
     FlatList,
     Vibration
 } from "react-native";
 
 import ThemeContext from "../../config/ThemeContext";
-import { declOfNum, normalizeSize } from "../../functions";
+import { declOfNum } from "../../functions";
 
-import { Cell, Icon } from "../";
+import { Cell, Icon, Text } from "../";
 
 export const MyAnimeList = (props) => {
     const theme = useContext(ThemeContext);
@@ -48,7 +47,7 @@ export const MyAnimeList = (props) => {
                     numberOfLines={2}
                     style={{
                         color: theme.cell.title_color,
-                        fontWeight: "500",
+                        fontWeight: "700",
                         fontSize: 15,
                     }}
                     >

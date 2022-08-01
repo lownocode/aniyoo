@@ -22,13 +22,9 @@ const Icon = (props) => {
             strokeLinejoin="round"
             strokeWidth="1"
             >
-                <G stroke={color} strokeWidth="1.8" transform="translate(4.5 2.5)">
-                    <Path d="M2.104 11.332a5.386 5.386 0 0010.772 0"></Path>
-                    <Path d="M12.876 8.24V6.098a5.385 5.385 0 10-10.772 0V8.24"></Path>
-                    <Path d="M7.49 18.763L7.49 16.718"></Path>
-                    <Path d="M0.712 11.332L14.268 11.332"></Path>
-                    <Path d="M5.997 7.952L8.982 7.952"></Path>
-                    <Path d="M7.991 5.182L6.988 5.182"></Path>
+                <G stroke={color} strokeWidth="1.7" transform="translate(2 2)">
+                    <Path d="M.75 10c0 6.937 2.313 9.25 9.25 9.25 6.937 0 9.25-2.313 9.25-9.25 0-6.937-2.313-9.25-9.25-9.25C3.063.75.75 3.063.75 10z"></Path>
+                    <Path d="M13.416 9.855c0-.904-4.584-3.796-5.104-3.276-.519.52-.57 5.984 0 6.553.571.57 5.104-2.373 5.104-3.277z"></Path>
                 </G>
             </G>
         </Svg>

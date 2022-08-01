@@ -10,7 +10,6 @@ import React, {
 
 import { 
     View, 
-    Text,
     Animated,
     Dimensions,
     TouchableOpacity,
@@ -19,7 +18,8 @@ import axios from "axios";
 
 import {
     Header,
-    MyAnimeList
+    MyAnimeList,
+    Text
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";

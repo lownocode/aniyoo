@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { View, Image, Text , ToastAndroid, FlatList, RefreshControl } from "react-native";
+import { View, Image, ToastAndroid, FlatList, RefreshControl } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -8,8 +8,9 @@ import ThemeContext from "../../config/ThemeContext";
 import { 
     Header,
     Cell,
+    Text
 } from "../../components";
-import { normalizeSize, storage } from "../../functions";
+import { storage } from "../../functions";
 
 export const LinkedAnime = (props) => {
     const theme = useContext(ThemeContext);

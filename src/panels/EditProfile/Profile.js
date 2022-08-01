@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { ScrollView, View, StyleSheet, Dimensions, ToastAndroid } from "react-native";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
@@ -10,15 +10,18 @@ import {
     Header,
     Cell,
     Icon,
+    Avatar,
 } from "../../components";
 import {
     SetStatus
 } from "../../modals";
 
-import { normalizeSize, storage } from "../../functions";
+import { storage } from "../../functions";
 
 export const EditProfileProfile = (props) => {
     const theme = useContext(ThemeContext);
+
+    const [ cachedUserData, setCachedUserData ] = useState({});
 
     const { 
         navigation: {
@@ -66,6 +69,16 @@ export const EditProfileProfile = (props) => {
         });
     };
 
+    const getCachedUserData = async () => {
+        const data = await storage.getItem("cachedUserData");
+
+        setCachedUserData(data);
+    };
+
+    useEffect(() => {
+        getCachedUserData();
+    }, []);
+
     const styles = StyleSheet.create({
         modalContainer: {
             left: 10,
@@ -110,19 +123,34 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
-                        backgroundColor: theme.accent + "10",
+                        width: 43,
+                        height: 43,
+                        backgroundColor: "red",//theme.accent + "10",
                         borderRadius: 100,
-                        justifyContent: "center",
-                        alignItems: "center"
+                        overflow: "hidden"
                     }}
                     >
-                        <Icon
-                        name="gallery"
-                        size={17}
-                        color={theme.accent}
+                        <Avatar
+                        url={cachedUserData?.photo}
+                        size={43}
+                        blurRadius={5}
                         />
+
+                        <View
+                        style={{
+                            position: "absolute",
+                            backgroundColor: "rgba(0, 0, 0, .4)",
+                            width: "100%",
+                            height: "100%",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Icon
+                            name="gallery"
+                            size={17}
+                            />
+                        </View>
                     </View>
                 }
                 subtitle="Загрузить с устройства"
@@ -136,8 +164,8 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",
@@ -162,8 +190,8 @@ export const EditProfileProfile = (props) => {
                 before={
                     <View
                     style={{
-                        width: normalizeSize(33),
-                        height: normalizeSize(33),
+                        width: 43,
+                        height: 43,
                         backgroundColor: theme.accent + "10",
                         borderRadius: 100,
                         justifyContent: "center",

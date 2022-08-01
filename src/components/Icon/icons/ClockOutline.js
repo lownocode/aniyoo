@@ -1,5 +1,5 @@
 import React from "react";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, G } from "react-native-svg";
 
 const Icon = (props) => {
     const {
@@ -8,15 +8,25 @@ const Icon = (props) => {
     } = props;
 
     return (
-        <Svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24"
+        <Svg
+        xmlns="http://www.w3.org/2000/svg"
         width={size}
         height={size}
-        fill={color}
+        viewBox="0 0 24 24"
         >
-            <Path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"></Path>
-            <Path d="M16 11h-3V8a1 1 0 00-2 0v4a1 1 0 001 1h4a1 1 0 000-2z"></Path>
+            <G
+            fill="none"
+            fillRule="evenodd"
+            stroke="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1"
+            >
+                <G stroke={color} strokeWidth="1.7" transform="translate(2 2)">
+                    <Path d="M19.25 10a9.25 9.25 0 11-18.5 0 9.25 9.25 0 0118.5 0z"></Path>
+                    <Path d="M14.1907 10.7672L9.6607 10.6932 9.6607 5.8462"></Path>
+                </G>
+            </G>
         </Svg>
     );
 }
