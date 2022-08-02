@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { View, Keyboard, ToastAndroid, TextInput, FlatList } from "react-native";
+import { View, Keyboard, ToastAndroid, TextInput, FlatList, Text } from "react-native";
 import axios from "axios";
 
 import dayjs from "dayjs";
@@ -15,7 +15,6 @@ import {
     Icon,
     PressIcon,
     Cell,
-    Text
 } from "../../components";
 
 import {

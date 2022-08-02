@@ -3,9 +3,10 @@ import {
     View, 
     Image, 
     FlatList,
+    Text
 } from "react-native";
 
-import { Cell, Icon, ContentHeader, Text } from "../";
+import { Cell, Icon, ContentHeader } from "../";
 
 import ThemeContext from "../../config/ThemeContext";
 import { declOfNum } from "../../functions";

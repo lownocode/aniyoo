@@ -1,5 +1,5 @@
 import React from "react";
-import { Text } from ".";
+import { Text } from "react-native";
 class TextExtraction {
     constructor(text, patterns) {
         this.text = text;

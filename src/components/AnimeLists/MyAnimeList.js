@@ -3,13 +3,14 @@ import {
     View, 
     Image, 
     FlatList,
-    Vibration
+    Vibration,
+    Text
 } from "react-native";
 
 import ThemeContext from "../../config/ThemeContext";
 import { declOfNum } from "../../functions";
 
-import { Cell, Icon, Text } from "../";
+import { Cell, Icon } from "../";
 
 export const MyAnimeList = (props) => {
     const theme = useContext(ThemeContext);

@@ -7,7 +7,8 @@ import {
     TouchableNativeFeedback, 
     StyleSheet, 
     Dimensions, 
-    Image
+    Image,
+    Text
 } from "react-native";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
@@ -33,7 +34,6 @@ import {
     PressIcon,
     Icon,
     ContentHeader,
-    Text
 } from "../components";
 import {
     storage,
@@ -75,7 +75,7 @@ export const Profile = props => {
         const browsingHistory = await storage.getItem("cachedBrowsingHistory");
 
         setUserData(user || {});
-        setBrowsingHistory(browsingHistory || {});
+        setBrowsingHistory(browsingHistory || []);
     };
 
     useEffect(() => {

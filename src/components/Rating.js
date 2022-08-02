@@ -1,12 +1,11 @@
 import React, { useContext } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 
 import {
     Icon,
     PressIcon,
     Button,
     Cell,
-    Text
 } from ".";
 
 import ThemeContext from "../config/ThemeContext";

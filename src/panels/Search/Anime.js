@@ -1,10 +1,11 @@
-import React, { useContext, useState, useRef, useEffect, useMemo } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { 
     View,
     StatusBar,
     ActivityIndicator,
     TextInput,
-    TouchableNativeFeedback
+    TouchableNativeFeedback,
+    Text
 } from "react-native";
 import axios from "axios";
 import Clipboard from "@react-native-community/clipboard";
@@ -14,7 +15,6 @@ import {
     PressIcon,
     SearchAnimeList,
     Placeholder,
-    Text
 } from "../../components";
 
 import {

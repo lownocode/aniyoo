@@ -3,12 +3,12 @@ import {
     FlatList, 
     View,
     TouchableNativeFeedback,
+    Text
 } from "react-native";
 import {
     Icon,
     Cell,
     Avatar,
-    Text
 } from "../";
 
 import dayjs from "dayjs";

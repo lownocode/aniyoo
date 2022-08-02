@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { Image, View, FlatList, RefreshControl } from "react-native";
+import { Image, View, FlatList, RefreshControl, Text } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -18,7 +18,6 @@ import {
     PressIcon,
     Placeholder,
     ContentHeader,
-    Text
 } from "../../components";
 
 export const GeneralUserBrowsingHistory = (props) => {

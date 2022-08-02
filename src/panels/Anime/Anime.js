@@ -12,6 +12,7 @@ import {
     Linking,
     ActivityIndicator,
     TouchableWithoutFeedback,
+    Text
 } from "react-native";
 import { PieChart } from "react-native-svg-charts";
 import { useRoute } from "@react-navigation/native";
@@ -49,7 +50,6 @@ import {
     Progress,
     DonutChart,
     Rating,
-    Text,
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS, DOMAIN } from "../../../variables";

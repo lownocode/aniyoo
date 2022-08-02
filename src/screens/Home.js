@@ -5,6 +5,7 @@ import {
     ToastAndroid, 
     View,
     TouchableNativeFeedback,
+    Text
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
@@ -18,7 +19,6 @@ import {
     Cell,
     Header,
     Icon,
-    Text,
     Divider,
     Placeholder
 } from "../components";

@@ -9,6 +9,7 @@ import {
     PanResponder,
     ToastAndroid,
     TouchableWithoutFeedback,
+    Text
 } from "react-native";
 import Video from "react-native-video";
 import { useRoute } from "@react-navigation/native";
@@ -23,7 +24,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, Icon, Progress, Text } from "../../components";
+import { Cell, Icon, Progress } from "../../components";
 import { 
     AnimeWatchedBefore, 
 } from "../../modals";

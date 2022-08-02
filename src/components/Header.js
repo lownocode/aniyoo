@@ -1,7 +1,7 @@
 import React, { Fragment, useContext } from 'react';
-import { View, StyleSheet, StatusBar, } from 'react-native';
+import { View, StyleSheet, StatusBar, Text } from 'react-native';
 
-import { Icon, PressIcon, Divider, Text } from ".";
+import { Icon, PressIcon, Divider } from ".";
 
 import ThemeContext from "../config/ThemeContext";
 

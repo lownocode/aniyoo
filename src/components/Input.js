@@ -1,7 +1,5 @@
 import React, { useContext } from "react";
-import { View, TextInput, StyleSheet, KeyboardAvoidingView } from "react-native";
-
-import { Text } from ".";
+import { View, TextInput, StyleSheet, Text } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 

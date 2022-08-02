@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { View, Image, ToastAndroid, FlatList, RefreshControl } from "react-native";
+import { View, Image, ToastAndroid, FlatList, RefreshControl, Text } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -8,7 +8,6 @@ import ThemeContext from "../../config/ThemeContext";
 import { 
     Header,
     Cell,
-    Text
 } from "../../components";
 import { storage } from "../../functions";
 

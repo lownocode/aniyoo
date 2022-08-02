@@ -9,7 +9,8 @@ import {
     RefreshControl, 
     TouchableNativeFeedback,
     StyleSheet,
-    Dimensions
+    Dimensions,
+    Text
 } from "react-native";
 
 import { useRoute } from "@react-navigation/native";
@@ -31,7 +32,6 @@ import {
     Button,
     WriteBar,
     Placeholder,
-    Text
 } from "../../components";
 import { CommentActions } from "../../modals";
 

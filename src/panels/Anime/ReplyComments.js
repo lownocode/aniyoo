@@ -9,7 +9,8 @@ import {
     TouchableNativeFeedback,
     StyleSheet,
     Dimensions,
-    FlatList
+    FlatList,
+    Text
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -29,7 +30,6 @@ import {
     Button,
     WriteBar,
     Placeholder,
-    Text
 } from "../../components";
 import { CommentActions } from "../../modals";
 

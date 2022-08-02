@@ -13,13 +13,13 @@ import {
     Animated,
     Dimensions,
     TouchableOpacity,
+    Text
 } from "react-native";
 import axios from "axios";
 
 import {
     Header,
     MyAnimeList,
-    Text
 } from "../components";
 
 import ThemeContext from "../config/ThemeContext";

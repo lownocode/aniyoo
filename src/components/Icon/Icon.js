@@ -114,6 +114,7 @@ import Globe from "./icons/Globe";
 import ClockHistory from "./icons/ClockHistory";
 import PlaySquare from "./icons/PlaySquare";
 import Sun from "./icons/Sun";
+import Warning from "./icons/Warning";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -232,6 +233,7 @@ export const Icon = (props) => {
         "clock-history": <ClockHistory {...props} />,
         "play-square": <PlaySquare {...props} />,
         "sun": <Sun {...props} />,
+        "warning": <Warning {...props} />,
     }[name];
 
     return (

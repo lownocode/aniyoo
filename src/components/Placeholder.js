@@ -1,7 +1,5 @@
 import React, { useContext } from "react";
-import { View, Dimensions, StyleSheet } from "react-native";
-
-import { Text } from ".";
+import { View, Dimensions, StyleSheet, Text } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 

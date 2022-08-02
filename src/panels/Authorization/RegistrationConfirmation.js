@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { View, TextInput, Keyboard, ToastAndroid } from "react-native";
+import { View, TextInput, Keyboard, ToastAndroid, Text } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -7,7 +7,6 @@ import {
     Header, 
     Icon,
     Button,
-    Text
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";

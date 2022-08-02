@@ -1,7 +1,5 @@
 import React, { useContext } from "react";
-import { View, TouchableNativeFeedback, StyleSheet } from "react-native";
-
-import { Text } from ".";
+import { View, TouchableNativeFeedback, StyleSheet, Text } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
 

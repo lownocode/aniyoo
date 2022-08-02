@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import axios from "axios";
 
 import {
@@ -7,7 +7,6 @@ import {
     Cell,
     Input,
     Icon,
-    Text
 } from "../components";
 import { storage, EventEmit } from "../functions";
 import ThemeContext from "../config/ThemeContext";

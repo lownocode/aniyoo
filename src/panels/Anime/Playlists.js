@@ -9,7 +9,8 @@ import {
     TouchableNativeFeedback,
     Dimensions,
     Linking,
-    RefreshControl
+    RefreshControl,
+    Text
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -23,7 +24,6 @@ import {
     ContentHeader, 
     Icon, 
     Placeholder,
-    Text 
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";

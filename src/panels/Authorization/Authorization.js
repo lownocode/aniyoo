@@ -4,7 +4,8 @@ import {
     ToastAndroid, 
     TextInput, 
     StatusBar, 
-    TouchableNativeFeedback 
+    TouchableNativeFeedback,
+    Text
 } from "react-native";
 import axios from "axios";
 
@@ -12,7 +13,6 @@ import {
     Button,
     Icon,
     PressIcon,
-    Text
 } from "../../components";
 import {
     storage,

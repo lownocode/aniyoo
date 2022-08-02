@@ -1,9 +1,8 @@
 import React, { useContext, useState } from "react";
-import { View, TouchableWithoutFeedback, ToastAndroid, ActivityIndicator } from "react-native";
+import { View, TouchableWithoutFeedback, ToastAndroid, ActivityIndicator, Text } from "react-native";
 import axios from "axios";
 
 import {
-    Text,
     Icon,
 } from "../components";
 import { storage } from "../functions";

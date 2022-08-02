@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { View, FlatList, ActivityIndicator, Dimensions, StyleSheet } from "react-native";
+import { View, FlatList, ActivityIndicator, Dimensions, StyleSheet, Text } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 
-import { Cell, Icon, Header, Text } from "../../components";
+import { Cell, Icon, Header } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";
 import { formatViews, storage } from "../../functions";

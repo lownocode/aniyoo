@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Vibration, TextInput, TouchableWithoutFeedback, ToastAndroid } from "react-native";
+import { View, Vibration, TextInput, TouchableWithoutFeedback, ToastAndroid, Text } from "react-native";
 import axios from "axios";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import { useRoute } from "@react-navigation/native";
@@ -8,7 +8,6 @@ import {
     Header,
     Button,
     Icon,
-    Text
 } from "../../components";
 
 import ThemeContext from "../../config/ThemeContext";

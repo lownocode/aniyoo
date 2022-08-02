@@ -8,7 +8,8 @@ import {
     StyleSheet, 
     Dimensions, 
     ToastAndroid,
-    Image
+    Image,
+    Text
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -33,7 +34,6 @@ import {
     Icon,
     Placeholder,
     PressIcon,
-    Text
 } from "../../components";
 import {
     SocialNetworks
