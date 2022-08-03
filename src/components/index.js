@@ -12,8 +12,11 @@ export * from "./WriteBar";
 export * from "./Progress";
 export * from "./DonutChart";
 export * from "./Icon/Icon";
+export * from "./FormattedText";
+export * from "./Accordion";
+
 export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";
-export * from "./FormattedText";
+
 export * from "./Lists/CommentsList";
-export * from "./Accordion";
+export * from "./Lists/AllComments";

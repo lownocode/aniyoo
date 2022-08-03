@@ -44,12 +44,7 @@ export const Avatar = (props) => {
     }, []);
 
     return (
-        <View
-        style={{
-            // justifyContent: "center",
-            // alignItems: "center",
-        }}
-        >
+        <View>
             <View
             style={{
                 width: size,
@@ -130,35 +125,37 @@ export const Avatar = (props) => {
                 }
             </View>
 
-            {online && (
-                <View
-                style={{
-                    width: 12,
-                    height: 12,
-                    backgroundColor: theme.background_content,
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    borderRadius: 100,
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-                >
-                <Animated.View
-                style={{
-                    width: 10,
-                    height: 10,
-                    backgroundColor: theme.accent,
-                    borderRadius: 100,
-                    transform: [
-                        {
-                        scale: onlineScaleValue,
-                        },
-                    ],
-                }}
-                />
-                </View>
-            )}
+            {
+                online && (
+                    <View
+                    style={{
+                        width: 12,
+                        height: 12,
+                        backgroundColor: theme.background_content,
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        borderRadius: 100,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    >
+                    <Animated.View
+                    style={{
+                        width: 10,
+                        height: 10,
+                        backgroundColor: theme.accent,
+                        borderRadius: 100,
+                        transform: [
+                            {
+                            scale: onlineScaleValue,
+                            },
+                        ],
+                    }}
+                    />
+                    </View>
+                )
+            }
         </View>
     );
 };

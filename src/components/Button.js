@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import { 
     View, 
     TouchableNativeFeedback, 
     StyleSheet, 
     ActivityIndicator,
-    Text
+    Text,
+    Animated
 } from "react-native";
 
 import ThemeContext from "../config/ThemeContext";
@@ -30,6 +31,8 @@ export const Button = (props) => {
         noAutoPressBackground = false,
         align = "center"
     } = props;
+
+    const buttonScale = useRef(new Animated.Value(1)).current;
 
     const buttonTypesNoBackground = ['outline'];
 
@@ -96,10 +99,20 @@ export const Button = (props) => {
         return theme.button[type][`press_background`];
     };
 
+    const scaleAnimation = (scale) => {
+        Animated.timing(buttonScale, {
+            toValue: scale,
+            duration: 100,
+            useNativeDriver: false
+        }).start();
+    };
+
     return (
-        <View style={localStyles.container}>
+        <Animated.View style={[localStyles.container, { transform: [{ scale: buttonScale }]}]}>
             <TouchableNativeFeedback 
-            onPress={onPress} 
+            onPress={onPress}
+            onPressIn={() => scaleAnimation(0.95)}
+            onPressOut={() => scaleAnimation(1)} 
             onLongPress={onLongPress}
             background={TouchableNativeFeedback.Ripple(background(), false)}
             disabled={
@@ -138,6 +151,6 @@ export const Button = (props) => {
                     }
                 </View> 
             </TouchableNativeFeedback>
-        </View>
+        </Animated.View>
     )
 };

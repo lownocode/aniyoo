@@ -49,8 +49,8 @@ export const Home = (props) => {
             }
         })
         .then(({ data }) =>  {
-            storage.setItem("cachedPopularComments", data[0]);
-            setPopularComments(data[0]);
+            storage.setItem("cachedPopularComments", data.getDayComments);
+            setPopularComments(data.getDayComments);
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);

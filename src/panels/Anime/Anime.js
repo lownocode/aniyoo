@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { 
     View, 
     ScrollView, 
@@ -9,10 +9,10 @@ import {
     StyleSheet,
     ToastAndroid,
     RefreshControl,
-    Linking,
     ActivityIndicator,
     TouchableWithoutFeedback,
-    Text
+    Text,
+    Animated
 } from "react-native";
 import { PieChart } from "react-native-svg-charts";
 import { useRoute } from "@react-navigation/native";
@@ -36,7 +36,6 @@ import {
     storage, 
     getAnimeAccentColor,
     invertColor,
-    lightenDarkenColor,
 } from "../../functions";
 
 import { 
@@ -50,9 +49,12 @@ import {
     Progress,
     DonutChart,
     Rating,
+    AllCommentsList,
 } from "../../components";
 import { AnimeSetList, CommentActions } from "../../modals";
 import { FLAGS, DOMAIN } from "../../../variables";
+
+const { height: WINDOW_HEIGHT } = Dimensions.get("window");
 
 export const Anime = (props) => {
     const theme = useContext(ThemeContext);
@@ -68,6 +70,13 @@ export const Anime = (props) => {
     const route = useRoute();
     const scrollViewRef = useRef();
     const modalRef = useRef();
+
+    const topButtonsPosition = useRef(new Animated.Value(20)).current;
+    const scrollYBefore = useRef(new Animated.Value(0)).current;
+    const statusBarBackgroundPosition = useRef(new Animated.Value(-StatusBar.currentHeight)).current;
+    const playButtonPosition = useRef(new Animated.Value(-45)).current;
+    const scalePlayButton = useRef(new Animated.Value(1)).current;
+    const scaleBackButton = useRef(new Animated.Value(1)).current;
 
     const [ refreshing, setRefreshing ] = useState(true);
     const [ animeData, setAnimeData ] = useState(route.params?.animeData);
@@ -123,8 +132,6 @@ export const Anime = (props) => {
             getExtendeds(data.id);
 
             setRefreshing(false);
-            
-            return data;
         })
         .catch(({ response: { data } }) => {
             console.log("err\n", data);
@@ -132,7 +139,6 @@ export const Anime = (props) => {
     };
 
     const getExtendeds = async (id) => {
-        console.log(lightenDarkenColor(accent, -80))
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.get", {
@@ -162,6 +168,52 @@ export const Anime = (props) => {
         .catch(({ response: { data } }) => {
             console.log("err\n", data);
         });
+    };
+
+    const scrollHandler = (y) => {
+        if(y > scrollYBefore.__getValue()) {//scroll to bottom
+            Animated.timing(topButtonsPosition, {
+                toValue: -100,
+                duration: 50,
+                useNativeDriver: false
+            }).start();
+
+            if(y > WINDOW_HEIGHT / 2) {
+                Animated.timing(statusBarBackgroundPosition, {
+                    toValue: 0,
+                    duration: 20,
+                    useNativeDriver: false
+                }).start();
+
+                Animated.timing(playButtonPosition, {
+                    toValue: 20,
+                    duration: 50,
+                    useNativeDriver: false
+                }).start();
+            }
+        } else {
+            Animated.timing(topButtonsPosition, {
+                toValue: 20,
+                duration: 50,
+                useNativeDriver: false
+            }).start();
+
+            if(y < WINDOW_HEIGHT / 2) {
+                Animated.timing(statusBarBackgroundPosition, {
+                    toValue: -StatusBar.currentHeight,
+                    duration: 20,
+                    useNativeDriver: false
+                }).start();
+
+                Animated.timing(playButtonPosition, {
+                    toValue: -45,
+                    duration: 50,
+                    useNativeDriver: false
+                }).start();
+            }
+        }
+
+        scrollYBefore.setValue(y);
     };
 
     const backToWatch = async (nextEpisode = false) => {
@@ -307,15 +359,6 @@ export const Anime = (props) => {
     
         return willFocusSubscription;
     }, []);
-
-    const openUrl = (link) => {
-        const validLink = Linking.canOpenURL(link);
-        if(!validLink) {
-            return ToastAndroid.show("Невозможно открыть эту ссылку", ToastAndroid.LONG);
-        }
-
-        return Linking.openURL(link);
-    };
 
     const seriesCount = (total, aired, status) => {
         if(typeof total !== "number" || Number.isNaN(total) || typeof aired !== "number" || Number.isNaN(aired)) {
@@ -759,32 +802,36 @@ export const Anime = (props) => {
                                 </Text>
                             </View>
 
-                            <View>
-                                <Text
-                                style={{
-                                    color: theme.text_color,
-                                    fontSize: (10),
-                                    borderColor: theme.divider_color,
-                                    backgroundColor: theme.divider_color + "98",
-                                    borderWidth: 1,
-                                    paddingHorizontal: 5,
-                                    paddingVertical: 1,
-                                    borderRadius: 5,
-                                    marginRight: 10,
-                                    marginTop: 5,
-                                }}
-                                >
-                                    {
-                                        {
-                                            "tv": "Сериал",
-                                            "ona": "ONA",
-                                            "ova": "OVA",
-                                            "special": "Спешл",
-                                            "movie": "Фильм"
-                                        }[item.kind]
-                                    }
-                                </Text>
-                            </View>
+                            {
+                                item.kind && (
+                                    <View>
+                                        <Text
+                                        style={{
+                                            color: theme.text_color,
+                                            fontSize: (10),
+                                            borderColor: theme.divider_color,
+                                            backgroundColor: theme.divider_color + "98",
+                                            borderWidth: 1,
+                                            paddingHorizontal: 5,
+                                            paddingVertical: 1,
+                                            borderRadius: 5,
+                                            marginRight: 10,
+                                            marginTop: 5,
+                                        }}
+                                        >
+                                            {
+                                                {
+                                                    "tv": "Сериал",
+                                                    "ona": "ONA",
+                                                    "ova": "OVA",
+                                                    "special": "Спешл",
+                                                    "movie": "Фильм"
+                                                }[item.kind]
+                                            }
+                                        </Text>
+                                    </View>
+                                )
+                            }
                         </View>
 
                         <Text
@@ -820,284 +867,6 @@ export const Anime = (props) => {
 
         return durationFormatter(duration * episodesTotal);
     };
-
-    const renderComments = (comment) => {
-        const markComment = async (commentId, mark) => {
-            const sign = await storage.getItem("AUTHORIZATION_SIGN");
-    
-            axios.post("/comments.mark", {
-                commentId: commentId,
-                mark: mark
-            }, {
-                headers: {
-                    "Authorization": sign
-                }
-            })
-            .then(({ data }) => {
-                const newCommentsData = comments?.items?.map(comment => {
-                    if(comment.id === commentId) {
-                        return { 
-                            ...comment, 
-                            mark: data.mark,
-                            rating: data.rating
-                        }
-                    }
-
-                    return comment;
-                });
-
-                setAnimeData({
-                    ...animeData,
-                    comments: newCommentsData
-                });
-                
-            })
-            .catch(({ response: { data } }) => {
-                ToastAndroid.show(data.message, ToastAndroid.CENTER);
-            });
-        };
-
-        return (
-            <Cell
-            key={"comment-" + comment.id}
-            title={comment.user.nickname}
-            centered={false}
-            centeredAfter={false}
-            onPress={() => {
-                setModalContent(
-                    <CommentActions 
-                    onClose={() => modalRef.current?.close()} 
-                    comment={comment} 
-                    successEditing={() => {
-                        getAnimeData();
-                    }}
-                    />
-                );
-                modalRef.current?.open();
-            }}
-            subtitle={
-                <View>
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center"
-                    }}
-                    >
-                        <Text
-                        style={{
-                            color: theme.cell.subtitle_color,
-                            marginRight: 5
-                        }}
-                        >
-                            {dayjs().to(comment.createdAt)}
-                        </Text>
-
-                        {
-                            comment.editedAt && (
-                                <Icon
-                                name="pencil-write"
-                                size={10}
-                                color={theme.cell.subtitle_color}
-                                />
-                            )
-                        }
-                    </View>
-
-                    {
-                            comment.text ? (
-                                <Text
-                                selectable
-                                selectionColor={accent}
-                                style={{
-                                    marginTop: 3,
-                                    color: theme.text_color,
-                                }}
-                                >
-                                    {
-                                        comment.text
-                                    }
-                                </Text>
-                            ) : (
-                                <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center"
-                                }}
-                                >
-                                    <Icon
-                                    name="trash-outline"
-                                    color={theme.text_secondary_color}
-                                    />
-
-                                    <Text
-                                    style={{
-                                        marginTop: 3,
-                                        color: theme.text_secondary_color,
-                                        marginLeft: 5,
-                                        fontStyle: "italic"
-                                    }}
-                                    >
-                                        Комментарий удалён.
-                                    </Text>
-                                </View>
-                            )
-                    }
-                </View>
-            }
-            additionalContentBottom={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginRight: 15,
-                }}
-                >
-                    <View
-                    style={{
-                        marginTop: -10
-                    }}
-                    >
-                        <View style={{ alignItems: "flex-start" }}>
-                            <Button
-                            title="Ответить"
-                            upperTitle={false}
-                            type="overlay"
-                            containerStyle={{
-                                marginTop: 0,
-                                marginBottom: 3
-                            }}
-                            textStyle={{ fontSize: 12 }}
-                            onPress={() => navigate("anime.reply_comments", {
-                                commentId: comment.id,
-                                animeId: animeData?.id,
-                                reply: {
-                                    id: comment.id,
-                                    user: comment.user
-                                }
-                            })}
-                            size="s"
-                            textColor={theme.text_secondary_color}
-                            />
-                        </View>
-                        
-                        <View>
-                            {
-                                comment.replies >= 1 && (
-                                    <Button
-                                    title={`Смотреть ${comment.replies} ${declOfNum(comment.replies, ["ответ", "ответа", "ответов"])}`}
-                                    upperTitle={false}
-                                    type="overlay"
-                                    textColor={theme.text_secondary_color}
-                                    containerStyle={{
-                                        marginTop: 0
-                                    }}
-                                    onPress={() => navigate("anime.reply_comments", {
-                                        commentId: comment.id,
-                                        animeId: animeData?.id
-                                    })}
-                                    size={30}
-                                    textStyle={{
-                                        fontSize: (11.5)
-                                    }}
-                                    before={
-                                        <Icon
-                                        name="reply"
-                                        color={theme.text_secondary_color}
-                                        size={13}
-                                        />
-                                    }
-                                    />
-                                )
-                            }
-                        </View>
-                    </View>
-                    
-                    <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginTop: -10
-                    }}
-                    >
-                        <View
-                        style={{
-                            borderRadius: 100,
-                            overflow: "hidden",
-                            borderColor: theme.divider_color,
-                            borderWidth: comment.mark === "down" ? 0 : 1,
-                            backgroundColor: comment.mark === "down" ? "#f54242" : "transparent"
-                        }}
-                        >
-                            <TouchableNativeFeedback
-                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                            onPress={() => markComment(comment.id, "down")}
-                            >
-                                <View
-                                style={{
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 15,
-                                }}
-                                >
-                                    <Icon
-                                    name="chevron-down"
-                                    color={comment.mark === "down" ? "#fff" : theme.icon_color}
-                                    size={15}
-                                    />
-                                </View>
-                            </TouchableNativeFeedback>
-                        </View>
-
-                        <Text
-                        style={{
-                            marginHorizontal: 10,
-                            fontWeight: "500",
-                            color: comment.mark === "up" ? theme.accent : comment.mark === "down" ? "#f54242" : theme.text_secondary_color
-                        }}
-                        >
-                            {comment.rating}
-                        </Text>
-
-                        <View
-                        style={{
-                            borderRadius: 100,
-                            overflow: "hidden",
-                            borderColor: theme.divider_color,
-                            borderWidth: comment.mark === "up" ? 0 : 1,
-                            backgroundColor: comment.mark === "up" ? theme.accent : "transparent"
-                        }}
-                        >
-                            <TouchableNativeFeedback
-                            background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                            onPress={() => markComment(comment.id, "up")}
-                            >
-                                <View
-                                style={{
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 15,
-                                }}
-                                >
-                                    <Icon
-                                    name="chevron-up"
-                                    color={comment.mark === "up" ? "#fff" : theme.icon_color}
-                                    size={15}
-                                    />
-                                </View>
-                            </TouchableNativeFeedback>
-                        </View>
-                    </View>
-                </View>
-            }
-            before={
-                <Avatar 
-                url={comment.user.photo}
-                online={(+new Date() - +new Date(comment?.user?.online?.time)) < 1 * 60 * 1000}
-                />
-            }
-            />
-        )
-    }; 
 
     const lists = [
         {
@@ -1277,6 +1046,14 @@ export const Anime = (props) => {
         setPopup(null);
     };
 
+    const scaleAnimation = (scale, variable) => {
+        Animated.timing(variable, {
+            toValue: scale,
+            duration: 100,
+            useNativeDriver: false
+        }).start();
+    };
+
     const styles = StyleSheet.create({
         modalContainer: {
             left: 10,
@@ -1293,30 +1070,47 @@ export const Anime = (props) => {
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <View
+            <Animated.View
+            style={{
+                backgroundColor: theme.background_content,
+                height: StatusBar.currentHeight,
+                position: "absolute",
+                top: statusBarBackgroundPosition,
+                left: 0,
+                right: 0,
+                zIndex: 1000
+            }}
+            />
+
+            <Animated.View
             style={{
                 position: "absolute",
                 top: StatusBar.currentHeight + 20,
-                left: 20,
+                left: topButtonsPosition,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: 45,
-                height: 45,
-                justifyContent: "center",
-                alignItems: "center",
                 zIndex: 100,
                 borderWidth: 0.5,
-                borderColor: theme.divider_color
+                borderColor: theme.divider_color,
+                transform: [
+                    {
+                        scale: scaleBackButton
+                    }
+                ]
             }}
             >
                 <TouchableNativeFeedback
                 background={TouchableNativeFeedback.Ripple(theme.cell.press_background, true)}
                 onPress={() => goBack()}
+                onPressIn={() => scaleAnimation(0.95, scaleBackButton)}
+                onPressOut={() => scaleAnimation(1, scaleBackButton)}
                 >
                     <View
                     style={{
-                        
-                        padding: 9
+                        width: 45,
+                        height: 45,
+                        justifyContent: "center",
+                        alignItems: "center",
                     }}
                     >
                         <Icon
@@ -1325,19 +1119,15 @@ export const Anime = (props) => {
                         />
                     </View>
                 </TouchableNativeFeedback>
-            </View>
+            </Animated.View>
 
-            <View
+            <Animated.View
             style={{
                 position: "absolute",
                 top: StatusBar.currentHeight + 20,
-                right: 20,
+                right: topButtonsPosition,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
-                width: 45,
-                height: 45,
-                justifyContent: "center",
-                alignItems: "center",
                 zIndex: 1000,
                 borderWidth: 0.5,
                 borderColor: theme.divider_color,
@@ -1359,7 +1149,10 @@ export const Anime = (props) => {
                     >
                         <View
                         style={{
-                            padding: 9
+                            width: 45,
+                            height: 45,
+                            justifyContent: "center",
+                            alignItems: "center",
                         }}
                         >
                             <Icon
@@ -1424,7 +1217,69 @@ export const Anime = (props) => {
                     }}
                     />
                 </Popup>
-            </View>
+            </Animated.View>
+
+            <Animated.View
+            style={{
+                borderRadius: 100,
+                overflow: "hidden",
+                position: "absolute",
+                bottom: playButtonPosition,
+                right: 20,
+                zIndex: 1000,
+                backgroundColor: accent,
+                transform: [
+                    {
+                        scale: scalePlayButton
+                    }
+                ]
+            }}
+            >
+                <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple(invertColor(accent, true) + "50", false)}
+                onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
+                onPressIn={() => scaleAnimation(0.95, scalePlayButton)}
+                onPressOut={() => scaleAnimation(1, scalePlayButton)}
+                >
+                    <View
+                    style={{
+                        paddingHorizontal: 25,
+                        height: 45,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexDirection: "row"
+                    }}
+                    >
+                        <Icon
+                        name={
+                            {
+                                "NO_WATCHED": "play",
+                                "WATCHED_BEFORE": "pause"
+                            }[animeStatus.status]
+                        }
+                        style={{
+                            marginRight: 10
+                        }}
+                        color={invertColor(accent, true)}
+                        />
+
+                        <Text
+                        style={{
+                            color: invertColor(accent, true),
+                            fontWeight: "700",
+                            fontSize: 17
+                        }}
+                        >
+                            {
+                                {
+                                    "NO_WATCHED": "Начать",
+                                    "WATCHED_BEFORE": "Продолжить"
+                                }[animeStatus.status]
+                            }
+                        </Text>
+                    </View>
+                </TouchableNativeFeedback>
+            </Animated.View>
 
             <Modalize
             ref={modalRef}
@@ -1448,6 +1303,7 @@ export const Anime = (props) => {
                     onRefresh={onRefresh}
                     />
                 }
+                onScroll={({ nativeEvent: { contentOffset: { y } } }) => scrollHandler(y)}
                 >
                     <View
                     style={{
@@ -1561,64 +1417,31 @@ export const Anime = (props) => {
                             </Text>
                         </View>
 
-                        <View
-                        style={{
-                            marginHorizontal: 10,
-                            borderRadius: 12,
-                            overflow: "hidden",
-                            backgroundColor: accent
-                        }}
-                        >
-                            <TouchableNativeFeedback
-                            disabled={!animeData?.id || animeData?.status === "anons"}
-                            onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
-                            >
-                                <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: 47
-                                }}
-                                >
-                                    {
-                                        {
-                                            "NO_WATCHED": (
-                                                <Icon
-                                                name="play"
-                                                size={12}
-                                                color={invertColor(accent, true)}
-                                                />
-                                            ),
-                                            "WATCHED_BEFORE": (
-                                                <Icon
-                                                name="pause"
-                                                size={12}
-                                                color={invertColor(accent, true)}
-                                                />
-                                            )
-                                        }[animeStatus.status]
-                                    }
-
-                                    <Text
-                                    numberOfLines={1}
-                                    style={{
-                                        marginLeft: 8,
-                                        fontSize: 18,
-                                        fontWeight: "500",
-                                        color: invertColor(accent, true)
-                                    }}
-                                    >
-                                        {
-                                            {
-                                                "NO_WATCHED": "Начать просмотр",
-                                                "WATCHED_BEFORE": "Продолжить просмотр"
-                                            }[animeStatus.status]
-                                        }
-                                    </Text>
-                                </View>
-                            </TouchableNativeFeedback>
-                        </View>
+                        <Button
+                        title={
+                            {
+                                "NO_WATCHED": "Начать просмотр",
+                                "WATCHED_BEFORE": "Продолжить просмотр"
+                            }[animeStatus.status]
+                        }
+                        size={47}
+                        backgroundColor={accent}
+                        textColor={invertColor(accent, true)}
+                        onPress={() => navigate("anime.select_translation", { animeId: animeData?.id, title: animeData?.title })}
+                        before={
+                            <Icon
+                            name={
+                                {
+                                    "NO_WATCHED": "play",
+                                    "WATCHED_BEFORE": "pause"
+                                }[animeStatus.status]
+                            }
+                            size={12}
+                            color={invertColor(accent, true)}
+                            />
+                        }
+                        containerStyle={{ marginBottom: 0 }}
+                        />
 
                         <View
                         style={{
@@ -2857,13 +2680,22 @@ export const Anime = (props) => {
                     {
                         comments?.items?.length < 1 ? (
                             <Placeholder
-                            title="Здесь пусто"
+                            title="Здесь ничего нет"
                             subtitle="Ещё никто не комментировал это аниме, будьте первым!"
                             />
-                        ) : comments?.items?.map(renderComments)
+                        ) : (
+                            <View>
+                                <AllCommentsList
+                                comments={{ list: comments?.items }}
+                                setModalContent={setModalContent}
+                                modalRef={modalRef}
+                                navigate={navigate}
+                                />
+                            </View>
+                        )
                     }
 
-                    <View style={{ marginBottom: 60 }}/>
+                    <View style={{ marginBottom: 100 }}/>
                 </ScrollView>
             </View>
         </View>

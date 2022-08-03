@@ -251,7 +251,7 @@ export const Profile = props => {
                 style={{
                     color: theme.text_color,
                     fontSize: 19,
-                    fontWeight: "600"
+                    fontWeight: "600",
                 }}
                 >
                     {userData?.nickname || ""}
@@ -716,7 +716,7 @@ export const Profile = props => {
                         paddingHorizontal: 5,
                         width: 70,
                         justifyContent: "center",
-                        alignItems: "center"
+                        alignItems: "center",
                     }}
                     >
                         <Avatar
@@ -744,7 +744,7 @@ export const Profile = props => {
     const friendsRender = () => (
         <View
         style={{
-            marginVertical: 20
+            marginVertical: 20,
         }}
         >
             <Cell
