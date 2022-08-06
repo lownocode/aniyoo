@@ -74,8 +74,8 @@ export const Profile = props => {
         const user = await storage.getItem("cachedUserData");
         const browsingHistory = await storage.getItem("cachedBrowsingHistory");
 
-        setUserData(user || {});
-        setBrowsingHistory(browsingHistory || []);
+        user && setUserData(user);
+        browsingHistory && setBrowsingHistory(browsingHistory);
     };
 
     useEffect(() => {

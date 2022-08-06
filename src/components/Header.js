@@ -82,12 +82,12 @@ export const Header = (props) => {
         return (
             <Fragment>
                 <View
-                    style={[
-                        {
-                            backgroundColor: backgroundColor, 
-                        },
-                        styles.header,
-                    ]}
+                style={[
+                    {
+                        backgroundColor: backgroundColor, 
+                    },
+                    styles.header,
+                ]}
                 >
                     <View style={styles.leftHeader}>
                         {backButton && 

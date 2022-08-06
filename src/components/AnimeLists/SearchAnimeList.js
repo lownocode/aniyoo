@@ -280,6 +280,7 @@ export const SearchAnimeList = (props) => {
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
+        // removeClippedSubviews
         ListHeaderComponent={
             <View
             style={{

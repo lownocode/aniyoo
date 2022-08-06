@@ -14,6 +14,7 @@ export * from "./DonutChart";
 export * from "./Icon/Icon";
 export * from "./FormattedText";
 export * from "./Accordion";
+export * from "./StatisticsLists";
 
 export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";

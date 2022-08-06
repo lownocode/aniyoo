@@ -259,7 +259,6 @@ export const Lists = props => {
                 });
             }}
             renderItem={({ item }) => {
-                console.log(JSON.stringify(item, null, "\t"))
                 return (
                     <View 
                     style={{

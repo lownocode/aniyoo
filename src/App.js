@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar, Linking } from "react-native";
+import { Linking, StatusBar } from "react-native";
 import Orientation from "react-native-orientation";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import SplashScreen from "react-native-splash-screen";
@@ -47,9 +46,8 @@ import {
     GeneralUserBrowsingHistory,
     GeneralUserComments
 } from "./panels";
-import { Tabs } from "./navigation/Tabs";
-
-import { sleep, storage } from "./functions";
+import Tabs from "./navigation/Tabs";
+import { storage } from "./functions";
 import axios from "axios";
 import { EventRegister } from "react-native-event-listeners";
 
@@ -57,13 +55,11 @@ import theme from "./config/theme";
 import ThemeContext from "./config/ThemeContext";
 import UserContext from "./config/UserContext";
 
-const Stack = createNativeStackNavigator();
 Orientation.lockToPortrait();
 
 export default App = () => {
     const [ darkThemeMode, setDarkThemeMode ] = useState(false);
     const [ UserData, setUserData ] = useState({});
-    const [ isError, setIsError ] = useState(false);
 
     const navigation = useNavigationContainerRef();
 
@@ -191,171 +187,7 @@ export default App = () => {
                 onReady={() => readyHandler()}
                 ref={navigation}
                 >
-                    <StatusBar
-                    backgroundColor="transparent"
-                    translucent
-                    />
-
-                    <Stack.Navigator 
-                    screenOptions={{ headerShown: false }}
-                    >
-                      <Stack.Screen 
-                      name="tabs" 
-                      component={Tabs}
-                      initialParams={{
-                        userData: UserData
-                      }}
-                      />
-
-                      <Stack.Screen 
-                      name="settings" 
-                      options={{ animation: "none", }}
-                      component={Settings}
-                      />
-
-                      <Stack.Screen 
-                      name="authorization"
-                      component={Authorization}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_profile" 
-                      options={{ animation: "none" }}
-                      component={EditProfile}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_profile.profile" 
-                      options={{ animation: "none" }}
-                      component={EditProfileProfile}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_profile.privacy" 
-                      options={{ animation: "none" }}
-                      component={EditProfilePrivacy}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_profile.security" 
-                      options={{ animation: "none" }}
-                      component={EditProfileSecurity}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_profile.change_nickname" 
-                      options={{ animation: "none" }}
-                      component={EditProfileChangeNickname}
-                      />
-
-                      <Stack.Screen 
-                      name="settings.application" 
-                      options={{ animation: "none" }}
-                      component={SettingsApplication}
-                      />
-
-                      <Stack.Screen 
-                      name="settings.another" 
-                      options={{ animation: "none" }}
-                      component={SettingsAnother}
-                      />
-
-                      <Stack.Screen 
-                      name="edit_social_networks" 
-                      options={{ animation: "none" }}
-                      component={EditSocialNetworks}
-                      />
-
-                      <Stack.Screen 
-                      name="anime" 
-                      options={{ animation: "none" }}
-                      component={Anime}
-                      />
-
-                      <Stack.Screen 
-                      name="linked_anime" 
-                      options={{ animation: "none" }}
-                      component={LinkedAnime}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.reply_comments" 
-                      options={{ animation: "none" }}
-                      component={AnimeReplyComments}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.all_comments" 
-                      options={{ animation: "none" }}
-                      component={AnimeAllComments}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.select_translation" 
-                      options={{ animation: "none" }}
-                      component={AnimeSelectTranslation}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.select_episode" 
-                      options={{ animation: "none" }}
-                      component={AnimeSelectEpisode}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.videoplayer" 
-                      options={{ animation: "none" }}
-                      component={AnimeVideoPlayer}
-                      />
-
-                      <Stack.Screen 
-                      name="user_profile" 
-                      options={{ animation: "none" }}
-                      component={AnotherUserProfile}
-                      />
-
-                      <Stack.Screen 
-                      name="search_anime" 
-                      options={{ animation: "none" }}
-                      component={SearchAnime}
-                      />
-
-                      <Stack.Screen 
-                      name="search_users" 
-                      options={{ animation: "none" }}
-                      component={SearchUsers}
-                      />
-
-                      <Stack.Screen 
-                      name="authorization.registration_confirmation" 
-                      options={{ animation: "slide_from_right" }}
-                      component={AuthorizationRegistrationConfirmation}
-                      />
-
-                      <Stack.Screen 
-                      name="user.friends" 
-                      options={{ animation: "none" }}
-                      component={UserFriends}
-                      />
-
-                      <Stack.Screen 
-                      name="anime.playlists" 
-                      options={{ animation: "none" }}
-                      component={AnimePlaylists}
-                      />
-
-                      <Stack.Screen 
-                      name="general_user.browsing_history" 
-                      options={{ animation: "none" }}
-                      component={GeneralUserBrowsingHistory}
-                      />
-
-                      <Stack.Screen 
-                      name="general_user.comments" 
-                      options={{ animation: "none" }}
-                      component={GeneralUserComments}
-                      />
-                    </Stack.Navigator>
+                    <Tabs />
                 </NavigationContainer>
             </UserContext.Provider>
         </ThemeContext.Provider>
