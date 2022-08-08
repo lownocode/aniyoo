@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { Linking } from "react-native";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
-import { Linking, StatusBar } from "react-native";
 import Orientation from "react-native-orientation";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import SplashScreen from "react-native-splash-screen";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import axios from "axios";
+import { EventRegister } from "react-native-event-listeners";
 
 // import FBMessaging from "@react-native-firebase/messaging";
 // import Firebase from "@react-native-firebase/app";
@@ -20,36 +23,11 @@ import SplashScreen from "react-native-splash-screen";
 // }
 
 import {
-    Settings,
     Authorization,
     AuthorizationRegistrationConfirmation,
-    EditProfile,
-    EditProfileProfile,
-    EditProfilePrivacy,
-    EditProfileSecurity,
-    EditProfileChangeNickname,
-    SettingsAnother,
-    SettingsApplication,
-    EditSocialNetworks,
-    Anime,
-    LinkedAnime,
-    AnimeReplyComments,
-    AnimeAllComments,
-    AnimeSelectTranslation,
-    AnimeSelectEpisode,
-    AnimeVideoPlayer,
-    AnotherUserProfile,
-    SearchAnime,
-    SearchUsers,
-    UserFriends,
-    AnimePlaylists,
-    GeneralUserBrowsingHistory,
-    GeneralUserComments
 } from "./panels";
 import Tabs from "./navigation/Tabs";
-import { storage } from "./functions";
-import axios from "axios";
-import { EventRegister } from "react-native-event-listeners";
+import { sleep, storage } from "./functions";
 
 import theme from "./config/theme";
 import ThemeContext from "./config/ThemeContext";
@@ -57,9 +35,12 @@ import UserContext from "./config/UserContext";
 
 Orientation.lockToPortrait();
 
+const AuthorizationStack = createNativeStackNavigator();
+
 export default App = () => {
     const [ darkThemeMode, setDarkThemeMode ] = useState(false);
     const [ UserData, setUserData ] = useState({});
+    const [ authorized, setAuthorized ] = useState(false);
 
     const navigation = useNavigationContainerRef();
 
@@ -80,7 +61,7 @@ export default App = () => {
         }, (error) => {
             if(error.response.data.code === "INVALID_SIGN") {
                 storage.setItem("AITHORIZATION_SIGN", null);
-                navigation.navigate("authorization");
+                return setAuthorized(false);
             }
         
             return Promise.reject(error);
@@ -89,17 +70,23 @@ export default App = () => {
 
     useEffect(() => {
         const eventListener = EventRegister.addEventListener("app", (data) => {
-            if(data.type === "changeTheme") {
-                storage.setItem("DARK_THEME_MODE", data.value);
+            switch(data.type) {
+                case "changeTheme": {
+                    storage.setItem("DARK_THEME_MODE", data.value);
 
-                changeNavigationBarColor(data.value ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !data.value, true);
-                setDarkThemeMode(data.value);
-                return;
-            }
-
-            if(data.type === "changeUser") {
-                setUserData(data.user);
-                return storage.setItem("cachedUserData", data.user);
+                    changeNavigationBarColor(data.value ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !data.value, true);
+                    return setDarkThemeMode(data.value);
+                }
+                case "changeUser": {
+                    setUserData(data.user);
+                    return storage.setItem("cachedUserData", data.user);
+                }
+                case "changeAuthorized": {
+                    setUserData(data.user);
+                    return setAuthorized(data.value);
+                }
+                default:
+                    return;
             }
         });
 
@@ -109,10 +96,6 @@ export default App = () => {
     }, []);
 
     const handleDeeplink = async () => {
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-
-        if(!sign) return;
-
         const getUrlVars = (url) => {
             if(!url) return;
 
@@ -168,26 +151,51 @@ export default App = () => {
         getTheme();
     }, []);
 
-    const readyHandler = async () => {
+    const getIsSignedIn = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
-        handleDeeplink().finally(() => {
-            if(!sign) {
-                navigation.navigate("authorization");
-            }   
-            
-            SplashScreen.hide();
-        });
+        if(!sign) return;
+
+        return setAuthorized(true);
     };
+
+    const initialize = new Promise((resolve) => {
+        getTheme();
+        handleDeeplink();
+        getIsSignedIn();
+
+        return sleep(0.5).then(() => resolve());
+    });
 
     return (
         <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
             <UserContext.Provider value={UserData}>
                 <NavigationContainer 
-                onReady={() => readyHandler()}
+                onReady={() => initialize.finally(() => SplashScreen.hide())}
                 ref={navigation}
                 >
-                    <Tabs />
+                    {
+                        authorized ? (
+                            <Tabs />
+                        ) : (
+                            <AuthorizationStack.Navigator
+                            screenOptions={{
+                                headerShown: false,
+                                animation: "none"
+                            }}
+                            >
+                                <AuthorizationStack.Screen 
+                                name="authorization" 
+                                component={Authorization} 
+                                />
+
+                                <AuthorizationStack.Screen 
+                                name="authorization.registration_confirmation" 
+                                component={AuthorizationRegistrationConfirmation} 
+                                />
+                            </AuthorizationStack.Navigator>
+                        )
+                    }
                 </NavigationContainer>
             </UserContext.Provider>
         </ThemeContext.Provider>

@@ -115,6 +115,7 @@ import ClockHistory from "./icons/ClockHistory";
 import PlaySquare from "./icons/PlaySquare";
 import Sun from "./icons/Sun";
 import Warning from "./icons/Warning";
+import BackspaceOutline from "./icons/BackspaceOutline";
 
 export const Icon = (props) => {
     const { name } = props;
@@ -234,6 +235,7 @@ export const Icon = (props) => {
         "play-square": <PlaySquare {...props} />,
         "sun": <Sun {...props} />,
         "warning": <Warning {...props} />,
+        "backspace-outline": <BackspaceOutline {...props} />,
     }[name];
 
     return (

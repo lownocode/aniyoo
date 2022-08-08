@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState } from "react";
-import { View, TextInput, Keyboard, ToastAndroid, Text } from "react-native";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { View, TextInput, Keyboard, ToastAndroid, Text, Dimensions, TouchableNativeFeedback, Animated, Vibration } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -11,6 +11,63 @@ import {
 
 import ThemeContext from "../../config/ThemeContext";
 import { storage } from "../../functions";
+
+const keyboardKeys = [
+    {
+        key: 1,
+        letters: ""
+    },
+    {
+        key: 2,
+        letters: "ABC"
+    },
+    {
+        key: 3,
+        letters: "DEF"
+    },
+    {
+        key: 4,
+        letters: "GHI"
+    },
+    {
+        key: 5,
+        letters: "JKL"
+    },
+    {
+        key: 6,
+        letters: "MNO"
+    },
+    {
+        key: 7,
+        letters: "PQRS"
+    },
+    {
+        key: 8,
+        letters: "TUV"
+    },
+    {
+        key: 9,
+        letters: "WXYZ"
+    },
+    {
+        key: 0,
+        letters: "+"
+    },
+    {
+        key: "backspace",
+        letters: ""
+    },
+];
+
+const { width } = Dimensions.get("screen");
+
+Array.prototype.chunk = function (n) {
+    if(!this.length) {
+        return [];
+    }
+
+    return [this.slice(0, n)].concat(this.slice(n).chunk(n));
+};
 
 export const AuthorizationRegistrationConfirmation = (props) => {
     const theme = useContext(ThemeContext);
@@ -24,18 +81,119 @@ export const AuthorizationRegistrationConfirmation = (props) => {
     } = props;
 
     const [ loading, setLoading ] = useState(false);
-    const [ values, setValues ] = useState({ 1: "", 2: "", 3: "", 4: "" });
+    const [ cellsData, setCellsData ] = useState([
+        {
+            cell: 1,
+            focused: true,
+            value: null,
+        },
+        {
+            cell: 2,
+            focused: false,
+            value: null,
+        },
+        {
+            cell: 3,
+            focused: false,
+            value: null,
+        },
+        {
+            cell: 4,
+            focused: false,
+            value: null,
+        },
+    ]);
 
-    const renderInputs = () => {
-        const unselectColor = theme.divider_color;
-        const selectColor = theme.accent;
+    // const cellBorderWidth = useRef(new Animated.Value(1.5)).current;
+    const cellTextScale = useRef(new Animated.Value(1)).current;
+    const cellTextTranslateY = useRef(new Animated.Value(0)).current;
 
-        const [ selectInput, setSelectInput ] = useState(0);
+    const sendCode = async (cellsData) => {
+        const code = cellsData.reduce((a, b) => a + String(b.value), "");
+        
+        axios.post("/users.registration", {
+            email: route.params?.email,
+            confirmation_code: code
+        })
+        .then(({ data }) => {
+            // storage.setItem("AUTHORIZATION_SIGN", data.user.sign);
+            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+        })
+        .catch(({ response: { data } }) => {
+            ToastAndroid.show(data.message, ToastAndroid.LONG);
+        });
+    };
 
-        const value1Ref = useRef();
-        const value2Ref = useRef();
-        const value3Ref = useRef();
-        const value4Ref = useRef();
+    const Cells = () => {
+        const renderCell = (item) => {
+            const changeFocus = (newFocusCellId) => {
+                Vibration.vibrate(30);
+
+                const newCellData = cellsData.map(item => {
+                    if(item.cell === newFocusCellId) {
+                        return {
+                            ...item,
+                            focused: true
+                        }
+                    }
+
+                    return {
+                        ...item,
+                        focused: false
+                    }
+                });
+
+                setCellsData(newCellData);
+            };
+
+            return (
+                <View
+                key={"cell-" + item.cell}
+                style={{
+                    width: 40,
+                    height: 50,
+                    borderRadius: 8,
+                    marginHorizontal: 5,
+                    borderWidth: 1.5,
+                    borderColor: item.focused ? theme.accent : theme.divider_color,
+                    overflow: "hidden"
+                }}
+                >
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                    onPress={() => changeFocus(item.cell)}
+                    >
+                        <View
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                        >
+                            <Animated.Text
+                            style={{
+                                color: theme.text_color,
+                                fontSize: 19,
+                                transform: [
+                                    {
+                                        scale: cellTextScale,
+                                    },
+                                    {
+                                        translateY: cellTextTranslateY
+                                    }
+                                ]
+                            }}
+                            >
+                                {
+                                    item.value
+                                }
+                            </Animated.Text>
+                        </View>
+                    </TouchableNativeFeedback>
+                </View>
+            )
+        };
 
         return (
             <View
@@ -46,137 +204,145 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                 marginTop: 45
             }}
             >
-                <TextInput
-                placeholder={selectInput === null ? values[1] : "✱"}
-                value={values[1]}
-                ref={value1Ref}
-                textAlign="center"
-                style={{
-                    width: 43,
-                    height: 50,
-                    borderRadius: 8,
-                    borderColor: selectInput === 1 ? selectColor : unselectColor,
-                    borderWidth: 1.3,
-                    marginRight: 15,
-                    color: theme.text_color
-                }}
-                maxLength={1}
-                keyboardType="number-pad"
-                onFocus={() => setSelectInput(1)}
-                selectionColor={theme.accent}
-                onChange={(e) => {
-                    setValues({ ...values, 1: e.nativeEvent.text });
-                    if(e.nativeEvent.text.length === 1) {
-                        return value2Ref.current?.focus();
-                    }
-                }}
-                />
-
-                <TextInput
-                placeholder={selectInput === 2 ? null : "✱"}
-                textAlign="center"
-                value={values[2]}
-                ref={value2Ref}
-                style={{
-                    width: 43,
-                    height: 50,
-                    borderRadius: 8,
-                    borderColor: selectInput === 2 ? selectColor : unselectColor,
-                    borderWidth: 1.3,
-                    marginRight: 15,
-                    color: theme.text_color
-                }}
-                maxLength={1}
-                keyboardType="number-pad"
-                onFocus={() => setSelectInput(2)}
-                selectionColor={theme.accent}
-                onChange={(e) => {
-                    setValues({ ...values, 2: e.nativeEvent.text });
-                    if(e.nativeEvent.text.length === 1) {
-                        return value3Ref.current?.focus();
-                    }
-
-                    value1Ref.current?.focus();
-                }}
-                />
-
-                <TextInput
-                placeholder={selectInput === 3 ? null : "✱"}
-                textAlign="center"
-                value={values[3]}
-                ref={value3Ref}
-                style={{
-                    width: 43,
-                    height: 50,
-                    borderRadius: 8,
-                    borderColor: selectInput === 3 ? selectColor : unselectColor,
-                    borderWidth: 1.3,
-                    marginRight: 15,
-                    color: theme.text_color
-                }}
-                maxLength={1}
-                keyboardType="number-pad"
-                onFocus={() => setSelectInput(3)}
-                selectionColor={theme.accent}
-                onChange={(e) => {
-                    setValues({ ...values, 3: e.nativeEvent.text });
-                    if(e.nativeEvent.text.length === 1) {
-                        return value4Ref.current?.focus();
-                    }
-
-                    value2Ref.current?.focus();
-                }}
-                />
-
-                <TextInput
-                placeholder={selectInput === 4 ? null : "✱"}
-                textAlign="center"
-                value={values[4]}
-                ref={value4Ref}
-                style={{
-                    width: 43,
-                    height: 50,
-                    borderRadius: 8,
-                    borderColor: selectInput === 4 ? selectColor : unselectColor,
-                    borderWidth: 1.3,
-                    color: theme.text_color
-                }}
-                maxLength={1}
-                keyboardType="number-pad"
-                onFocus={() => setSelectInput(4)}
-                selectionColor={theme.accent}
-                onChange={(e) => {
-                    setValues({ ...values, 4: e.nativeEvent.text });
-                    if(e.nativeEvent.text.length === 1) {
-                        setSelectInput(0);
-                        Keyboard.dismiss();
-                        return //registration();
-                    } 
-
-                    value3Ref.current?.focus();
-                }}
-                />
+                {
+                    cellsData.map(renderCell)
+                }
             </View>
         )
     };
 
-    const registration = () => {
-        setLoading(true);
+    const Keyboard = () => {
+        const handleKeyPress = (key) => {
+            Vibration.vibrate(30);
 
-        const code = Object.values(values).join("");
+            const nowFocusedCell = cellsData.find(x => x.focused)?.cell;
+            const changeFocusNewCell = cellsData.find(x => !x.focused && x.cell === (key === "backspace" ? nowFocusedCell - 1 : nowFocusedCell + 1))?.cell ?? 0;
+            
+            const newCellsData = cellsData.map(item => {
+                if(item.focused) {
+                    return {
+                        ...item,
+                        focused: key === "backspace" && nowFocusedCell === 1 ? true : false,
+                        value: key === "backspace" ? null : key,
+                    }
+                }
 
-        axios.post("/users.registration", {
-            email: route.params?.email,
-            confirmation_code: code
-        })
-        .then(({ data }) => {
-            storage.setItem("AUTHORIZATION_SIGN", data.user.sign);
-            navigate("tabs", { userData: data.user });
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
-        })
-        .catch(({ response: { data } }) => {
-            ToastAndroid.show(data.message, ToastAndroid.LONG);
-        }).finally(() => setLoading(false));
+                if(item.cell === changeFocusNewCell) {
+                    return {
+                        ...item,
+                        focused: true
+                    }
+                }
+
+                return item;
+            });
+
+            setCellsData(newCellsData);
+
+            if(changeFocusNewCell === 0) {
+                return sendCode(newCellsData);
+            }
+        };
+
+        const renderKeys = (item) => {
+            return (
+                <View
+                key={"key-"+ item.key}
+                style={{
+                    flex: 1,
+                    height: 50,
+                    backgroundColor: theme.divider_color,
+                    borderRadius: 9,
+                    marginHorizontal: 3,
+                    marginVertical: 3,
+                    overflow: "hidden"
+                }}
+                >
+                    <TouchableNativeFeedback
+                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
+                    onPress={() => handleKeyPress(item.key)}
+                    >
+                        <View
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            flexDirection: "row",
+                            justifyContent: item.key === "backspace" ? "center" : "flex-start",
+                            alignItems: "center",
+                            paddingHorizontal: 30
+                        }}
+                        >
+                            {
+                                item.key === "backspace" ? (
+                                    <Icon
+                                    name="backspace-outline"
+                                    size={25}
+                                    color={theme.text_color}
+                                    />
+                                ) : (
+                                    <Text
+                                    style={{
+                                        color: theme.text_color,
+                                        fontWeight: "600",
+                                        fontSize: 25,
+                                    }}
+                                    >
+                                        {
+                                            item.key
+                                        }
+                                    </Text>
+                                )
+                            }
+
+                            {
+                                item.letters ? (
+                                    <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        color: theme.text_secondary_color,
+                                        fontSize: 16,
+                                        opacity: .8,
+                                        width: 55,
+                                        flex: 1,
+                                        textAlign: "right"
+                                    }}
+                                    >
+                                        {
+                                            item.letters
+                                        }
+                                    </Text>
+                                ) : null
+                            }
+                        </View>
+                    </TouchableNativeFeedback>
+                </View>
+            )
+        };
+
+        return (
+            <View
+            style={{
+                marginHorizontal: 10,
+                marginBottom: 10
+            }}
+            >
+                {
+                    keyboardKeys.chunk(3).map((chunk, chunkIndex) => (
+                        <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                        }}
+                        key={chunkIndex}
+                        >
+                            {chunk.map(renderKeys)}
+                        </View>
+                    ))
+                }
+            </View>
+        )
     };
     
     return (
@@ -220,18 +386,11 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                     На указанный электронный адрес <Text style={{ color: theme.accent, fontWeight: "500" }}>{route.params?.email}</Text> был отправлен код подтверждения, пожалуйста, введите его ниже для завершения регистрации. Если в основной почте нет письма, проверьте папку «Спам»
                 </Text>
 
-                {renderInputs()}
+                <Cells />
             </View>
 
             <View>
-                <Button
-                onPress={() => registration()}
-                disabled={loading}
-                loading={loading}
-                title="Зарегистрироваться"
-                backgroundColor={theme.accent}
-                textColor="#ffffff"
-                />
+                <Keyboard />
             </View>
         </View>
     )

@@ -42,6 +42,7 @@ export const Button = (props) => {
             overflow: "hidden", 
             borderRadius: 10,
             margin: 10,
+            opacity: disabled ? 0.5 : 1,
             ...containerStyle
         },
         button: {

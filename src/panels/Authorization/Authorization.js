@@ -1,13 +1,16 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import { 
     View, 
     ToastAndroid, 
     TextInput, 
     StatusBar, 
     TouchableNativeFeedback,
-    Text
+    Text,
+    Animated,
+    Easing
 } from "react-native";
 import axios from "axios";
+import { EventRegister } from "react-native-event-listeners";
 
 import {
     Button,
@@ -119,6 +122,9 @@ export const Authorization = (props) => {
     const [ secureSignInPassword, setSecureSignInPassword ] = useState(true);
     const [ secureRegistrationPassword, setSecureRegistrationPassword ] = useState(true);
     const [ loading, setLoading ] = useState(false);
+    const [ switchWidth, setSwitchWidth ] = useState(0);
+
+    const switchButtonPosition = useRef(new Animated.Value(2)).current;
 
     const signIn = () => {
         setLoading(true);
@@ -129,7 +135,11 @@ export const Authorization = (props) => {
         })
         .then(({ data }) => {
             storage.setItem("AUTHORIZATION_SIGN", data?.sign);
-            navigate("tabs", { userData: data });
+            EventRegister.emit("app", {
+                type: "changeAuthorized",
+                value: true,
+                user: data
+            });
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);
@@ -138,6 +148,9 @@ export const Authorization = (props) => {
 
     const registrationNextStep = () => {
         setLoading(true);
+        navigate("authorization.registration_confirmation", {
+            email: email,
+        });
         
         axios.post("/users.registration", {
             nickname: nickname,
@@ -155,6 +168,19 @@ export const Authorization = (props) => {
         }).finally(() => setLoading(false));
     };
 
+    const changeSwitch = (newSwitch, index) => {
+        const toValue = index === 1 ? 2 : (switchWidth / index) - 2;
+        
+        Animated.timing(switchButtonPosition, {
+            toValue: toValue,
+            duration: 300,
+            useNativeDriver: false,
+            easing: Easing.elastic(1)
+        }).start();
+
+        setMode(newSwitch);
+    };
+    
     return (
         <View 
         style={{
@@ -178,15 +204,28 @@ export const Authorization = (props) => {
             </View>
 
             <View 
+            onLayout={(e) => setSwitchWidth(e.nativeEvent.layout.width)}
             style={{ 
                 flexDirection: "row", 
                 justifyContent: "center", 
                 alignItems: "center", 
                 backgroundColor: theme.divider_color + "50",
                 marginHorizontal: 15,
-                borderRadius: 10
+                borderRadius: 10,
+                height: 45,
             }}
             >
+                <Animated.View
+                style={{
+                    backgroundColor: theme.accent,
+                    borderRadius: 10,
+                    position: "absolute",
+                    height: 40,
+                    width: "50%",
+                    left: switchButtonPosition,
+                }}
+                />
+
                 <View
                 style={{
                     borderRadius: 10,
@@ -196,26 +235,19 @@ export const Authorization = (props) => {
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.accent + "50", false)}
-                    onPress={() => setMode("signIn")}
+                    onPress={() => changeSwitch("signIn", 1)}
                     disabled={mode === "signIn" || loading}
                     >
-                        <View
-                        style={{
-                            backgroundColor: mode === "signIn" ? theme.accent + "20" : "transparent",
-                            paddingVertical: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 10
-                        }}
-                        >
+                        <View style={{ height: 45, justifyContent: "center" }}>
                             <Text
                             style={{
                                 textAlign: "center",
-                                fontWeight: "500",
+                                fontWeight: "700",
                                 fontSize: 15,
-                                color: mode === "signIn" ? theme.accent : theme.text_secondary_color,
+                                color: mode === "signIn" ? "#fff" : theme.text_secondary_color,
                             }}
                             >
-                                Вход в аккаунт
+                                Вход
                             </Text>
                         </View>
                     </TouchableNativeFeedback>
@@ -230,23 +262,16 @@ export const Authorization = (props) => {
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.accent + "50", false)}
-                    onPress={() => setMode("registration")}
+                    onPress={() => changeSwitch("registration", 2)}
                     disabled={mode === "registration" || loading}
                     >
-                        <View
-                        style={{
-                            backgroundColor: mode === "registration" ? theme.accent + "20" : "transparent",
-                            paddingVertical: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 10
-                        }}
-                        >
+                        <View style={{ height: 45, justifyContent: "center" }}>
                             <Text
                             style={{
                                 textAlign: "center",
                                 fontWeight: "500",
                                 fontSize: 15,
-                                color: mode === "registration" ? theme.accent : theme.text_secondary_color,
+                                color: mode === "registration" ? "#fff" : theme.text_secondary_color,
                             }}
                             >
                                 Регистрация
@@ -344,6 +369,7 @@ export const Authorization = (props) => {
                                 backgroundColor={theme.accent}
                                 onPress={() => signIn()}
                                 loading={loading}
+                                disabled={!email || !password}
                                 />
                             </View>
                         </View>
@@ -449,6 +475,7 @@ export const Authorization = (props) => {
                                 textColor="#ffffff"
                                 backgroundColor={theme.accent}
                                 loading={loading}
+                                disabled={!email || !password || !nickname}
                                 />
                             </View>
                         </View>
