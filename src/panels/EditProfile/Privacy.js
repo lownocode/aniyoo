@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
-import { ScrollView, View, Switch } from "react-native";
-
-import ThemeContext from "../../config/ThemeContext";
+import React from "react";
+import { ScrollView, View } from "react-native";
+import { useSelector } from "react-redux";
 
 import { 
     Header,
@@ -9,7 +8,7 @@ import {
 } from "../../components";
 
 export const EditProfilePrivacy = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

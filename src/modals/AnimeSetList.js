@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
-import { View, TouchableWithoutFeedback, ToastAndroid, ActivityIndicator, Text } from "react-native";
+import React, { useState } from "react";
+import { View, TouchableWithoutFeedback, ToastAndroid, Text } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 import {
     Icon,
 } from "../components";
 import { storage } from "../functions";
-import ThemeContext from "../config/ThemeContext";
 
 export const AnimeSetList = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         animeId, 

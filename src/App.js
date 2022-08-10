@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
-import Orientation from "react-native-orientation";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
 import SplashScreen from "react-native-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import axios from "axios";
 import { EventRegister } from "react-native-event-listeners";
+import { Provider, useDispatch } from "react-redux";
+import { store } from "./redux/store";
+import { getThemeIsDark } from "./redux/reducers";
 
 // import FBMessaging from "@react-native-firebase/messaging";
 // import Firebase from "@react-native-firebase/app";
@@ -29,31 +30,17 @@ import {
 import Tabs from "./navigation/Tabs";
 import { sleep, storage } from "./functions";
 
-import theme from "./config/theme";
-import ThemeContext from "./config/ThemeContext";
 import UserContext from "./config/UserContext";
-
-Orientation.lockToPortrait();
 
 const AuthorizationStack = createNativeStackNavigator();
 
-export default App = () => {
-    const [ darkThemeMode, setDarkThemeMode ] = useState(false);
+const App = () => {
+    const dispatch = useDispatch();
+
     const [ UserData, setUserData ] = useState({});
     const [ authorized, setAuthorized ] = useState(false);
 
     const navigation = useNavigationContainerRef();
-
-    const getTheme = async () => {
-        const darkMode = await storage.getItem("DARK_THEME_MODE");
-        if(darkMode === null) {
-            await storage.setItem("DARK_THEME_MODE", true);
-            return setDarkThemeMode(true);
-        }
-
-        changeNavigationBarColor(darkMode ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !darkMode, true);
-        setDarkThemeMode(darkMode);
-    }; 
 
     useEffect(() => {
         axios.interceptors.response.use((response) => {
@@ -71,12 +58,6 @@ export default App = () => {
     useEffect(() => {
         const eventListener = EventRegister.addEventListener("app", (data) => {
             switch(data.type) {
-                case "changeTheme": {
-                    storage.setItem("DARK_THEME_MODE", data.value);
-
-                    changeNavigationBarColor(data.value ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !data.value, true);
-                    return setDarkThemeMode(data.value);
-                }
                 case "changeUser": {
                     setUserData(data.user);
                     return storage.setItem("cachedUserData", data.user);
@@ -147,10 +128,6 @@ export default App = () => {
         });
     }; 
 
-    useEffect(() => {
-        getTheme();
-    }, []);
-
     const getIsSignedIn = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
@@ -160,7 +137,7 @@ export default App = () => {
     };
 
     const initialize = new Promise((resolve) => {
-        getTheme();
+        dispatch(getThemeIsDark());
         handleDeeplink();
         getIsSignedIn();
 
@@ -168,36 +145,42 @@ export default App = () => {
     });
 
     return (
-        <ThemeContext.Provider value={darkThemeMode ? theme.DARK : theme.LIGHT}>
-            <UserContext.Provider value={UserData}>
-                <NavigationContainer 
-                onReady={() => initialize.finally(() => SplashScreen.hide())}
-                ref={navigation}
-                >
-                    {
-                        authorized ? (
-                            <Tabs />
-                        ) : (
-                            <AuthorizationStack.Navigator
-                            screenOptions={{
-                                headerShown: false,
-                                animation: "none"
-                            }}
-                            >
-                                <AuthorizationStack.Screen 
-                                name="authorization" 
-                                component={Authorization} 
-                                />
+        <UserContext.Provider value={UserData}>
+            <NavigationContainer 
+            onReady={() => initialize.finally(() => SplashScreen.hide())}
+            ref={navigation}
+            >
+                {
+                    authorized ? (
+                        <Tabs />
+                    ) : (
+                        <AuthorizationStack.Navigator
+                        screenOptions={{
+                            headerShown: false,
+                            animation: "none"
+                        }}
+                        >
+                            <AuthorizationStack.Screen 
+                            name="authorization" 
+                            component={Authorization} 
+                            />
 
-                                <AuthorizationStack.Screen 
-                                name="authorization.registration_confirmation" 
-                                component={AuthorizationRegistrationConfirmation} 
-                                />
-                            </AuthorizationStack.Navigator>
-                        )
-                    }
-                </NavigationContainer>
-            </UserContext.Provider>
-        </ThemeContext.Provider>
+                            <AuthorizationStack.Screen 
+                            name="authorization.registration_confirmation" 
+                            component={AuthorizationRegistrationConfirmation} 
+                            />
+                        </AuthorizationStack.Navigator>
+                    )
+                }
+            </NavigationContainer>
+        </UserContext.Provider>
     );
+};
+
+export default AppWrapper = () => {
+    return (
+        <Provider store={store}>
+            <App />
+        </Provider>
+    )
 };

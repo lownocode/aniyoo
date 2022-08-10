@@ -1,4 +1,5 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
 import { 
     View, 
     ToastAndroid, 
@@ -21,10 +22,8 @@ import {
     storage,
 } from "../../functions";
 
-import ThemeContext from "../../config/ThemeContext";
-
 const Input = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         value,
@@ -107,7 +106,7 @@ const Input = (props) => {
 };
 
 export const Authorization = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

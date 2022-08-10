@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Image, View, FlatList, RefreshControl, Text } from "react-native";
+import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
@@ -8,7 +9,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
-import ThemeContext from "../../config/ThemeContext";
 import { storage } from "../../functions";
 
 import { 
@@ -21,7 +21,7 @@ import {
 } from "../../components";
 
 export const GeneralUserBrowsingHistory = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const { 

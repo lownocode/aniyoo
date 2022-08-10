@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { View, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Icon,
@@ -8,10 +9,8 @@ import {
 
 import { formatViews } from "../functions";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const SelectVideoSource = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         onClose, 

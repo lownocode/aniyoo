@@ -1,5 +1,5 @@
 import React from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 class TextExtraction {
     constructor(text, patterns) {
         this.text = text;
@@ -109,10 +109,13 @@ class TextExtraction {
 };
 
 const PATTERNS = {
-    url: /(https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.(xn--)?[a-z0-9-]{2,20}\b([-a-zA-Z0-9@:%_\+\[\],.~#?&\/=]*[-a-zA-Z0-9@:%_\+\]~#?&\/=])*/i,
-    bold: /\*(.*)\*/g,
-    crossedOut: /\-(.*)\-/g,
-    underline: /\_(.*)\_/g,
+    url: /(([a-z]+:\/\/)?(([a-z0-9\-]+\.)+([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel|local|internal))(:[0-9]{1,5})?(\/[a-z0-9_\-\.~]+)*(\/([a-z0-9_\-\.]*)(\?[a-z0-9+_\-\.%=&amp;]*)?)?(#[a-zA-Z0-9!$&'()*+.=-_~:@/?]*)?)(\s+|$)/gi,
+    bold: /\*(.*?)\*/g,
+    crossedOut: /\-(.*?)\-/g,
+    underline: /\_(.*?)\_/g,
+    slantRight: /\/(.*?)\//g,
+    copy: /\`(.*?)\`/g,
+    hyperlink: /\[(.*?)\]/g,
 };
 
 export const FormattedText = (props) => {

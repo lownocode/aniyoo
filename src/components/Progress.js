@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, View } from "react-native";
-
-import ThemeContext from "../config/ThemeContext";
+import { useSelector } from "react-redux";
 
 export const Progress = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         step = 0,

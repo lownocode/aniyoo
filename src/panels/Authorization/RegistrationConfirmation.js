@@ -1,16 +1,13 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { View, TextInput, Keyboard, ToastAndroid, Text, Dimensions, TouchableNativeFeedback, Animated, Vibration } from "react-native";
+import React, { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { View, ToastAndroid, Text, TouchableNativeFeedback, Animated, Vibration } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
 import {
     Header, 
     Icon,
-    Button,
 } from "../../components";
-
-import ThemeContext from "../../config/ThemeContext";
-import { storage } from "../../functions";
 
 const keyboardKeys = [
     {
@@ -59,8 +56,6 @@ const keyboardKeys = [
     },
 ];
 
-const { width } = Dimensions.get("screen");
-
 Array.prototype.chunk = function (n) {
     if(!this.length) {
         return [];
@@ -70,7 +65,7 @@ Array.prototype.chunk = function (n) {
 };
 
 export const AuthorizationRegistrationConfirmation = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const {

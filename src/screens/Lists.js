@@ -1,5 +1,4 @@
 import React, { 
-    useContext, 
     useEffect, 
     useState, 
     createRef, 
@@ -7,7 +6,6 @@ import React, {
     forwardRef, 
     useCallback 
 } from "react";
-
 import { 
     View, 
     Animated,
@@ -15,6 +13,7 @@ import {
     TouchableOpacity,
     Text
 } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 import {
@@ -22,14 +21,12 @@ import {
     MyAnimeList,
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
-
 import { storage } from "../functions";
 
 const { width } = Dimensions.get("screen");
 
 export const Lists = props => {    
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { navigation } = props;
 

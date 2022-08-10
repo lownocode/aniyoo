@@ -1,25 +1,25 @@
-import React, { useContext } from "react";
+import React from "react";
 import { 
     FlatList, 
     View,
     TouchableNativeFeedback,
     Text
 } from "react-native";
-import {
-    Icon,
-    Cell,
-    Avatar,
-} from "../";
+import { useSelector } from "react-redux";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
-import ThemeContext from "../../config/ThemeContext";
+import {
+    Icon,
+    Cell,
+    Avatar,
+} from "../";
 
 export const CommentsList = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         list

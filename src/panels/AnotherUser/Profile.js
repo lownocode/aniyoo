@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
+import { useSelector } from "react-redux";
 import { 
     View, 
     RefreshControl, 
@@ -22,8 +23,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
-import ThemeContext from "../../config/ThemeContext";
-
 import {
     Avatar,
     Button,
@@ -46,7 +45,7 @@ import {
 import UserContext from "../../config/UserContext";
 
 export const AnotherUserProfile = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const user = useContext(UserContext);
 
     const route = useRoute();

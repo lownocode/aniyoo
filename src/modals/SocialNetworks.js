@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Linking, ToastAndroid, View } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Button,
@@ -9,10 +10,8 @@ import {
     Icon
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const SocialNetworks = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         onClose, 

@@ -1,16 +1,13 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { 
     TouchableNativeFeedback, 
     View,
-    Animated
 } from "react-native";
-
+import { useSelector } from "react-redux";
 import { Transition, Transitioning } from "react-native-reanimated";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Accordion = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         children,

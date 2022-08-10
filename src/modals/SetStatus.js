@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 import {
@@ -9,10 +10,9 @@ import {
     Icon,
 } from "../components";
 import { storage, EventEmit } from "../functions";
-import ThemeContext from "../config/ThemeContext";
 
 export const SetStatus = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { onClose } = props;
     

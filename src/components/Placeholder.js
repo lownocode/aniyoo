@@ -1,10 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
 import { View, Dimensions, StyleSheet, Text } from "react-native";
-
-import ThemeContext from "../config/ThemeContext";
+import { useSelector } from "react-redux";
 
 export const Placeholder = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         title = "", 

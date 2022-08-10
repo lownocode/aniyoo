@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { 
     Image, 
     ScrollView, 
@@ -12,7 +13,6 @@ import {
     RefreshControl,
     Text
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
 import dayjs from "dayjs";
@@ -26,12 +26,11 @@ import {
     Placeholder,
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
 import { sleep, storage } from "../../functions";
 import LinearGradient from "react-native-linear-gradient";
 
 export const AnimePlaylists = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

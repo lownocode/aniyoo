@@ -1,10 +1,9 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ScrollView, View, StyleSheet, Dimensions, ToastAndroid } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
 import { Modalize } from "react-native-modalize";
-
-import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -19,7 +18,7 @@ import {
 import { storage } from "../../functions";
 
 export const EditProfileProfile = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const [ cachedUserData, setCachedUserData ] = useState({});
 

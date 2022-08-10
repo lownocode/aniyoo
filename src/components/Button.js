@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 import { 
     View, 
     TouchableNativeFeedback, 
@@ -7,11 +7,10 @@ import {
     Text,
     Animated
 } from "react-native";
-
-import ThemeContext from "../config/ThemeContext";
+import { useSelector } from "react-redux";
 
 export const Button = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         title, 

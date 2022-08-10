@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { View, ScrollView, Linking } from "react-native";
+import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 
 import {
@@ -9,10 +10,8 @@ import {
     Accordion,
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
-
 export const EditProfile = props => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const { 

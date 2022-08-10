@@ -1,15 +1,14 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import { TouchableNativeFeedback, View, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 import { 
     Icon,
     Header,
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Search = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

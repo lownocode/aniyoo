@@ -1,5 +1,6 @@
 import axios from "axios";
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { 
     TextInput, 
     View, 
@@ -19,11 +20,10 @@ import {
     PressIcon,
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
 import { storage } from "../../functions";
 
 const SearchInput = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const inputRef = useRef();
 
     const {
@@ -94,7 +94,7 @@ const SearchInput = (props) => {
 };
 
 export const SearchUsers = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         navigation: {

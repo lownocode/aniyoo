@@ -1,12 +1,12 @@
-import React, { Fragment, useContext } from 'react';
-import { View, StyleSheet, StatusBar, Text } from 'react-native';
+import React, { Fragment } from "react";
+import { View, StyleSheet, StatusBar, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Icon, PressIcon, Divider } from ".";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Header = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
+
     const {
         backgroundColor = theme.header_background,
         backButton,

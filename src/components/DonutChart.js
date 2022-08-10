@@ -1,13 +1,12 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
 import Svg, { G, Circle } from "react-native-svg";
-
-import ThemeContext from "../config/ThemeContext";
+import { useSelector } from "react-redux";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export const DonutChart = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         percentage = 50,

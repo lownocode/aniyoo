@@ -1,5 +1,6 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Keyboard, ToastAndroid, TextInput, FlatList, Text } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 import dayjs from "dayjs";
@@ -21,10 +22,8 @@ import {
     storage,
 } from "../../functions";
 
-import ThemeContext from "../../config/ThemeContext";
-
 export const EditProfileChangeNickname = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

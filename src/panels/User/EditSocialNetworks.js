@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Vibration, TextInput, TouchableWithoutFeedback, ToastAndroid, Text } from "react-native";
 import axios from "axios";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
@@ -10,11 +10,10 @@ import {
     Icon,
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
 import { storage } from "../../functions";
 
 export const EditSocialNetworks = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const {

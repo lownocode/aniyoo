@@ -1,10 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
 import Svg, { G, Path, Rect } from "react-native-svg";
 
-import ThemeContext from "../../../config/ThemeContext";
-
 const Icon = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         size = 15

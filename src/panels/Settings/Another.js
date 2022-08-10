@@ -1,14 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 import { ScrollView, View } from "react-native";
+import { useSelector } from "react-redux";
 
 import { 
     Header,
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
-
 export const SettingsAnother = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

@@ -1,13 +1,12 @@
-import React, { useContext } from "react";
-
-import ThemeContext from "../../config/ThemeContext";
+import React from "react";
+import { useSelector } from "react-redux";
 
 import { 
     Header,
 } from "../../components";
 
 export const EditProfileSecurity = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

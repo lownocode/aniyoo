@@ -1,8 +1,7 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef } from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
+import { useSelector } from "react-redux";
 import { Modalize } from "react-native-modalize";
-
-import ThemeContext from "../../config/ThemeContext";
 
 import {
     Header,
@@ -15,7 +14,7 @@ import {
 } from "../../modals";
 
 export const Settings = props => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

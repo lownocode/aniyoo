@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, TouchableNativeFeedback, Vibration, Text, Animated } from "react-native";
+import { useSelector } from "react-redux";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { EventRegister } from "react-native-event-listeners";
 
 import {
     Lists,
@@ -40,8 +40,6 @@ import {
 import { Avatar, Icon } from "../components";
 import { storage } from "../functions";
 
-import ThemeContext from "../config/ThemeContext";
-
 const Tab = createBottomTabNavigator();
 
 const HomeStackNavigator = createNativeStackNavigator();
@@ -56,7 +54,7 @@ const ROUTES_NO_TABBAR = [
 ];
 
 export default Tabs = () => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const [ cachedUserData, setCachedUserData ] = useState({});
     const [ tabWidth, setTabWidth ] = useState(0);

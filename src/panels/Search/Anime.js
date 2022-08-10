@@ -1,4 +1,5 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { 
     View,
     StatusBar,
@@ -22,10 +23,8 @@ import {
     storage,
 } from "../../functions";
 
-import ThemeContext from "../../config/ThemeContext";
-
 const SearchInput = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const inputRef = useRef();
 
     const {
@@ -97,7 +96,7 @@ const SearchInput = (props) => {
 };
 
 export const SearchAnime = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         navigation: {

@@ -1,6 +1,7 @@
 import { useRoute } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { FlatList, View, } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Avatar,
@@ -10,10 +11,8 @@ import {
     Icon
 } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
-
 export const UserFriends = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const {

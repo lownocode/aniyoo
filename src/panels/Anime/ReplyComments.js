@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useSelector } from "react-redux";
 import { 
     View, 
     ToastAndroid, 
@@ -36,10 +37,9 @@ import {
 import { CommentActions } from "../../modals";
 
 import { declOfNum, storage } from "../../functions";
-import ThemeContext from "../../config/ThemeContext";
 
 export const AnimeReplyComments = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const [ comment, setComment ] = useState({});

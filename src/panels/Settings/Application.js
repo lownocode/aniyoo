@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React from "react";
 import { ScrollView, View, Switch } from "react-native";
-import { EventRegister } from "react-native-event-listeners";
-import ThemeContext from "../../config/ThemeContext";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+    setTheme
+} from "../../redux/reducers";
 
 import { 
     Header,
@@ -9,10 +12,9 @@ import {
     Icon
 } from "../../components";
 
-import { storage } from "../../functions";
-
 export const SettingsApplication = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
+    const dispatch = useDispatch();
 
     const { 
         navigation: {
@@ -20,24 +22,8 @@ export const SettingsApplication = (props) => {
         },
     } = props;
 
-    const [ darkThemeMode, setDarkThemeMode ] = useState(false);
-
-    useEffect(() => {
-        (async () => {
-            const theme = await storage.getItem("DARK_THEME_MODE");
-
-            setDarkThemeMode(theme);
-        })();
-    }, []);
-
     const switchDarkTheme = (value) => {
-        EventRegister.emit("app", {
-            type: "changeTheme",
-            value: value
-        });
-        setDarkThemeMode(value);
-
-        storage.setItem("DARK_THEME_MODE", value);
+        dispatch(setTheme(value ? "DARK" : "LIGHT"));
     };
 
     return (
@@ -69,13 +55,13 @@ export const SettingsApplication = (props) => {
                 subtitle="Интерфейс приобретает тёмный цвет"
                 after={
                     <Switch
-                    value={darkThemeMode}
+                    value={theme.name === "dark"}
                     onValueChange={(value) => switchDarkTheme(value)}
                     trackColor={{ false: theme.switch.track_off, true: theme.switch.track_on }}
-                    thumbColor={darkThemeMode ? theme.switch.thumb : theme.switch.thumb_light}
+                    thumbColor={theme.name === "dark" ? theme.switch.thumb : theme.switch.thumb_light}
                     />
                 }
-                onPress={() => switchDarkTheme(!darkThemeMode)}
+                onPress={() => switchDarkTheme(theme.name === "dark" ? false : true)}
                 />
             </ScrollView>
         </View>

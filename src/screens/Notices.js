@@ -1,5 +1,6 @@
-import React, { useContext} from "react";
+import React from "react";
 import { View, } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Header,
@@ -7,10 +8,8 @@ import {
     Placeholder
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Notices = () => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     return (
         <View style={{ backgroundColor: theme.background_content, flex: 1 }}>

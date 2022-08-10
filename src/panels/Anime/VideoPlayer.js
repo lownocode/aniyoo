@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { 
     StatusBar, 
     TouchableNativeFeedback, 
@@ -29,11 +30,10 @@ import {
     AnimeWatchedBefore, 
 } from "../../modals";
 
-import ThemeContext from "../../config/ThemeContext";
 import { declOfNum, storage } from "../../functions";
 
 export const AnimeVideoPlayer = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         navigation: {

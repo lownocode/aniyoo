@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { View, Switch, ToastAndroid } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 import {
@@ -10,10 +11,8 @@ import {
 } from "../components";
 import { storage } from "../functions";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const EditComment = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         onClose, 

@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Icon,
@@ -8,10 +9,8 @@ import {
     Cell,
 } from ".";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Rating = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         length,

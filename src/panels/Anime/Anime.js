@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { 
     View, 
     StatusBar, 
@@ -13,7 +14,7 @@ import {
     Text,
     Animated,
     FlatList,
-    ScrollView
+    ScrollView,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -30,7 +31,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
-import ThemeContext from "../../config/ThemeContext";
 import { 
     declOfNum, 
     storage, 
@@ -44,12 +44,11 @@ import {
     Divider,
     Cell,
     ContentHeader,
-    Avatar,
+    FormattedText,
     Placeholder,
     Progress,
     DonutChart,
     Rating,
-    AllCommentsList,
     StatisticsList,
     RenderAllCommentsList,
 } from "../../components";
@@ -59,7 +58,7 @@ import { FLAGS, DOMAIN } from "../../../variables";
 const { height: WINDOW_HEIGHT } = Dimensions.get("window");
 
 export const Anime = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         navigation: {
@@ -1506,7 +1505,7 @@ export const Anime = (props) => {
                         )
                     }
 
-                    {/* <View
+                    <View
                     style={{
                         backgroundColor: theme.divider_color,
                         marginHorizontal: 10,
@@ -1515,12 +1514,12 @@ export const Anime = (props) => {
                         borderRadius: 10,
                         overflow: "hidden",
                         paddingHorizontal: (15),
-                        paddingVertical: (8)
+                        paddingVertical: (8),
                     }}
                     >
                         <FormattedText
                         style={{
-                            color: theme.text_color
+                            color: theme.text_color,
                         }}
                         patterns={
                             [
@@ -1529,7 +1528,7 @@ export const Anime = (props) => {
                                     style: { 
                                         color: theme.accent,
                                     }, 
-                                    onPress: (link) => openUrl(link) 
+                                    // onPress: (link) => openUrl(link) 
                                 },
                                 { 
                                     type: "bold", 
@@ -1553,12 +1552,30 @@ export const Anime = (props) => {
                                     },
                                     onPress: (link) => console.log(link) 
                                 },
+                                {
+                                    type: "slantRight",
+                                    symbol: "/",
+                                    style: {
+                                        fontStyle: "italic"
+                                    },
+                                    onPress: (link) => console.log(link) 
+                                },
+                                {
+                                    type: "copy",
+                                    symbol: "`",
+                                    style: {
+                                        backgroundColor: "#24d01120",
+                                        borderRadius: 100,
+                                        color: "#24d011"
+                                    },
+                                    onPress: (link) => console.log(link) 
+                                },
                             ]
                         }
                         >
-                            _тест_ *bold* _test2_ не подчеркнутый текст _test3_ https://vk.com __asf__ asdf asdfasfd
-                        </FormattedText> 
-                    </View> */}
+                            Привет! Это - *Примечание*. Здесь _Вы_ можете узнать самую последнюю и -актуальную- информацию по поводу этого аниме. Здесь могут быть /различные виды форматирования/ текста, а также можно указывать ссылки вида https://aniyoo.ru или просто aniyoo.ru или позволять `копирование текста при нажатии`. 
+                        </FormattedText>  
+                    </View>
 
                     <View
                     style={{

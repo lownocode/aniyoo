@@ -1,15 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
-import { FlatList, ToastAndroid, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ToastAndroid, View } from "react-native";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 
 import { CommentsList, Header } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
 import { storage } from "../../functions";
 
 export const GeneralUserComments = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const {

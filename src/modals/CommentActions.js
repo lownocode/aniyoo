@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { View, ToastAndroid } from "react-native";
+import { useSelector } from "react-redux";
 import Clipboard from "@react-native-community/clipboard";
 
 import {
@@ -8,7 +9,6 @@ import {
     Icon
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
 import UserContext from "../config/UserContext";
 
 import {
@@ -17,7 +17,7 @@ import {
 } from ".";
 
 export const CommentActions = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const user = useContext(UserContext);
 
     const [ mode, setMode ] = useState("default");

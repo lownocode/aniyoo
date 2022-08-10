@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Image, ToastAndroid, FlatList, RefreshControl, Text } from "react-native";
+import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-
-import ThemeContext from "../../config/ThemeContext";
 
 import { 
     Header,
@@ -12,7 +11,7 @@ import {
 import { storage } from "../../functions";
 
 export const LinkedAnime = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         navigation: {

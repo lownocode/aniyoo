@@ -1,18 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import { 
     View, 
     Image, 
     FlatList,
     Text
 } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Cell, Icon, ContentHeader } from "../";
 
-import ThemeContext from "../../config/ThemeContext";
 import { declOfNum } from "../../functions";
 
 export const SearchAnimeList = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         list,

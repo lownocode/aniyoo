@@ -1,15 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { useSelector } from "react-redux";
 import { PieChart } from "react-native-svg-charts";
 
 import {
     Icon
 } from ".";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const StatisticsList = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         stats,

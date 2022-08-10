@@ -1,10 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
 import LinearGradient from "react-native-linear-gradient";
-
-import ThemeContext from "../config/ThemeContext";
+import { useSelector } from "react-redux";
 
 export const Divider = () => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     return (
         <LinearGradient

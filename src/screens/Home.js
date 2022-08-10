@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
     ScrollView, 
     ToastAndroid, 
@@ -7,6 +7,7 @@ import {
     TouchableNativeFeedback,
     Text
 } from "react-native";
+import { useSelector } from "react-redux";
 import LinearGradient from "react-native-linear-gradient";
 
 import dayjs from "dayjs";
@@ -23,11 +24,10 @@ import {
     Placeholder
 } from "../components";
 
-import ThemeContext from "../config/ThemeContext";
 import { storage } from "../functions";
 
 export const Home = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         navigation: {

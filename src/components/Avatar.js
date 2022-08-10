@@ -1,12 +1,11 @@
-import React, { useContext, useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { View, Image, Animated, ActivityIndicator } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Icon } from ".";
 
-import ThemeContext from "../config/ThemeContext";
-
 export const Avatar = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         url, 

@@ -1,19 +1,19 @@
-import React, { useContext } from "react";
+import React from "react";
 import { View } from "react-native";
+import { useSelector } from "react-redux";
 
 import {
     Icon,
     Cell,
     Divider
 } from "../components";
-import ThemeContext from "../config/ThemeContext";
 
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 export const AnimeWatchedBefore = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const { 
         data,

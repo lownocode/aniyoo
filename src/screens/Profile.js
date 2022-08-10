@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { 
     View, 
     RefreshControl, 
@@ -10,6 +10,7 @@ import {
     Image,
     Text
 } from "react-native";
+import { useSelector } from "react-redux";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
@@ -21,8 +22,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
-
-import ThemeContext from "../config/ThemeContext";
 
 import {
     Avatar,
@@ -45,7 +44,7 @@ import {
 import { SetStatus, SocialNetworks } from "../modals";
 
 export const Profile = props => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
     
     const { 

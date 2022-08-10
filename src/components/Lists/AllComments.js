@@ -1,10 +1,11 @@
-import React, { useContext, useState, useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import { 
     View, 
     FlatList, 
     TouchableNativeFeedback,
     Text,
 } from "react-native";
+import { useSelector } from "react-redux";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -20,11 +21,8 @@ import {
 
 import { CommentActions } from "../../modals";
 
-import { declOfNum } from "../../functions";
-import ThemeContext from "../../config/ThemeContext";
-
 export const RenderAllCommentsList = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const {
         modalRef,

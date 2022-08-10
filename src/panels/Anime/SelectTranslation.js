@@ -1,17 +1,17 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, FlatList, ActivityIndicator, Dimensions, StyleSheet, Text } from "react-native";
+import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 
 import { Cell, Icon, Header } from "../../components";
 
-import ThemeContext from "../../config/ThemeContext";
 import { formatViews, storage } from "../../functions";
 import { SelectVideoSource } from "../../modals";
 
 export const AnimeSelectTranslation = (props) => {
-    const theme = useContext(ThemeContext);
+    const { theme: { theme } } = useSelector(state => state);
 
     const [ translations, setTranslations ] = useState([]);
     const [ loading, setLoading ] = useState(null);
