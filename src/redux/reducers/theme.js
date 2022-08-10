@@ -18,7 +18,7 @@ const themeSlice = createSlice({
         theme: theme.DARK
     },
     reducers: {
-        setTheme(state, action) {
+        setTheme: (state, action) => {
             const { payload } = action;
 
             const isDarkMode = payload === "DARK" ? true : false;

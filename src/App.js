@@ -7,7 +7,7 @@ import axios from "axios";
 import { EventRegister } from "react-native-event-listeners";
 import { Provider, useDispatch } from "react-redux";
 import { store } from "./redux/store";
-import { getThemeIsDark } from "./redux/reducers";
+import { getThemeIsDark, getUserData } from "./redux/reducers";
 
 // import FBMessaging from "@react-native-firebase/messaging";
 // import Firebase from "@react-native-firebase/app";
@@ -138,6 +138,8 @@ const App = () => {
 
     const initialize = new Promise((resolve) => {
         dispatch(getThemeIsDark());
+        dispatch(getUserData());
+
         handleDeeplink();
         getIsSignedIn();
 

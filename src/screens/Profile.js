@@ -10,12 +10,11 @@ import {
     Image,
     Text
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { PieChart } from 'react-native-svg-charts';
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 import { EventRegister } from "react-native-event-listeners";
-import { useRoute } from "@react-navigation/native";
 import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
@@ -38,25 +37,22 @@ import {
     storage,
     declOfNum,
 } from "../functions";
-import {
-    USER_SCHEMA
-} from "../../variables";
 import { SetStatus, SocialNetworks } from "../modals";
+import { getUserData } from "../redux/reducers";
 
 export const Profile = props => {
-    const { theme: { theme } } = useSelector(state => state);
-    const route = useRoute();
+    const dispatch = useDispatch();
+
+    const theme = useSelector(state => state.theme.theme);
+    const { data: user, loading: userLoading } = useSelector(state => state.user);
     
     const { 
         navigation: {
             navigate,
         },
         navigation,
-        cachedUserData
     } = props;
 
-    const [ refreshing, setRefreshing ] = useState(false);
-    const [ userData, setUserData ] = useState(cachedUserData || route.params?.userData || USER_SCHEMA);
     const [ modalContent, setModalContent ] = useState(null);
     const [ friends, setFriends ] = useState([]);
     const [ popupVisible, setPopupVisible ] = useState(false);
@@ -65,46 +61,8 @@ export const Profile = props => {
     const modalRef = useRef();
 
     const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        getUserData();
+        dispatch(getUserData());
     }, []);
-
-    const getCachedData = async () => {
-        const user = await storage.getItem("cachedUserData");
-        const browsingHistory = await storage.getItem("cachedBrowsingHistory");
-
-        user && setUserData(user);
-        browsingHistory && setBrowsingHistory(browsingHistory);
-    };
-
-    useEffect(() => {
-        getCachedData();
-    }, []);
-
-    const getUserData = async () => {
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        
-        axios.post("/users.signIn", null, {
-            headers: {
-                "head": "test",
-                "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            EventRegister.emit("app", {
-                type: "changeUser",
-                user: data
-            });
-
-            setUserData(data);
-            if(data?.friendsCount >= 1) {
-                getFriends();
-            }
-        })
-        .finally(() => {
-            setRefreshing(false);
-        });
-    }; 
 
     const getFriends = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
@@ -143,21 +101,12 @@ export const Profile = props => {
         });
     };
 
-    useEffect(() => {
-        const willFocusSubscription = navigation.addListener('focus', () => {
-            getUserData();
-            getBrowsingHistory();
-        });
-    
-        return willFocusSubscription;
-    }, []);
-
     const statisticsChartValues = [
-        userData?.list?.watching || 0,
-        userData?.list?.completed || 0,
-        userData?.list?.planned || 0,
-        userData?.list?.postponed || 0,
-        userData?.list?.dropped || 0,
+        user?.list?.watching || 0,
+        user?.list?.completed || 0,
+        user?.list?.planned || 0,
+        user?.list?.postponed || 0,
+        user?.list?.dropped || 0,
     ];
     const statisticsChartColors = [theme.anime.watching, theme.anime.completed, theme.anime.planned, theme.anime.postponed, theme.anime.dropped];
 
@@ -253,7 +202,7 @@ export const Profile = props => {
                     fontWeight: "600",
                 }}
                 >
-                    {userData?.nickname || ""}
+                    {user?.nickname || ""}
                 </Text>
             }
             subtitle={
@@ -273,12 +222,12 @@ export const Profile = props => {
                     >
                         <Text 
                         style={{
-                            color: userData?.status?.trim()?.length >= 1 ? theme.text_secondary_color : theme.accent,
+                            color: user?.status?.trim()?.length >= 1 ? theme.text_secondary_color : theme.accent,
                             fontSize: 13
                         }}
                         numberOfLines={3}
                         >
-                            {userData?.status?.trim()?.length >= 1 ? userData?.status : "Установить статус"}
+                            {user?.status?.trim()?.length >= 1 ? user?.status : "Установить статус"}
                         </Text>
                     </TouchableNativeFeedback>
 
@@ -302,7 +251,7 @@ export const Profile = props => {
             disabled
             before={
                 <Avatar
-                url={userData?.photo}
+                url={user?.photo}
                 size={80}
                 />
             }
@@ -316,7 +265,7 @@ export const Profile = props => {
             }}
             >
                 {
-                    userData?.tags?.map((item, index) => (
+                    user?.tags?.map((item, index) => (
                         <View
                         key={"tag_" + index}
                         style={{
@@ -392,7 +341,7 @@ export const Profile = props => {
                 onPress={() => {
                     setModalContent(
                         <SocialNetworks 
-                        networks={userData?.social_networks}
+                        networks={user?.social_networks}
                         navigate={navigate} 
                         onClose={() => {
                             modalRef.current?.close();
@@ -419,7 +368,7 @@ export const Profile = props => {
                 containerStyle={{
                     marginBottom: 0
                 }}
-                onPress={() => navigate("edit_profile", { userData: userData })}
+                onPress={() => navigate("edit_profile", { user: user })}
                 />
             </View>
 
@@ -458,7 +407,7 @@ export const Profile = props => {
                                 fontWeight: "700"
                             }}
                             >
-                                {userData?.commentsCount}
+                                {user?.commentsCount}
                             </Text>
 
                             <View
@@ -481,7 +430,7 @@ export const Profile = props => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.commentsCount, ["комментарий","комментария","комментариев"])}
+                                    {declOfNum(user?.commentsCount, ["комментарий","комментария","комментариев"])}
                                 </Text>
                             </View>
                         </View>
@@ -512,7 +461,7 @@ export const Profile = props => {
                                 fontWeight: "700"
                             }}
                             >
-                                {userData?.collectionsCount}
+                                {user?.collectionsCount}
                             </Text>
 
                             <View
@@ -535,7 +484,7 @@ export const Profile = props => {
                                     marginLeft: 5
                                 }}
                                 >
-                                    {declOfNum(userData?.collectionsCount, ["коллекция","коллекции","коллекций"])}
+                                    {declOfNum(user?.collectionsCount, ["коллекция","коллекции","коллекций"])}
                                 </Text>
                             </View>
                         </View>
@@ -768,7 +717,7 @@ export const Profile = props => {
                         fontWeight: "300",
                     }}
                     >
-                        {userData?.friendsCount}
+                        {user?.friendsCount}
                     </Text>
                 </Text>
             }
@@ -778,7 +727,7 @@ export const Profile = props => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: userData?.subscribersCount >= 1 ? theme.accent : theme.divider_color,
+                    backgroundColor: user?.subscribersCount >= 1 ? theme.accent : theme.divider_color,
                     borderRadius: 100,
                     paddingVertical: 2,
                     paddingHorizontal: 9,
@@ -791,7 +740,7 @@ export const Profile = props => {
                         textAlignVertical: "center"
                     }}
                     >
-                        {userData?.subscribersCount || 0} {declOfNum(userData?.subscribersCount, ["заявка","заявки","заявок"])}
+                        {user?.subscribersCount || 0} {declOfNum(user?.subscribersCount, ["заявка","заявки","заявок"])}
                     </Text>
 
                     <Icon
@@ -1109,7 +1058,7 @@ export const Profile = props => {
                                 textAlign: "center"
                             }}
                             >
-                                Дата регистрации: {dayjs(userData?.createdAt).format("DD MMM YYYY")}
+                                Дата регистрации: {dayjs(user?.createdAt).format("DD MMM YYYY")}
                             </Text>
                         </View>
                     </Popup>
@@ -1134,7 +1083,7 @@ export const Profile = props => {
             modalStyle={styles.modalContainer}
             adjustToContentHeight
             onClose={() => {
-                getUserData();
+                // getUserData();
                 EventRegister.emit("changeTabbar", { type: "show" });
             }}
             >
@@ -1149,7 +1098,7 @@ export const Profile = props => {
                 <RefreshControl
                 progressBackgroundColor={theme.refresh_control_background}
                 colors={[theme.accent]}
-                refreshing={refreshing}
+                refreshing={userLoading}
                 onRefresh={onRefresh}
                 />
             }

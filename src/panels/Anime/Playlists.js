@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
+import { useRoute } from "@react-navigation/native";
 import { 
     Image, 
     ScrollView, 
