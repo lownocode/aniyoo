@@ -9,19 +9,9 @@ import { Provider, useDispatch } from "react-redux";
 import { store } from "./redux/store";
 import { getThemeIsDark, getUserData } from "./redux/reducers";
 
-// import FBMessaging from "@react-native-firebase/messaging";
-// import Firebase from "@react-native-firebase/app";
-
-// if (!Firebase.apps.length) {
-//   Firebase.initializeApp({
-//     appId: "1:746738249066:android:5efc0116808568abf20913",
-//     apiKey: "AIzaSyCzQhtAUcazg3-Ol01BwtpUOc9INxPCTZE",
-//     projectId: "aniyoo",
-//     storageBucket: "aniyoo.appspot.com",
-//     databaseURL: "https://aniyoo-default-rtdb.europe-west1.firebasedatabase.app/",
-//     messagingSenderId: "746738249066",
-//   });
-// }
+import FBMessaging from "@react-native-firebase/messaging";
+import Firebase from "@react-native-firebase/app";
+import notifee from "@notifee/react-native";
 
 import {
     Authorization,
@@ -30,14 +20,22 @@ import {
 import Tabs from "./navigation/Tabs";
 import { sleep, storage } from "./functions";
 
-import UserContext from "./config/UserContext";
-
 const AuthorizationStack = createNativeStackNavigator();
+
+if (!Firebase.apps.length) {
+    Firebase.initializeApp({
+        appId: "1:746738249066:android:5efc0116808568abf20913",
+        apiKey: "AIzaSyCzQhtAUcazg3-Ol01BwtpUOc9INxPCTZE",
+        projectId: "aniyoo",
+        storageBucket: "aniyoo.appspot.com",
+        databaseURL: "https://aniyoo-default-rtdb.europe-west1.firebasedatabase.app/",
+        messagingSenderId: "746738249066",
+    });
+}
 
 const App = () => {
     const dispatch = useDispatch();
 
-    const [ UserData, setUserData ] = useState({});
     const [ authorized, setAuthorized ] = useState(false);
 
     const navigation = useNavigationContainerRef();
@@ -58,12 +56,7 @@ const App = () => {
     useEffect(() => {
         const eventListener = EventRegister.addEventListener("app", (data) => {
             switch(data.type) {
-                case "changeUser": {
-                    setUserData(data.user);
-                    return storage.setItem("cachedUserData", data.user);
-                }
                 case "changeAuthorized": {
-                    setUserData(data.user);
                     return setAuthorized(data.value);
                 }
                 default:
@@ -136,10 +129,17 @@ const App = () => {
         return setAuthorized(true);
     };
 
+    const notificationsAndUserInit = async () => {
+        await FBMessaging().registerDeviceForRemoteMessages();
+        const notifyToken = await FBMessaging().getToken();
+
+        dispatch(getUserData(notifyToken ?? null));
+    };
+
     const initialize = new Promise((resolve) => {
         dispatch(getThemeIsDark());
-        dispatch(getUserData());
 
+        notificationsAndUserInit();
         handleDeeplink();
         getIsSignedIn();
 
@@ -147,35 +147,33 @@ const App = () => {
     });
 
     return (
-        <UserContext.Provider value={UserData}>
-            <NavigationContainer 
-            onReady={() => initialize.finally(() => SplashScreen.hide())}
-            ref={navigation}
-            >
-                {
-                    authorized ? (
-                        <Tabs />
-                    ) : (
-                        <AuthorizationStack.Navigator
-                        screenOptions={{
-                            headerShown: false,
-                            animation: "none"
-                        }}
-                        >
-                            <AuthorizationStack.Screen 
-                            name="authorization" 
-                            component={Authorization} 
-                            />
+        <NavigationContainer 
+        onReady={() => initialize.finally(() => SplashScreen.hide())}
+        ref={navigation}
+        >
+            {
+                authorized ? (
+                    <Tabs />
+                ) : (
+                    <AuthorizationStack.Navigator
+                    screenOptions={{
+                        headerShown: false,
+                        animation: "none"
+                    }}
+                    >
+                        <AuthorizationStack.Screen 
+                        name="authorization" 
+                        component={Authorization} 
+                        />
 
-                            <AuthorizationStack.Screen 
-                            name="authorization.registration_confirmation" 
-                            component={AuthorizationRegistrationConfirmation} 
-                            />
-                        </AuthorizationStack.Navigator>
-                    )
-                }
-            </NavigationContainer>
-        </UserContext.Provider>
+                        <AuthorizationStack.Screen 
+                        name="authorization.registration_confirmation" 
+                        component={AuthorizationRegistrationConfirmation} 
+                        />
+                    </AuthorizationStack.Navigator>
+                )
+            }
+        </NavigationContainer>
     );
 };
 

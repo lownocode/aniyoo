@@ -3,10 +3,10 @@ import axios from "axios";
 
 import { storage } from "../../functions";
 
-export const getUserData = createAsyncThunk("user/fetchData", async () => {
+export const getUserData = createAsyncThunk("user/fetchData", async (notifyToken) => {
     const sign = await storage.getItem("AUTHORIZATION_SIGN");
     
-    return axios.post("/users.signIn", null, {
+    return axios.post("/users.signIn", { notifyToken }, {
         headers: {
             "Authorization": sign
         }
