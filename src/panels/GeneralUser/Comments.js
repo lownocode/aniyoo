@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { ToastAndroid, View } from "react-native";
-import { useSelector } from "react-redux";
+import { ToastAndroid, } from "react-native";
 import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 
-import { CommentsList, Header } from "../../components";
+import { CommentsList, Panel } from "../../components";
 
 import { storage } from "../../functions";
 
 export const GeneralUserComments = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
     const route = useRoute();
 
     const {
@@ -44,16 +42,15 @@ export const GeneralUserComments = (props) => {
     }, []);
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Комментарии"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Комментарии",
+            backOnPress: () => goBack()
+        }}
+        >
             <CommentsList
             list={comments}
             />
-        </View>
+        </Panel>
     )
 };

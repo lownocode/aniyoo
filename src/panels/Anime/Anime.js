@@ -51,14 +51,14 @@ import {
     Rating,
     StatisticsList,
     RenderAllCommentsList,
+    Panel
 } from "../../components";
 import { AnimeSetList } from "../../modals";
 import { FLAGS, DOMAIN } from "../../../variables";
-
-const { height: WINDOW_HEIGHT } = Dimensions.get("window");
+import { STATUSBAR_HEIGHT, WINDOW_HEIGHT } from "../../../constants";
 
 export const Anime = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         navigation: {
@@ -74,7 +74,7 @@ export const Anime = (props) => {
 
     const topButtonsPosition = useRef(new Animated.Value(20)).current;
     const scrollYBefore = useRef(new Animated.Value(0)).current;
-    const statusBarBackgroundPosition = useRef(new Animated.Value(-StatusBar.currentHeight)).current;
+    const statusBarBackgroundPosition = useRef(new Animated.Value(-STATUSBAR_HEIGHT)).current;
     const playButtonPosition = useRef(new Animated.Value(-45)).current;
     const scalePlayButton = useRef(new Animated.Value(1)).current;
     const scaleBackButton = useRef(new Animated.Value(1)).current;
@@ -180,7 +180,7 @@ export const Anime = (props) => {
             }).start();
 
             if(y > WINDOW_HEIGHT / 2) {
-                Animated.sequence([
+                Animated.parallel([
                     Animated.timing(statusBarBackgroundPosition, {
                         toValue: 0,
                         duration: 50,
@@ -201,10 +201,10 @@ export const Anime = (props) => {
             }).start();
 
             if(y < WINDOW_HEIGHT / 2) {
-                Animated.sequence([
+                Animated.parallel([
                     Animated.timing(statusBarBackgroundPosition, {
-                        toValue: -StatusBar.currentHeight,
-                        duration: 20,
+                        toValue: -STATUSBAR_HEIGHT,
+                        duration: 50,
                         useNativeDriver: false
                     }),
                     Animated.timing(playButtonPosition, {
@@ -923,11 +923,13 @@ export const Anime = (props) => {
     });
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <Panel
+        headerShown={false}
+        >
             <Animated.View
             style={{
                 backgroundColor: theme.background_content,
-                height: StatusBar.currentHeight,
+                height: STATUSBAR_HEIGHT,
                 position: "absolute",
                 top: statusBarBackgroundPosition,
                 left: 0,
@@ -939,7 +941,7 @@ export const Anime = (props) => {
             <Animated.View
             style={{
                 position: "absolute",
-                top: StatusBar.currentHeight + 20,
+                top: STATUSBAR_HEIGHT + 20,
                 left: topButtonsPosition,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
@@ -978,7 +980,7 @@ export const Anime = (props) => {
             <Animated.View
             style={{
                 position: "absolute",
-                top: StatusBar.currentHeight + 20,
+                top: STATUSBAR_HEIGHT + 20,
                 right: topButtonsPosition,
                 backgroundColor: theme.background_content,
                 borderRadius: 100,
@@ -1505,77 +1507,83 @@ export const Anime = (props) => {
                         )
                     }
 
-                    <View
-                    style={{
-                        backgroundColor: theme.divider_color,
-                        marginHorizontal: 10,
-                        marginBottom: 10,
-                        zIndex: 0,
-                        borderRadius: 10,
-                        overflow: "hidden",
-                        paddingHorizontal: (15),
-                        paddingVertical: (8),
-                    }}
-                    >
-                        <FormattedText
-                        style={{
-                            color: theme.text_color,
-                        }}
-                        patterns={
-                            [
-                                { 
-                                    type: "url", 
-                                    style: { 
-                                        color: theme.accent,
-                                    }, 
-                                    // onPress: (link) => openUrl(link) 
-                                },
-                                { 
-                                    type: "bold", 
-                                    symbol: "*",
-                                    style: { 
-                                        fontWeight: "700",
-                                    }, 
-                                },
-                                {
-                                    type: "crossedOut",
-                                    symbol: "-",
-                                    style: {
-                                        textDecorationLine: "line-through"
+                    {
+                        animeData?.note && (
+                            <View
+                            style={{
+                                backgroundColor: theme.divider_color,
+                                marginHorizontal: 10,
+                                marginBottom: 10,
+                                zIndex: 0,
+                                borderRadius: 10,
+                                overflow: "hidden",
+                                paddingHorizontal: (15),
+                                paddingVertical: (8),
+                            }}
+                            >
+                                <FormattedText
+                                style={{
+                                    color: theme.text_color,
+                                }}
+                                patterns={
+                                    [
+                                        { 
+                                            type: "url", 
+                                            style: { 
+                                                color: theme.accent,
+                                            }, 
+                                            // onPress: (link) => openUrl(link) 
+                                        },
+                                        { 
+                                            type: "bold", 
+                                            symbol: "*",
+                                            style: { 
+                                                fontWeight: "700",
+                                            }, 
+                                        },
+                                        {
+                                            type: "crossedOut",
+                                            symbol: "-",
+                                            style: {
+                                                textDecorationLine: "line-through"
+                                            }
+                                        },
+                                        {
+                                            type: "underline",
+                                            symbol: "_",
+                                            style: {
+                                                textDecorationLine: "underline"
+                                            },
+                                            onPress: (link) => console.log(link) 
+                                        },
+                                        {
+                                            type: "slantRight",
+                                            symbol: "/",
+                                            style: {
+                                                fontStyle: "italic"
+                                            },
+                                            onPress: (link) => console.log(link) 
+                                        },
+                                        {
+                                            type: "copy",
+                                            symbol: "`",
+                                            style: {
+                                                backgroundColor: "#24d01120",
+                                                borderRadius: 100,
+                                                color: "#24d011"
+                                            },
+                                            onPress: (link) => console.log(link) 
+                                        },
+                                    ]
+                                }
+                                >
+                                    {
+                                        animeData?.note
                                     }
-                                },
-                                {
-                                    type: "underline",
-                                    symbol: "_",
-                                    style: {
-                                        textDecorationLine: "underline"
-                                    },
-                                    onPress: (link) => console.log(link) 
-                                },
-                                {
-                                    type: "slantRight",
-                                    symbol: "/",
-                                    style: {
-                                        fontStyle: "italic"
-                                    },
-                                    onPress: (link) => console.log(link) 
-                                },
-                                {
-                                    type: "copy",
-                                    symbol: "`",
-                                    style: {
-                                        backgroundColor: "#24d01120",
-                                        borderRadius: 100,
-                                        color: "#24d011"
-                                    },
-                                    onPress: (link) => console.log(link) 
-                                },
-                            ]
-                        }
-                        >
-                            Привет! Это - *Примечание*. Здесь _Вы_ можете узнать самую последнюю и -актуальную- информацию по поводу этого аниме. Здесь могут быть /различные виды форматирования/ текста, а также можно указывать ссылки вида https://aniyoo.ru или просто aniyoo.ru или позволять `копирование текста при нажатии`. 
-                        </FormattedText>  
-                    </View>
+                                </FormattedText>  
+                            </View>
+                        )
+                    }
 
                     <View
                     style={{
@@ -2522,6 +2530,6 @@ export const Anime = (props) => {
 
                 <View style={{ marginBottom: 100 }} />
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

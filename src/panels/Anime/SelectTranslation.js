@@ -5,13 +5,13 @@ import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Modalize } from "react-native-modalize";
 
-import { Cell, Icon, Header } from "../../components";
+import { Cell, Icon, Panel } from "../../components";
 
 import { formatViews, storage } from "../../functions";
 import { SelectVideoSource } from "../../modals";
 
 export const AnimeSelectTranslation = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const [ translations, setTranslations ] = useState([]);
     const [ loading, setLoading ] = useState(null);
@@ -181,13 +181,12 @@ export const AnimeSelectTranslation = (props) => {
     });
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Выбор озвучки"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Выбор озвучки",
+            backOnPress: () => goBack()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
@@ -203,6 +202,6 @@ export const AnimeSelectTranslation = (props) => {
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderTranslations}
             />
-        </View>
+        </Panel>
     )
 };

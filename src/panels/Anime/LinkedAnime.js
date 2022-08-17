@@ -5,13 +5,13 @@ import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 
 import { 
-    Header,
+    Panel,
     Cell,
 } from "../../components";
 import { storage } from "../../functions";
 
 export const LinkedAnime = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         navigation: {
@@ -201,15 +201,13 @@ export const LinkedAnime = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            backButton
-            backButtonOnPress={() => goBack()}
-            title="Связанные аниме"
-            />
-
+        <Panel
+        headerProps={{
+            title: "Связанные аниме",
+            backOnPress: () => goBack()
+        }}
+        >
             <FlatList
-            overScrollMode="never"
             showsVerticalScrollIndicator={false}
             data={animeList}
             keyExtractor={(_, index) => index.toString()}
@@ -223,6 +221,6 @@ export const LinkedAnime = (props) => {
                 />
             }
             />
-        </View>
+        </Panel>
     )
 };

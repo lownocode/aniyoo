@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, TouchableNativeFeedback, Vibration, Text, Animated } from "react-native";
+import { View, Vibration, Text, Animated, TouchableWithoutFeedback, Dimensions } from "react-native";
 import { useSelector } from "react-redux";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -38,7 +38,6 @@ import {
 } from "../panels";
 
 import { Avatar, Icon } from "../components";
-import { storage } from "../functions";
 
 const Tab = createBottomTabNavigator();
 
@@ -48,27 +47,23 @@ const ListsStackNavigator = createNativeStackNavigator();
 const NoticesStackNavigator = createNativeStackNavigator();
 const ProfileStackNavigator = createNativeStackNavigator();
 
+const { width: WINDOW_WIDTH } = Dimensions.get("window");
+
 const TAB_OFFSET = 7;
+const TABS_COUNT = 5;
+const TAB_WIDTH = WINDOW_WIDTH / TABS_COUNT;
 const ROUTES_NO_TABBAR = [
     "anime.videoplayer",
 ];
 
 export default Tabs = () => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { user } = useSelector(state => state.user);
+    const { theme } = useSelector(state => state.theme);
 
-    const [ cachedUserData, setCachedUserData ] = useState({});
-    const [ tabWidth, setTabWidth ] = useState(0);
     const [ tabBarHidden, setTabBarHidden ] = useState(false);
 
     const indicatorPosition = useRef(new Animated.Value(0)).current;
     const tabBarHeight = useRef(new Animated.Value(65)).current;
-
-    const getCachedUserData = async () => {
-        const data = await storage.getItem("cachedUserData");
-        if(!data) return;
-
-        setCachedUserData(data);
-    };
 
     const changeTabBarVisibility = (hide) => {
         setTabBarHidden(hide);
@@ -80,27 +75,13 @@ export default Tabs = () => {
         }).start();
     };
 
-    useEffect(() => { 
-        getCachedUserData();
-    }, []);
-
     const CustomTabbar = (props) => {
         const {
             state,
             navigation,
         } = props;
 
-        const onPress = (isFocused, route, index) => {
-            const toValue = index === state.routes.length - 1 
-            ? (tabWidth * index) - TAB_OFFSET :  index === 0 
-            ? (tabWidth * index) + TAB_OFFSET : tabWidth * index; 
-
-            Animated.timing(indicatorPosition, {
-                toValue: toValue,
-                duration: 300,
-                useNativeDriver: false
-            }).start();
-
+        const onPress = (isFocused, route) => {
             const event = navigation.emit({
                 type: "tabPress",
                 target: route.key,
@@ -127,7 +108,6 @@ export default Tabs = () => {
 
         return (
             <Animated.View
-            onLayout={(e) => setTabWidth(e.nativeEvent.layout.width / state.routes.length)}
             style={{
                 backgroundColor: theme.bottom_tabbar.background,
                 height: tabBarHeight,
@@ -143,9 +123,9 @@ export default Tabs = () => {
                                 backgroundColor: theme.bottom_tabbar.active_tab_background,
                                 borderRadius: 10,
                                 position: "absolute",
-                                width: tabWidth,
+                                width: TAB_WIDTH,
                                 height: 50,
-                                left: indicatorPosition.__getValue() ? indicatorPosition : (tabWidth * state.index) - TAB_OFFSET,
+                                left: indicatorPosition,
                             }}
                             />
 
@@ -181,21 +161,16 @@ export default Tabs = () => {
         }[routeName];
 
         return (
-            <TouchableNativeFeedback 
-            onPressIn={() => {
-                Vibration.vibrate(20);
-                props.onPress();
-            }}
-            delayPressIn={0}
-            background={TouchableNativeFeedback.Ripple(theme.divider_color, true)}
+            <TouchableWithoutFeedback 
+            onPressIn={() => props.onPress()}
             disabled={isFocused}
             >
                 <View  
                 style={{
                     alignItems: "center",
                     flex: 1,
-                    marginRight: routeName === "profile-stack" ? TAB_OFFSET : 0,
-                    marginLeft: routeName === "home-stack" ? TAB_OFFSET : 0,
+                    marginRight: isFocused && routeName === "profile-stack" ? TAB_OFFSET : 0,
+                    marginLeft: isFocused && routeName === "home-stack" ? TAB_OFFSET : 0,
                     height: 50,
                     justifyContent: isFocused ? "space-evenly" : "center",
                     borderRadius: 12,
@@ -204,7 +179,7 @@ export default Tabs = () => {
                     {
                         routeName === "profile-stack" ? (
                             <Avatar
-                            url={cachedUserData?.photo}
+                            url={user?.photo}
                             size={isFocused ? 25 : 30}
                             />
                         ) : (
@@ -235,7 +210,7 @@ export default Tabs = () => {
                     }
                     
                 </View>
-            </TouchableNativeFeedback>
+            </TouchableWithoutFeedback>
         )
     };
 
@@ -498,6 +473,29 @@ export default Tabs = () => {
         initialRouteName="profile-stack"
         screenOptions={tabbarOptions}
         tabBar={props => <CustomTabbar {...props} />}
+        screenListeners={{
+            focus: event => {
+                const stackIndex = {
+                    "home": 1,
+                    "search": 2,
+                    "lists": 3,
+                    "notices": 4,
+                    "profile": 5
+                }[event.target.split("-stack")[0]];
+
+                Vibration.vibrate(30);
+
+                const toValue = stackIndex === 1 
+                ? TAB_OFFSET : stackIndex === TABS_COUNT 
+                ? ((TAB_WIDTH * stackIndex) - TAB_WIDTH) - TAB_OFFSET : (TAB_WIDTH * stackIndex) - TAB_WIDTH;
+
+                Animated.timing(indicatorPosition, {
+                    toValue: toValue,
+                    duration: 300,
+                    useNativeDriver: false
+                }).start();
+            }
+        }}
         >
             <Tab.Screen
             name="home-stack"

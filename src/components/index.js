@@ -15,6 +15,7 @@ export * from "./Icon/Icon";
 export * from "./FormattedText";
 export * from "./Accordion";
 export * from "./StatisticsLists";
+export * from "./Panel";
 
 export * from "./AnimeLists/MyAnimeList";
 export * from "./AnimeLists/SearchAnimeList";

@@ -3,7 +3,7 @@ import { View, Dimensions, StyleSheet, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 export const Placeholder = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         title = "", 

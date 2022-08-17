@@ -19,7 +19,7 @@ import {
 } from "../";
 
 export const CommentsList = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         list

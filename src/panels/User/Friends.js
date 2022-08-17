@@ -6,13 +6,13 @@ import { useSelector } from "react-redux";
 import {
     Avatar,
     Cell,
-    Header,
+    Panel,
     Placeholder,
     Icon
 } from "../../components";
 
 export const UserFriends = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const {
@@ -42,13 +42,12 @@ export const UserFriends = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Друзья"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Друзья",
+            backOnPress: () => goBack()
+        }}
+        >
             {
                 friends.length < 1 ? (
                     <Placeholder
@@ -72,6 +71,6 @@ export const UserFriends = (props) => {
                     />
                 )
             }
-        </View>
+        </Panel>
     )
 };

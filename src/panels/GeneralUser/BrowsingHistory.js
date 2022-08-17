@@ -21,7 +21,7 @@ import {
 } from "../../components";
 
 export const GeneralUserBrowsingHistory = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const { 
@@ -260,14 +260,13 @@ export const GeneralUserBrowsingHistory = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="История просмотров"
-            subtitle={route.params?.username || null}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "История просмотра",
+            subtitle: route.params?.username || null,
+            backOnPress: () => goBack()
+        }}
+        >
             {
                 browsingHistory.items.length === 0 ? (
                     <Placeholder
@@ -339,6 +338,6 @@ export const GeneralUserBrowsingHistory = (props) => {
                     />
                 )
             }
-        </View>
+        </Panel>
     )
 };

@@ -22,7 +22,7 @@ import {
 import { CommentActions } from "../../modals";
 
 export const RenderAllCommentsList = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         modalRef,

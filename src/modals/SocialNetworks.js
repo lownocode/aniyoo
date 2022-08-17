@@ -11,7 +11,7 @@ import {
 } from "../components";
 
 export const SocialNetworks = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         onClose, 

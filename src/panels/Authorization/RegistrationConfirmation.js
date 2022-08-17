@@ -1,58 +1,69 @@
-import React, { useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { View, ToastAndroid, Text, TouchableNativeFeedback, Animated, Vibration } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { 
+    View, 
+    Text, 
+    TouchableNativeFeedback, 
+    Animated, 
+    Vibration, 
+    ToastAndroid,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
+import { EventRegister } from "react-native-event-listeners";
 
 import {
-    Header, 
+    Panel, 
     Icon,
 } from "../../components";
+import { setUser } from "../../redux/reducers";
+import { storage } from "../../functions";
 
 const keyboardKeys = [
     {
         key: 1,
-        letters: ""
+        letters: "%",
     },
     {
         key: 2,
-        letters: "ABC"
+        letters: "ABC",
+
     },
     {
         key: 3,
-        letters: "DEF"
+        letters: "DEF",
     },
     {
         key: 4,
-        letters: "GHI"
+        letters: "GHI",
     },
     {
         key: 5,
-        letters: "JKL"
+        letters: "JKL",
     },
     {
         key: 6,
-        letters: "MNO"
+        letters: "MNO",
     },
     {
         key: 7,
-        letters: "PQRS"
+        letters: "PQRS",
     },
     {
         key: 8,
-        letters: "TUV"
+        letters: "TUV",
     },
     {
         key: 9,
-        letters: "WXYZ"
+        letters: "WXYZ",
     },
     {
         key: 0,
-        letters: "+"
+        letters: "+",
     },
     {
         key: "backspace",
-        letters: ""
+        letters: "",
     },
 ];
 
@@ -64,99 +75,249 @@ Array.prototype.chunk = function (n) {
     return [this.slice(0, n)].concat(this.slice(n).chunk(n));
 };
 
-export const AuthorizationRegistrationConfirmation = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+const REMAINING_TIME_TO_RESENT_CODE = 5;
+
+export const AuthorizationRegistrationConfirmation = () => {
+    const dispatch = useDispatch();
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
-    const {
-        navigation: {
-            goBack,
-            navigate
-        }
-    } = props;
-
     const [ loading, setLoading ] = useState(false);
-    const [ cellsData, setCellsData ] = useState([
-        {
-            cell: 1,
-            focused: true,
-            value: null,
-        },
-        {
-            cell: 2,
-            focused: false,
-            value: null,
-        },
-        {
-            cell: 3,
-            focused: false,
-            value: null,
-        },
-        {
-            cell: 4,
-            focused: false,
-            value: null,
-        },
-    ]);
+    const [ remainingTime, setRemainingTime ] = useState(REMAINING_TIME_TO_RESENT_CODE);
+    const [ cellValues, setCellValues ] = useState({ 1: null, 2:  null, 3: null, 4: null });
 
-    // const cellBorderWidth = useRef(new Animated.Value(1.5)).current;
-    const cellTextScale = useRef(new Animated.Value(1)).current;
-    const cellTextTranslateY = useRef(new Animated.Value(0)).current;
+    const resendCodeTextScale = useRef(new Animated.Value(0.7)).current;
+    const focusedCell = useRef(new Animated.Value(1)).current;
+    const loadingOpacity = useRef(new Animated.Value(1)).current;
+    const cellsContainerTranslationX = useRef(new Animated.Value(0)).current;
 
-    const sendCode = async (cellsData) => {
-        const code = cellsData.reduce((a, b) => a + String(b.value), "");
+    const cells = [
+        {
+            id: 1,
+            textScale: useRef(new Animated.Value(1)).current,
+            textTranslateX: useRef(new Animated.Value(0)).current,
+        },
+        {
+            id: 2,
+            textScale: useRef(new Animated.Value(1)).current,
+            textTranslateX: useRef(new Animated.Value(0)).current,
+        },
+        {
+            id: 3,
+            textScale: useRef(new Animated.Value(1)).current,
+            textTranslateX: useRef(new Animated.Value(0)).current,
+        },
+        {
+            id: 4,
+            textScale: useRef(new Animated.Value(1)).current,
+            textTranslateX: useRef(new Animated.Value(0)).current,
+        },
+    ];
+
+    const scaleAnimation = (element, scale) => {
+        Animated.timing(element, {
+            toValue: scale,
+            duration: 100,
+            useNativeDriver: false
+        }).start();
+    };
+
+    const keyboardHandler = (key) => {
+        const cell = cells.find(x => x.id === focusedCell.__getValue());
+
+        if(key === "backspace") {
+            focusedCell.setValue(cell.id - 1 === 0 ? 1 : cell.id - 1);
+
+            return Animated.sequence([
+                Animated.timing(cell.textTranslateX, {
+                    toValue: -100,
+                    duration: 500,
+                    useNativeDriver: false,
+                }),
+                Animated.timing(cell.textTranslateX, {
+                    toValue: 0,
+                    duration: 0,
+                    useNativeDriver: false,
+                })
+            ]).start(() => {
+                setCellValues({
+                    ...cellValues,
+                    [cell.id]: null
+                });
+            });
+        }
+
+        focusedCell.setValue(cell.id + 1 === 5 ? 4 : cell.id + 1);
+
+        setCellValues({
+            ...cellValues,
+            [cell.id]: key
+        });
+
+        Animated.sequence([
+            Animated.timing(cell.textScale, {
+                toValue: 0,
+                duration: 1,
+                useNativeDriver: false,
+            }),
+            Animated.timing(cell.textScale, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: false,
+            }),
+        ]).start();
+
+        if(cell.id === 4) {
+            sendCode({
+                ...cellValues,
+                4: key
+            });
+        }
+    };
+
+    const changeCellFocus = (cellId) => {
+        Vibration.vibrate(30);
+
+        setCellValues({
+            ...cellValues,
+            [cellId]: null,
+        });
+
+        focusedCell.setValue(cellId);
+    };
+
+    const sendCode = async (cellValues) => {
+        const codeValid = Object.values(cellValues).findIndex(x => x === null) < 0;
+
+        if(!codeValid) return;
+
+        setLoading(true);
+        const code = Object.values(cellValues).join("");
         
         axios.post("/users.registration", {
             email: route.params?.email,
             confirmation_code: code
         })
         .then(({ data }) => {
-            // storage.setItem("AUTHORIZATION_SIGN", data.user.sign);
-            ToastAndroid.show(data.message, ToastAndroid.CENTER);
+            dispatch(setUser(data.user));
+            storage.setItem("AUTHORIZATION_SIGN", data.user.sign);
+            EventRegister.emit("app", {
+                type: "changeAuthorized",
+                value: true,
+            });
+        })
+        .catch(({ response: { data } }) => {
+            Vibration.vibrate(60);
+            ToastAndroid.show(data.message, ToastAndroid.LONG);
+            Animated.sequence([
+                Animated.timing(cellsContainerTranslationX, {
+                    toValue: -15,
+                    duration: 200,
+                    useNativeDriver: false,
+                }),
+                Animated.timing(cellsContainerTranslationX, {
+                    toValue: 15,
+                    duration: 200,
+                    useNativeDriver: false,
+                }),
+                Animated.timing(cellsContainerTranslationX, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: false,
+                }),
+            ]).start();
+        })
+        .finally(() => setLoading(false));
+    };
+
+    const resendCode = async () => {
+        setRemainingTime(REMAINING_TIME_TO_RESENT_CODE);
+
+        axios.post("/settings.resendMail", {
+            email: route.params?.email
+        })
+        .then(({ data }) => {
+            ToastAndroid.show(data.message, ToastAndroid.LONG);
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.LONG);
         });
+
+        let counter = 0;
+        const intervalId = setInterval(() => {
+            counter += 1;
+            setRemainingTime(prev => prev - 1);
+
+            if (counter >= REMAINING_TIME_TO_RESENT_CODE) {
+                clearInterval(intervalId);
+                Animated.timing(resendCodeTextScale, {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: false,
+                }).start();
+
+                Vibration.vibrate(35);
+            }
+        }, 1000);
+
+        return () => clearInterval(intervalId);
     };
+
+    useEffect(() => {
+        if(loading) {
+            return Animated.loop(
+                Animated.sequence([
+                    Animated.timing(loadingOpacity, {
+                        toValue: 0.5,
+                        duration: 500,
+                        useNativeDriver: false,
+                    }),
+                    Animated.timing(loadingOpacity, {
+                        toValue: 1,
+                        duration: 500,
+                        useNativeDriver: false,
+                    }),
+                ])
+            ).start();
+        }
+
+        Animated.timing(loadingOpacity).stop();
+    }, [loading]);
 
     const Cells = () => {
         const renderCell = (item) => {
-            const changeFocus = (newFocusCellId) => {
-                Vibration.vibrate(30);
-
-                const newCellData = cellsData.map(item => {
-                    if(item.cell === newFocusCellId) {
-                        return {
-                            ...item,
-                            focused: true
-                        }
-                    }
-
-                    return {
-                        ...item,
-                        focused: false
-                    }
-                });
-
-                setCellsData(newCellData);
-            };
-
+            const borderColor = focusedCell.interpolate({
+                inputRange: [
+                    Number(item.id) - 1,
+                    Number(item.id),
+                    Number(item.id) + 1
+                ],
+                outputRange: [
+                    theme.divider_color,
+                    theme.accent,
+                    theme.divider_color
+                ],
+                extrapolate: "clamp",
+            });
+            
             return (
-                <View
-                key={"cell-" + item.cell}
-                style={{
+                <Animated.View
+                key={"cellId-" + item.id}
+                style={[{
                     width: 40,
                     height: 50,
                     borderRadius: 8,
                     marginHorizontal: 5,
                     borderWidth: 1.5,
-                    borderColor: item.focused ? theme.accent : theme.divider_color,
-                    overflow: "hidden"
-                }}
+                    borderColor: loading ? theme.accent : borderColor,
+                    overflow: "hidden",
+                    opacity: loadingOpacity
+                }]}
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                    onPress={() => changeFocus(item.cell)}
+                    onPress={() => changeCellFocus(item.id)}
+                    disabled={loading}
                     >
                         <View
                         style={{
@@ -172,21 +333,21 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                                 fontSize: 19,
                                 transform: [
                                     {
-                                        scale: cellTextScale,
+                                        scale: item.textScale,
                                     },
                                     {
-                                        translateY: cellTextTranslateY
+                                        translateX: item.textTranslateX
                                     }
                                 ]
                             }}
                             >
                                 {
-                                    item.value
+                                    cellValues[item.id]
                                 }
                             </Animated.Text>
                         </View>
                     </TouchableNativeFeedback>
-                </View>
+                </Animated.View>
             )
         };
 
@@ -200,71 +361,38 @@ export const AuthorizationRegistrationConfirmation = (props) => {
             }}
             >
                 {
-                    cellsData.map(renderCell)
+                    cells.map(renderCell)
                 }
             </View>
         )
     };
 
     const Keyboard = () => {
-        const handleKeyPress = (key) => {
-            Vibration.vibrate(30);
-
-            const nowFocusedCell = cellsData.find(x => x.focused)?.cell;
-            const changeFocusNewCell = cellsData.find(x => !x.focused && x.cell === (key === "backspace" ? nowFocusedCell - 1 : nowFocusedCell + 1))?.cell ?? 0;
-            
-            const newCellsData = cellsData.map(item => {
-                if(item.focused) {
-                    return {
-                        ...item,
-                        focused: key === "backspace" && nowFocusedCell === 1 ? true : false,
-                        value: key === "backspace" ? null : key,
-                    }
-                }
-
-                if(item.cell === changeFocusNewCell) {
-                    return {
-                        ...item,
-                        focused: true
-                    }
-                }
-
-                return item;
-            });
-
-            setCellsData(newCellsData);
-
-            if(changeFocusNewCell === 0) {
-                return sendCode(newCellsData);
-            }
-        };
-
         const renderKeys = (item) => {
             return (
-                <View
+                <Animated.View
                 key={"key-"+ item.key}
                 style={{
                     flex: 1,
-                    height: 50,
                     backgroundColor: theme.divider_color,
                     borderRadius: 9,
                     marginHorizontal: 3,
                     marginVertical: 3,
-                    overflow: "hidden"
+                    overflow: "hidden",
                 }}
                 >
                     <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                    onPress={() => handleKeyPress(item.key)}
+                    onPress={() => keyboardHandler(item.key)}
+                    disabled={loading}
                     >
                         <View
                         style={{
                             width: "100%",
-                            height: "100%",
-                            flexDirection: "row",
+                            minHeight: 50,
+                            flexDirection: "column",
                             justifyContent: item.key === "backspace" ? "center" : "flex-start",
                             alignItems: "center",
-                            paddingHorizontal: 30
                         }}
                         >
                             {
@@ -295,11 +423,9 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                                     numberOfLines={1}
                                     style={{
                                         color: theme.text_secondary_color,
-                                        fontSize: 16,
+                                        fontSize: 10,
                                         opacity: .8,
-                                        width: 55,
-                                        flex: 1,
-                                        textAlign: "right"
+                                        textAlign: "center"
                                     }}
                                     >
                                         {
@@ -310,9 +436,23 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                             }
                         </View>
                     </TouchableNativeFeedback>
-                </View>
+                </Animated.View>
             )
         };
+
+        const keyboardKeysRender = useMemo(() => keyboardKeys.chunk(3).map((chunk, chunkIndex) => (
+            <View
+            style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                flexWrap: "wrap",
+            }}
+            key={chunkIndex}
+            >
+                {chunk.map(renderKeys)}
+            </View>
+        )));
 
         return (
             <View
@@ -322,32 +462,40 @@ export const AuthorizationRegistrationConfirmation = (props) => {
             }}
             >
                 {
-                    keyboardKeys.chunk(3).map((chunk, chunkIndex) => (
-                        <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                        }}
-                        key={chunkIndex}
-                        >
-                            {chunk.map(renderKeys)}
-                        </View>
-                    ))
+                    keyboardKeysRender
                 }
             </View>
         )
     };
+
+    useEffect(() => {
+        let counter = 0;
+        const intervalId = setInterval(() => {
+            counter += 1;
+            setRemainingTime(prev => prev - 1);
+
+            if (counter >= REMAINING_TIME_TO_RESENT_CODE) {
+                clearInterval(intervalId);
+                Animated.timing(resendCodeTextScale, {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: false,
+                }).start();
+
+                Vibration.vibrate(35);
+            }
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+    }, []);
     
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Подтверждение регистрации"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Подтверждение регистрации",
+            backOnPress: () => goBack()
+        }}
+        >
             <View
             style={{
                 justifyContent: "center",
@@ -381,12 +529,44 @@ export const AuthorizationRegistrationConfirmation = (props) => {
                     На указанный электронный адрес <Text style={{ color: theme.accent, fontWeight: "500" }}>{route.params?.email}</Text> был отправлен код подтверждения, пожалуйста, введите его ниже для завершения регистрации. Если в основной почте нет письма, проверьте папку «Спам»
                 </Text>
 
-                <Cells />
+                <Animated.View
+                style={{
+                    transform: [
+                        {
+                            translateX: cellsContainerTranslationX
+                        }
+                    ]
+                }}
+                >
+                    <Cells />
+                </Animated.View>
             </View>
 
             <View>
+                <Animated.Text
+                onPressIn={() => remainingTime <= 0 && scaleAnimation(resendCodeTextScale, .9)}
+                onPressOut={() => remainingTime <= 0 && scaleAnimation(resendCodeTextScale, 1)}
+                onPress={() => remainingTime <= 0 && resendCode()}
+                style={{
+                    textAlign: "center",
+                    color: remainingTime >=  1 ? theme.text_secondary_color : theme.accent,
+                    marginBottom: 15,
+                    fontSize: 15,
+                    textTransform: "uppercase",
+                    transform: [
+                        {
+                            scale: resendCodeTextScale
+                        }
+                    ]
+                }}
+                >
+                    {
+                        remainingTime >=  1 ? `отправить код снова через ${remainingTime} сек.` : "Отправить код снова"
+                    }
+                </Animated.Text>
+
                 <Keyboard />
             </View>
-        </View>
+        </Panel>
     )
 };

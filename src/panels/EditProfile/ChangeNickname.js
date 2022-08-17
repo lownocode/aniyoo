@@ -9,7 +9,7 @@ import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
 import {
-    Header,
+    Panel,
     Avatar,
     ContentHeader,
     Button,
@@ -23,7 +23,7 @@ import {
 } from "../../functions";
 
 export const EditProfileChangeNickname = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         navigation: {
@@ -202,14 +202,12 @@ export const EditProfileChangeNickname = (props) => {
     };
     
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Смена никнейма"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "Смена никнейма",
+            backOnPress: () => goBack()
+        }}
+        >
             <FlatList
             data={history}
             keyExtractor={(_, index) => index.toString()}
@@ -292,6 +290,6 @@ export const EditProfileChangeNickname = (props) => {
                 </View>
             )}
             />
-        </View>
+        </Panel>
     )
 };

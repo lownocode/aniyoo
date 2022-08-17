@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import Svg, { G, Path, Rect } from "react-native-svg";
 
 const Icon = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         size = 15

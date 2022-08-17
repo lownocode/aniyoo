@@ -24,7 +24,7 @@ import "dayjs/locale/ru";
 dayjs.extend(relativeTime).locale("ru");
 
 import { 
-    Header, 
+    Panel, 
     Cell,
     PressIcon,
     Icon,
@@ -39,7 +39,7 @@ import { CommentActions } from "../../modals";
 import { declOfNum, storage } from "../../functions";
 
 export const AnimeReplyComments = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const [ comment, setComment ] = useState({});
@@ -504,13 +504,12 @@ export const AnimeReplyComments = (props) => {
     });
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1}}>
-            <Header
-            title="Ответы на комментарий"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Ответы на комментарий",
+            backOnPress: () => goBack()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
@@ -940,6 +939,6 @@ export const AnimeReplyComments = (props) => {
                     </KeyboardAvoidingView>
                 )
             }
-        </View>
+        </Panel>
     )
 };

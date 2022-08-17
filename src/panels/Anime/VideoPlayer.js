@@ -33,7 +33,7 @@ import {
 import { declOfNum, storage } from "../../functions";
 
 export const AnimeVideoPlayer = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         navigation: {

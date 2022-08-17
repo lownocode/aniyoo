@@ -1,123 +1,120 @@
-import React, { Fragment } from "react";
-import { View, StyleSheet, StatusBar, Text } from "react-native";
+import React from "react";
+import { View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
-import { Icon, PressIcon, Divider } from ".";
+import { STATUSBAR_HEIGHT } from "../../constants";
+import { Icon, PressIcon } from ".";
 
-export const Header = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+export const Header = props => {
+    const { theme } = useSelector(state => state.theme);
 
     const {
-        backgroundColor = theme.header_background,
-        backButton,
         title,
-        titleStyle,
-        subtitleStyle,
         subtitle,
-        backButtonOnPress,
-        afterComponent,
-        divider = true
+        backOnPress,
+        afterActions,
+        beforeActions
     } = props;
 
-    const statusBarHeight = StatusBar.currentHeight;
+    return (
+        <View style={{ zIndex: 10 }}>
+            <View
+            style={{
+                height: STATUSBAR_HEIGHT,
+                backgroundColor: theme.background_content
+            }}
+            />
 
-    const styles = StyleSheet.create({
-        header: {
-            flexDirection: 'row',
-            alignItems: "center",
-            paddingTop: statusBarHeight + 20,
-            paddingBottom: 10,
-            justifyContent: "space-between",
-            zIndex: 100,
-        },
-        leftHeader: {
-            flexDirection: 'row',
-            alignItems: 'center',
-        },
-        back: {
-            color: '#5F5F5F',
-            marginTop: 3,
-        },
-        title: {
-            fontSize: 18,
-            fontWeight: "500",
-            color: theme.text_color,
-            marginLeft: backButton ? 0 : 25,
-        },
-        subtitle: {
-            color: 'gray',
-            fontSize: 14,
-            fontWeight: "400",
-            marginLeft: backButton ? 0 : 25,
-            marginTop: -2
-        },
-        after: {
-            marginRight: 25,
-        }
-    });
-
-    const renderTitle = () => {
-        return (
-            <View>
-                <Text 
-                style={{...styles.title, ...titleStyle}}
-                numberOfLines={1}
-                >
-                    {title}
-                </Text>
+            <View
+            style={{
+                backgroundColor: theme.background_content,
+                height: 60,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 17
+            }}
+            >
+                {
+                    backOnPress && (
+                        <View>
+                            <PressIcon
+                            onPress={() => backOnPress()}
+                            icon={
+                                <Icon
+                                name="arrow-back"
+                                color={theme.text_color}
+                                />
+                            }
+                            />
+                        </View>
+                    )
+                }
 
                 {
-                    subtitle &&
-                    <Text 
-                    style={[styles.subtitle, subtitleStyle]}
-                    numberOfLines={1}
-                    >
-                        {subtitle}
-                    </Text>
+                    beforeActions && (
+                        <View>
+                            {
+                                beforeActions
+                            }
+                        </View>
+                    )
                 }
-            </View>
-        );
-    };
-
-        return (
-            <Fragment>
+                
                 <View
-                style={[
-                    {
-                        backgroundColor: backgroundColor, 
-                    },
-                    styles.header,
-                ]}
+                style={{
+                    flex: 1,
+                }}
                 >
-                    <View style={styles.leftHeader}>
-                        {backButton && 
-                        <PressIcon 
-                        icon={
-                            <Icon
-                            name="arrow-back"
-                            color={theme.text_color}
-                            />
+                    <Text
+                    numberOfLines={1}
+                    style={{
+                        color: theme.text_color,
+                        fontSize: 20,
+                        fontWeight: "600",
+                        marginLeft: backOnPress ? 15 : 0
+                    }}
+                    >
+                        {
+                            title
                         }
-                        onPress={backButtonOnPress}
-                        containerStyle={{
-                            marginHorizontal: 17,
-                        }}
-                        />}
-                        {renderTitle()}
-                    </View>
+                    </Text>
 
                     {
-                        afterComponent && (
-                            <View style={styles.after}>
-                                {afterComponent}
-                            </View>
+                        subtitle && (
+                            <Text
+                            numberOfLines={1}
+                            style={{
+                                color: theme.text_secondary_color,
+                                fontWeight: "400"
+                            }}
+                            >
+                                {
+                                    subtitle
+                                }
+                            </Text>
                         )
                     }
                 </View>
 
                 {
-                    divider && <Divider />
+                    afterActions && (
+                        <View>
+                            {
+                                afterActions
+                            }
+                        </View>
+                    )
                 }
-            </Fragment>
-        );
+            </View>
+
+            <View
+            style={{
+                backgroundColor: theme.divider_color,
+                height: 0.5,
+                marginHorizontal: 15,
+                opacity: 0.5
+            }}
+            />
+        </View>
+    )
 };

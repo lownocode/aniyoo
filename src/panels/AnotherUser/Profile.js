@@ -29,7 +29,7 @@ import {
     Cell,
     ContentHeader,
     Divider,
-    Header,
+    Panel,
     Icon,
     Placeholder,
     PressIcon,
@@ -45,7 +45,7 @@ import {
 import UserContext from "../../config/UserContext";
 
 export const AnotherUserProfile = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const user = useContext(UserContext);
 
     const route = useRoute();
@@ -1195,13 +1195,12 @@ export const AnotherUserProfile = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Профиль"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Профиль",
+            backOnPress: () => goBack()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
@@ -1228,6 +1227,6 @@ export const AnotherUserProfile = (props) => {
                 {statisticsRender()}
                 {renderBrowsingHistory()}
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

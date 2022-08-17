@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 
 import {
-    Header,
+    Panel,
     MyAnimeList,
 } from "../components";
 
@@ -26,7 +26,7 @@ import { storage } from "../functions";
 const { width } = Dimensions.get("screen");
 
 export const Lists = props => {    
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { navigation } = props;
 
@@ -231,12 +231,11 @@ export const Lists = props => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Списки"
-            height={30}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Списки"
+        }}
+        >
             <Tabs />
 
             <Animated.FlatList
@@ -269,6 +268,6 @@ export const Lists = props => {
                 )
             }}
             />
-        </View>
+        </Panel>
     )
 };

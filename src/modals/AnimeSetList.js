@@ -9,7 +9,7 @@ import {
 import { storage } from "../functions";
 
 export const AnimeSetList = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         animeId, 

@@ -3,10 +3,10 @@ import React, { useState } from "react";
 import { View, FlatList, ActivityIndicator, } from "react-native";
 import { useSelector } from "react-redux";
 
-import { Header, Placeholder } from "../../components";
+import { Panel, Placeholder } from "../../components";
 
 export const GeneralUserFriends = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const {
@@ -19,17 +19,12 @@ export const GeneralUserFriends = (props) => {
     const [ loading, setLoading ] = useState(route.params?.friendsList?.length > 0);
 
     return (
-        <View>
-            <Header
-            title="Друзья"
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
-            <View>
-
-            </View>
-
+        <Panel
+        headerProps={{
+            title: "Друзья",
+            backOnPress: () => goBack()
+        }}
+        >
             {
                 loading ? (
                     <Placeholder
@@ -48,6 +43,6 @@ export const GeneralUserFriends = (props) => {
                     />
                 )
             }
-        </View>
+        </Panel>
     )
 };

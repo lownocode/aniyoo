@@ -3,7 +3,7 @@ import { TextInput, View, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 
 export const WriteBar = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         placeholder,

@@ -13,7 +13,7 @@ import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 export const AnimeWatchedBefore = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         data,

@@ -10,7 +10,7 @@ import {
 } from ".";
 
 export const Rating = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         length,

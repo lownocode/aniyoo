@@ -13,7 +13,7 @@ import { declOfNum } from "../../functions";
 import { Cell, Icon } from "../";
 
 export const MyAnimeList = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         animes,

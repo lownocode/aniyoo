@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { 
     View, 
     ToastAndroid, 
@@ -8,7 +8,7 @@ import {
     TouchableNativeFeedback,
     Text,
     Animated,
-    Easing
+    Easing,
 } from "react-native";
 import axios from "axios";
 import { EventRegister } from "react-native-event-listeners";
@@ -21,9 +21,10 @@ import {
 import {
     storage,
 } from "../../functions";
+import { setUser } from "../../redux/reducers";
 
 const Input = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         value,
@@ -106,7 +107,8 @@ const Input = (props) => {
 };
 
 export const Authorization = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const dispatch = useDispatch();
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         navigation: {
@@ -133,11 +135,11 @@ export const Authorization = (props) => {
             password: password
         })
         .then(({ data }) => {
+            dispatch(setUser(data));
             storage.setItem("AUTHORIZATION_SIGN", data?.sign);
             EventRegister.emit("app", {
                 type: "changeAuthorized",
                 value: true,
-                user: data
             });
         })
         .catch(({ response: { data } }) => {
@@ -147,9 +149,6 @@ export const Authorization = (props) => {
 
     const registrationNextStep = () => {
         setLoading(true);
-        navigate("authorization.registration_confirmation", {
-            email: email,
-        });
         
         axios.post("/users.registration", {
             nickname: nickname,

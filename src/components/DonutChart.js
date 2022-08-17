@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export const DonutChart = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         percentage = 50,

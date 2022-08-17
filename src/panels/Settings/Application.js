@@ -7,13 +7,13 @@ import {
 } from "../../redux/reducers";
 
 import { 
-    Header,
+    Panel,
     Cell,
     Icon
 } from "../../components";
 
 export const SettingsApplication = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const dispatch = useDispatch();
 
     const { 
@@ -27,15 +27,13 @@ export const SettingsApplication = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Настройки"
-            subtitle="Приложение"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "Настройки",
+            subtitle: "Приложение",
+            backOnPress: () => goBack()
+        }}
+        >
             <ScrollView
             showsVerticalScrollIndicator={false}
             style={{ marginTop: -15 }}
@@ -64,6 +62,6 @@ export const SettingsApplication = (props) => {
                 onPress={() => switchDarkTheme(theme.name === "dark" ? false : true)}
                 />
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

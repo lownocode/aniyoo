@@ -5,10 +5,11 @@ import { useSelector } from "react-redux";
 import { 
     Icon,
     Header,
+    Panel,
 } from "../components";
 
 export const Search = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         navigation: {
@@ -17,12 +18,11 @@ export const Search = (props) => {
     } = props;
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Поиск"
-            height={30}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Поиск"
+        }}
+        >
             <View>
                 <View
                 style={{
@@ -148,6 +148,6 @@ export const Search = (props) => {
                     </TouchableNativeFeedback>
                 </View>
             </View>
-        </View>
+        </Panel>
     )
 };

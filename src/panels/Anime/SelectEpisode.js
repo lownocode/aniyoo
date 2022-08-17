@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, FlatList, StatusBar, Vibration, ToastAndroid, Text } from "react-native";
 import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
@@ -9,13 +9,13 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
-import { Cell, Header, Icon, } from "../../components";
+import { Cell, Panel, Icon, } from "../../components";
 
 import { formatViews, storage } from "../../functions";
 import { showNavigationBar } from "react-native-navigation-bar-color";
 
 export const AnimeSelectEpisode = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const [ animeViewData, setAnimeViewData ] = useState([]);
 
@@ -216,14 +216,13 @@ export const AnimeSelectEpisode = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Выбор серии"
-            subtitle={route.params?.translation}
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Выбор серии",
+            subtitle: route.params?.translation,
+            backOnPress: () => goBack()
+        }}
+        >
             <FlatList
             data={route.params?.episodes}
             keyExtractor={(_, index) => index.toString()}
@@ -231,6 +230,6 @@ export const AnimeSelectEpisode = (props) => {
             overScrollMode="never"
             showsVerticalScrollIndicator={false}
             />
-        </View>
+        </Panel>
     )
 };

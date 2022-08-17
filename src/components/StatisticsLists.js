@@ -8,7 +8,7 @@ import {
 } from ".";
 
 export const StatisticsList = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         stats,

@@ -12,7 +12,7 @@ import {
 import { storage } from "../functions";
 
 export const EditComment = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         onClose, 

@@ -1,15 +1,12 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
-import { useSelector } from "react-redux";
 
 import { 
-    Header,
+    Panel,
     Cell,
 } from "../../components";
 
 export const EditProfilePrivacy = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
-
     const { 
         navigation: {
             goBack
@@ -17,20 +14,14 @@ export const EditProfilePrivacy = (props) => {
     } = props;
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Редактировать профиль"
-            subtitle="Приватность"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
-            <ScrollView
-            showsVerticalScrollIndicator={false}
-            >
-                <View style={{marginTop: 5, paddingTop: 15}}/>
-
+        <Panel
+        headerProps={{
+            title: "Редактировать профиль",
+            subtitle: "Приватность",
+            backOnPress: () => goBack()
+        }}
+        >
+            <ScrollView>
                 <Cell
                 title="Закрытый профиль"
                 subtitle="При включении этой функции все Ваши данные в профиле будут скрыты для всех людей"
@@ -71,6 +62,6 @@ export const EditProfilePrivacy = (props) => {
                 subtitle="Все пользователи"
                 />
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

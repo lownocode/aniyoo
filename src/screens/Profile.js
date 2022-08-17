@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { 
     View, 
     RefreshControl, 
@@ -8,13 +8,11 @@ import {
     StyleSheet, 
     Dimensions, 
     Image,
-    Text
+    Text,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { PieChart } from 'react-native-svg-charts';
-import axios from "axios";
 import { Modalize } from "react-native-modalize";
-import { EventRegister } from "react-native-event-listeners";
 import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
@@ -27,24 +25,24 @@ import {
     Button,
     Cell,
     Divider,
-    Header,
     Placeholder,
     PressIcon,
     Icon,
     ContentHeader,
+    Panel,
 } from "../components";
 import {
     storage,
     declOfNum,
 } from "../functions";
 import { SetStatus, SocialNetworks } from "../modals";
-import { getUserData } from "../redux/reducers";
+import { getUserData, setModalVisible } from "../redux/reducers";
 
 export const Profile = props => {
     const dispatch = useDispatch();
 
-    const theme = useSelector(state => state.theme.theme);
-    const { data: user, loading: userLoading } = useSelector(state => state.user);
+    const { theme } = useSelector(state => state.theme);
+    const { user, loading: userLoading } = useSelector(state => state.user);
     
     const { 
         navigation: {
@@ -64,42 +62,33 @@ export const Profile = props => {
         dispatch(getUserData());
     }, []);
 
-    const getFriends = async () => {
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        
-        axios.post("/friends.get", {
-            order: "online"
-        }, {
-            headers: {
-                "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            setFriends(data);
-        })
-        .catch(({ response: { data } }) => {
-            console.log(data);
-        });
-    }; 
-
-    const getBrowsingHistory = async () => {
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-        
-        axios.post("/lists.get", {
-            status: "history",
-            limit: 5
-        }, {
-            headers: {
-                "Authorization": sign,
-            }
-        })
-        .then(({ data }) => {
-            setBrowsingHistory(data.list);
-        })
-        .catch(({ response: { data } }) => {
-            console.log(data);
-        });
-    };
+    const userCounters = [
+        {
+            icon: (
+                <Icon
+                name="comments"
+                size={14}
+                color={theme.text_color}
+                />
+            ),
+            title: "Комментарии",
+            count: user?.commentsCount ?? 0,
+            type: "comments",
+            onPress: () => navigate("general_user.comments")
+        },
+        {
+            icon: (
+                <Icon
+                name="layers"
+                size={12}
+                color={theme.text_color}
+                />
+            ),
+            title: "Коллекции",
+            count: user?.collectionsCount ?? 0,
+            type: "collections"
+        }
+    ];
 
     const statisticsChartValues = [
         user?.list?.watching || 0,
@@ -208,17 +197,18 @@ export const Profile = props => {
             subtitle={
                 <View>
                     <TouchableNativeFeedback 
-                    onPress={() => {
-                        setModalContent(
-                            <SetStatus 
-                            navigate={navigate} 
-                            onClose={() => {
-                                modalRef.current?.close();
-                            }}
-                            />
-                        );
-                        modalRef.current?.open();
-                    }}
+                    onPress={() => 
+                        dispatch(setModalVisible(true))
+                        // setModalContent(
+                        //     <SetStatus 
+                        //     navigate={navigate} 
+                        //     onClose={() => {
+                        //         modalRef.current?.close();
+                        //     }}
+                        //     />
+                        // );
+                        // modalRef.current?.open();
+                    }
                     >
                         <Text 
                         style={{
@@ -374,125 +364,24 @@ export const Profile = props => {
 
             <View
             style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-                marginVertical: 10,
-                marginHorizontal: 5
+                backgroundColor: theme.divider_color + "60",
+                borderRadius: 100,
+                marginHorizontal: 10,
+                marginVertical:  20,
+                paddingVertical: 5,
+                overflow: "hidden"
             }}
             >
-                <View
-                style={{
-                    borderRadius: 10,
-                    overflow: "hidden",
-                }}
+                <ScrollView
+                horizontal
+                contentContainerStyle={{ flexGrow: 1 }}
+                showsHorizontalScrollIndicator={false}
                 >
-                    <TouchableNativeFeedback
-                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                    onPress={() => navigate("general_user.comments")}
-                    >
-                        <View
-                        style={{
-                            paddingVertical: 5,
-                            paddingHorizontal: 30,
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Text
-                            style={{
-                                fontSize: 22,
-                                color: theme.accent,
-                                fontWeight: "700"
-                            }}
-                            >
-                                {user?.commentsCount}
-                            </Text>
-
-                            <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}
-                            >
-                                <Icon
-                                name="comments"
-                                color={theme.accent}
-                                size={10}
-                                />
-                                <Text
-                                style={{
-                                    color: theme.accent,
-                                    fontSize: 12,
-                                    fontWeight: "500",
-                                    marginLeft: 5
-                                }}
-                                >
-                                    {declOfNum(user?.commentsCount, ["комментарий","комментария","комментариев"])}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
-
-                <View
-                style={{
-                    borderRadius: 10,
-                    overflow: "hidden",
-                }}
-                >
-                    <TouchableNativeFeedback
-                    background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                    >
-                        <View
-                        style={{
-                            paddingVertical: 5,
-                            paddingHorizontal: 30,
-                            justifyContent: "center",
-                            alignItems: "center"
-                        }}
-                        >
-                            <Text
-                            style={{
-                                fontSize: 22,
-                                color: theme.accent,
-                                fontWeight: "700"
-                            }}
-                            >
-                                {user?.collectionsCount}
-                            </Text>
-
-                            <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}
-                            >
-                                <Icon
-                                name="layers"
-                                color={theme.accent}
-                                size={10}
-                                />
-                                <Text
-                                style={{
-                                    color: theme.accent,
-                                    fontSize: 12,
-                                    fontWeight: "500",
-                                    marginLeft: 5
-                                }}
-                                >
-                                    {declOfNum(user?.collectionsCount, ["коллекция","коллекции","коллекций"])}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
+                    {
+                        userCounters.map(renderCounters)
+                    }
+                </ScrollView>
             </View>
-
-            <Divider dividerStyle={{marginTop: 1}}/>
 
             {friendsRender()}
         </View>
@@ -692,7 +581,7 @@ export const Profile = props => {
     const friendsRender = () => (
         <View
         style={{
-            marginVertical: 20,
+            marginBottom: 20,
         }}
         >
             <Cell
@@ -975,125 +864,182 @@ export const Profile = props => {
         )
     };
 
-    return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            divider={false}
-            title="Профиль"
-            afterComponent={
-                <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 7,
-                }}
+    const renderCounters = (item) => {
+        return (
+            <View
+            key={"counter-" + item.type}
+            style={{
+                backgroundColor: theme.divider_color,
+                borderRadius: 100,
+                flex: 1,
+                marginHorizontal: 5,
+                overflow: "hidden",
+            }}
+            >
+                <TouchableNativeFeedback
+                onPress={() => item.onPress()}
+                background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
                 >
-                    <Popup
-                    visible={popupVisible}
-                    onRequestClose={() => setPopupVisible(false)}
-                    animationDuration={100}
+                    <View
                     style={{
-                        backgroundColor: theme.popup_background,
-                        borderRadius: 10,
-                        overflow: "hidden",
+                        paddingVertical: 10,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "row",
                     }}
-                    anchor={
-                        <PressIcon 
-                        icon={
-                            <Icon 
-                            name="four-dots" 
-                            color={theme.icon_color} 
-                            />
-                        }
-                        onPressIn={() => setPopupVisible(true)}
-                        containerStyle={{
-                            marginRight: 15
-                        }}
-                        />
-                    }
                     >
-                        <Cell
-                        title="Скопировать ссылку"
-                        before={
-                            <Icon
-                            name="copy-outline"
-                            color={theme.icon_color}
-                            />
+                        {
+                            item.icon
                         }
-                        containerStyle={{
-                            paddingVertical: 15
-                        }}
-                        contentStyle={{
-                            flex: 0
-                        }}
-                        />
 
-                        <Divider />
-
-                        <Cell
-                        title="Поделиться"
-                        flexedContent={false}
-                        before={
-                            <Icon
-                            color={theme.icon_color}
-                            name="share"
-                            />
-                        }
-                        containerStyle={{
-                            paddingVertical: 15
-                        }}
-                        contentStyle={{
-                            flex: 0
-                        }}
-                        />
-
-                        <View
+                        <Text
                         style={{
-                            marginVertical: 10
+                            marginLeft: 5,
+                            marginRight: 10,
+                            color: theme.text_color,
                         }}
                         >
-                            <Text
-                            style={{
-                                fontSize: 13,
-                                textAlign: "center"
-                            }}
-                            >
-                                Дата регистрации: {dayjs(user?.createdAt).format("DD MMM YYYY")}
-                            </Text>
-                        </View>
-                    </Popup>
+                            {
+                                item.title
+                            }
+                        </Text>
 
+                        <Text
+                        style={{
+                            color: theme.text_color,
+                            fontWeight: "600",
+                            fontSize: 16
+                        }}
+                        >
+                            {
+                                item.count
+                            }
+                        </Text>
+
+                        <Icon
+                        name="chevron-right"
+                        color={theme.text_color}
+                        />
+                    </View>
+                </TouchableNativeFeedback>
+            </View>
+        )
+    };
+
+    const renderHeaderAfterActions = () => {
+        return (
+            <View
+            style={{
+                flexDirection: "row",
+                alignItems: "center"
+            }}
+            >
+                <Popup
+                visible={popupVisible}
+                onRequestClose={() => setPopupVisible(false)}
+                animationDuration={100}
+                style={{
+                    backgroundColor: theme.popup_background,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                }}
+                anchor={
                     <PressIcon 
                     icon={
                         <Icon 
-                        name="gear-outline" 
+                        name="four-dots" 
                         color={theme.icon_color} 
-                        size={25}
                         />
                     }
-                    onPress={() => navigate("settings")}
+                    onPressIn={() => setPopupVisible(true)}
+                    containerStyle={{
+                        marginRight: 15
+                    }}
                     />
-                </View>
-            }
-            />
+                }
+                >
+                    <Cell
+                    title="Скопировать ссылку"
+                    before={
+                        <Icon
+                        name="copy-outline"
+                        color={theme.icon_color}
+                        />
+                    }
+                    containerStyle={{
+                        paddingVertical: 15
+                    }}
+                    contentStyle={{
+                        flex: 0
+                    }}
+                    />
 
+                    <Divider />
+
+                    <Cell
+                    title="Поделиться"
+                    flexedContent={false}
+                    before={
+                        <Icon
+                        color={theme.icon_color}
+                        name="share"
+                        />
+                    }
+                    containerStyle={{
+                        paddingVertical: 15
+                    }}
+                    contentStyle={{
+                        flex: 0
+                    }}
+                    />
+
+                    <View
+                    style={{
+                        marginVertical: 10
+                    }}
+                    >
+                        <Text
+                        style={{
+                            fontSize: 13,
+                            textAlign: "center"
+                        }}
+                        >
+                            Дата регистрации: {dayjs(user?.createdAt).format("DD MMM YYYY")}
+                        </Text>
+                    </View>
+                </Popup>
+
+                <PressIcon 
+                icon={
+                    <Icon 
+                    name="gear-outline" 
+                    color={theme.icon_color} 
+                    size={25}
+                    />
+                }
+                onPress={() => navigate("settings")}
+                />
+            </View>
+        )
+    };
+
+    return (
+        <Panel
+        headerProps={{
+            title: "Профиль",
+            afterActions: renderHeaderAfterActions()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
             modalStyle={styles.modalContainer}
             adjustToContentHeight
-            onClose={() => {
-                // getUserData();
-                EventRegister.emit("changeTabbar", { type: "show" });
-            }}
             >
                 {modalContent}
             </Modalize>
 
             <ScrollView
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            overScrollMode="never"
             refreshControl={
                 <RefreshControl
                 progressBackgroundColor={theme.refresh_control_background}
@@ -1107,6 +1053,6 @@ export const Profile = props => {
                 {statisticsRender()}
                 {renderBrowsingHistory()}
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

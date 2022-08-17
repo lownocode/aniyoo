@@ -18,12 +18,13 @@ import {
     Icon,
     Placeholder,
     PressIcon,
+    Panel
 } from "../../components";
 
 import { storage } from "../../functions";
 
 const SearchInput = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const inputRef = useRef();
 
     const {
@@ -36,7 +37,7 @@ const SearchInput = (props) => {
         style={{
             backgroundColor: theme.divider_color,
             marginHorizontal: 15,
-            borderRadius: 10,
+            borderRadius: 100,
             flexDirection: "row",
             alignItems: "center",
             flex: 1
@@ -74,13 +75,14 @@ const SearchInput = (props) => {
                     <PressIcon
                     icon={
                         <Icon
-                        name="backspace"
+                        name="backspace-outline"
                         color={theme.text_secondary_color}
                         size={20}
                         />
                     }
                     containerStyle={{
-                        marginHorizontal: 10
+                        marginLeft: 10,
+                        marginRight: 5
                     }}
                     onPress={() => {
                         inputRef.current?.focus();
@@ -94,7 +96,7 @@ const SearchInput = (props) => {
 };
 
 export const SearchUsers = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         navigation: {
@@ -207,7 +209,9 @@ export const SearchUsers = (props) => {
     }; 
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <Panel
+        headerShown={false}
+        >
             <View
             style={{
                 paddingTop: StatusBar.currentHeight + 20,
@@ -240,11 +244,12 @@ export const SearchUsers = (props) => {
                     <Icon
                     name="mic-outline"
                     color={theme.text_secondary_color}
-                    size={22}
+                    size={17}
                     />
                 }
                 containerStyle={{
-                    marginRight: 5
+                    marginRight: 10,
+                    backgroundColor: theme.divider_color
                 }}
                 onPress={() => goBack()}
                 />
@@ -254,11 +259,12 @@ export const SearchUsers = (props) => {
                     <Icon
                     name="options"
                     color={theme.text_secondary_color}
-                    size={22}
+                    size={17}
                     />
                 }
                 containerStyle={{
-                    marginRight: 15
+                    marginRight: 15,
+                    backgroundColor: theme.divider_color
                 }}
                 onPress={() => goBack()}
                 />
@@ -377,6 +383,6 @@ export const SearchUsers = (props) => {
                     />
                 )
             }
-        </View>
+        </Panel>
     )
 };

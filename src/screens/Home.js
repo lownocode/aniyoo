@@ -21,13 +21,14 @@ import {
     Header,
     Icon,
     Divider,
-    Placeholder
+    Placeholder,
+    Panel
 } from "../components";
 
 import { storage } from "../functions";
 
 export const Home = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         navigation: {
@@ -281,12 +282,11 @@ export const Home = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Главная"
-            height={30}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Главная"
+        }}
+        >
             <ScrollView
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
@@ -333,6 +333,6 @@ export const Home = (props) => {
                     }
                 </LinearGradient>
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

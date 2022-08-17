@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 export const Input = props => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     
     const {
         placeholder,

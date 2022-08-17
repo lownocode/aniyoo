@@ -10,7 +10,7 @@ import {
 import { formatViews } from "../functions";
 
 export const SelectVideoSource = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         onClose, 

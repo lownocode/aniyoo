@@ -1,8 +1,8 @@
-import { AppRegistry, LogBox } from "react-native";
+import { AppRegistry, LogBox, } from "react-native";
 import axios from "axios";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import Orientation from "react-native-orientation";
-import notifee from "@notifee/react-native";
+import notifee, { EventType, AndroidStyle, AndroidImportance } from "@notifee/react-native";
 import FBMessaging from "@react-native-firebase/messaging";
 
 import App from "./src/App";
@@ -15,20 +15,55 @@ LogBox.ignoreLogs([
 ]);
 
 const onMessageReceived = async (message) => {
-    console.log(message);
-    const channelId = await notifee.createChannel({
-        id: 'default',
-        name: 'Default Channel',
-      });
-    notifee.displayNotification({
-        title: 'Your order has been shipped',
-        body: `Your order was shipped at this`,
+    await notifee.createChannel({
+        id: "default",
+        name: "Default Channel",
+        importance: AndroidImportance.HIGH
+    });
+
+    return notifee.displayNotification({
+        title: '08:00am Alarm',
+        body: 'The alarm you set for 08:00am requires attention!',
         android: {
-            channelId
+            channelId: 'default',
+            style: {
+                type: AndroidStyle.MESSAGING,
+                person: {
+                  name: 'John Doe',
+                  icon: 'https://my-cdn.com/avatars/123.png',
+                },
+                messages: [
+                  {
+                    text: 'Hey, how are you?',
+                    timestamp: Date.now() - 600000, // 10 minutes ago
+                  },
+                  {
+                    text: 'Great thanks, food later?',
+                    timestamp: Date.now(), // Now
+                    person: {
+                      name: 'Sarah Lane',
+                      icon: 'https://my-cdn.com/avatars/567.png',
+                    },
+                  },
+                ],
+                
+              },
+              actions: [
+                {
+                  title: '<b>ответить</b> &#128111;',
+                  pressAction: { id: 'dance' },
+                  input: true
+                },
+              ],
         },
     });
 };
 
+notifee.onBackgroundEvent(async ({ type, detail, headless }) => {
+    if (type === EventType.DISMISSED) {
+        console.log("dismiss notice")
+    }
+});
 FBMessaging().onMessage(onMessageReceived);
 FBMessaging().setBackgroundMessageHandler(onMessageReceived);
 

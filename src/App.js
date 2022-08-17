@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Linking } from "react-native";
+import React, { useEffect, useState, useRef, createRef } from "react";
+import { Linking, View } from "react-native";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import SplashScreen from "react-native-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import axios from "axios";
 import { EventRegister } from "react-native-event-listeners";
-import { Provider, useDispatch } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./redux/store";
 import { getThemeIsDark, getUserData } from "./redux/reducers";
+import { Modalize } from "react-native-modalize";
 
 import FBMessaging from "@react-native-firebase/messaging";
 import Firebase from "@react-native-firebase/app";
-import notifee from "@notifee/react-native";
 
 import {
     Authorization,
@@ -19,6 +19,7 @@ import {
 } from "./panels";
 import Tabs from "./navigation/Tabs";
 import { sleep, storage } from "./functions";
+import { WINDOW_WIDTH } from "../constants";
 
 const AuthorizationStack = createNativeStackNavigator();
 
@@ -36,9 +37,13 @@ if (!Firebase.apps.length) {
 const App = () => {
     const dispatch = useDispatch();
 
+    const { theme } = useSelector(state => state.theme);
+    const { modal } = useSelector(state => state.app);
+
     const [ authorized, setAuthorized ] = useState(false);
 
     const navigation = useNavigationContainerRef();
+    const modalRef = useRef();
 
     useEffect(() => {
         axios.interceptors.response.use((response) => {
@@ -68,6 +73,10 @@ const App = () => {
             EventRegister.removeEventListener(eventListener);
         };
     }, []);
+
+    useEffect(() => {
+        console.log(modal)
+    }, [modal]);
 
     const handleDeeplink = async () => {
         const getUrlVars = (url) => {
@@ -151,6 +160,26 @@ const App = () => {
         onReady={() => initialize.finally(() => SplashScreen.hide())}
         ref={navigation}
         >
+            <Modalize
+            ref={modalRef}
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            modalStyle={{
+                left: 10,
+                width: WINDOW_WIDTH - 20,
+                bottom: 10,
+                borderRadius: 15,
+                backgroundColor: theme.bottom_modal.background,
+                borderColor: theme.bottom_modal.border,
+                borderWidth: 0.5,
+                overflow: "hidden",
+                borderRadius: 15,
+            }}
+            adjustToContentHeight
+            >
+                {
+                    // modal.content
+                }
+            </Modalize>
             {
                 authorized ? (
                     <Tabs />

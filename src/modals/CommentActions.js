@@ -17,7 +17,7 @@ import {
 } from ".";
 
 export const CommentActions = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const user = useContext(UserContext);
 
     const [ mode, setMode ] = useState("default");

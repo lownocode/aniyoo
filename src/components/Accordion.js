@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { Transition, Transitioning } from "react-native-reanimated";
 
 export const Accordion = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         children,

@@ -3,7 +3,7 @@ import { View, TouchableNativeFeedback, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 export const ContentHeader = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         text, 

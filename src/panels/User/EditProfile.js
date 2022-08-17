@@ -4,14 +4,14 @@ import { useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 
 import {
-    Header,
     Cell,
     Icon,
     Accordion,
+    Panel,
 } from "../../components";
 
 export const EditProfile = props => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const { 
@@ -24,14 +24,12 @@ export const EditProfile = props => {
     const [ userData ] = useState(route.params?.userData || {});
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Редактировать профиль"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "Редактировать профиль",
+            backOnPress: () => goBack()
+        }}
+        >
             <ScrollView 
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
@@ -414,6 +412,6 @@ export const EditProfile = props => {
                     />
                 </Accordion>
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

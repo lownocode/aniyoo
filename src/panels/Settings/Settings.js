@@ -4,17 +4,17 @@ import { useSelector } from "react-redux";
 import { Modalize } from "react-native-modalize";
 
 import {
-    Header,
     Cell,
     Icon,
     Divider,
+    Panel,
 } from "../../components";
 import {
     ConfirmExit,
 } from "../../modals";
 
 export const Settings = props => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         navigation: {
@@ -42,14 +42,12 @@ export const Settings = props => {
     });
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Настройки"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "Настройки",
+            backOnPress: () => goBack()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
@@ -59,12 +57,7 @@ export const Settings = props => {
                 {modalContent}
             </Modalize>
             
-            <ScrollView 
-            showsVerticalScrollIndicator={false}
-            style={{ marginTop: -15 }}
-            >
-                <View style={{ paddingTop: 15 }}/>
-
+            <ScrollView>
                 <Cell
                 centered={false}
                 title="Выйти из аккаунта"
@@ -169,6 +162,6 @@ export const Settings = props => {
                 subtitle="Появился вопрос? Задайте его поддержке прямо сейчас!"
                 />
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

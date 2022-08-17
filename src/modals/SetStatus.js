@@ -12,7 +12,7 @@ import {
 import { storage, EventEmit } from "../functions";
 
 export const SetStatus = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { onClose } = props;
     

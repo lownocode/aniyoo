@@ -6,7 +6,7 @@ import { launchImageLibrary } from "react-native-image-picker";
 import { Modalize } from "react-native-modalize";
 
 import { 
-    Header,
+    Panel,
     Cell,
     Icon,
     Avatar,
@@ -18,7 +18,7 @@ import {
 import { storage } from "../../functions";
 
 export const EditProfileProfile = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const [ cachedUserData, setCachedUserData ] = useState({});
 
@@ -93,15 +93,13 @@ export const EditProfileProfile = (props) => {
     });
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
-            <Header
-            title="Редактировать профиль"
-            subtitle="Профиль"
-            height={30}
-            backButtonOnPress={() => goBack()}
-            backButton
-            />
-
+        <Panel
+        headerProps={{
+            title: "Редактировать профиль",
+            subtitle: "Профиль",
+            backOnPress: () => goBack()
+        }}
+        >
             <Modalize
             ref={modalRef}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
@@ -211,6 +209,6 @@ export const EditProfileProfile = (props) => {
                 }}
                 />
             </ScrollView>
-        </View>
+        </Panel>
     )
 };

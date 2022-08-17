@@ -3,7 +3,7 @@ import { StyleSheet, TouchableNativeFeedback, View } from "react-native";
 import { useSelector } from "react-redux";
 
 export const PressIcon = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         onPress, 

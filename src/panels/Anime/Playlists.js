@@ -25,13 +25,14 @@ import {
     ContentHeader, 
     Icon, 
     Placeholder,
+    Panel
 } from "../../components";
 
 import { sleep, storage } from "../../functions";
 import LinearGradient from "react-native-linear-gradient";
 
 export const AnimePlaylists = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const { 
         navigation: {
@@ -419,7 +420,9 @@ export const AnimePlaylists = (props) => {
     }, [images]);
 
     return (
-        <View style={{ backgroundColor: theme.background_content, flex: 1 }}>
+        <Panel
+        headerShown={false}
+        >
             <View
             style={{
                 position: "absolute",
@@ -489,6 +492,6 @@ export const AnimePlaylists = (props) => {
                     </ScrollView>
                 )
             }
-        </View>
+        </Panel>
     )
 };

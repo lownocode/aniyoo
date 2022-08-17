@@ -3,7 +3,7 @@ import { Animated, View } from "react-native";
 import { useSelector } from "react-redux";
 
 export const Progress = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         step = 0,

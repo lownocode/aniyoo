@@ -10,7 +10,7 @@ import {
 import { useSelector } from "react-redux";
 
 export const Button = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         title, 

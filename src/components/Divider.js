@@ -3,7 +3,7 @@ import LinearGradient from "react-native-linear-gradient";
 import { useSelector } from "react-redux";
 
 export const Divider = () => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     return (
         <LinearGradient

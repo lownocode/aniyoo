@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { Icon } from ".";
 
 export const Avatar = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
 
     const {
         url, 

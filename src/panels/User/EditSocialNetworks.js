@@ -5,15 +5,15 @@ import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatli
 import { useRoute } from "@react-navigation/native";
 
 import { 
-    Header,
     Button,
     Icon,
+    Panel,
 } from "../../components";
 
 import { storage } from "../../functions";
 
 export const EditSocialNetworks = (props) => {
-    const { theme: { theme } } = useSelector(state => state);
+    const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
     const {
@@ -250,14 +250,12 @@ export const EditSocialNetworks = (props) => {
     };
 
     return (
-        <View style={{ backgroundColor: theme.background_content }}>
-            <Header
-            title="Редактировать социальные сети"
-            height={30}
-            backButton
-            backButtonOnPress={() => goBack()}
-            />
-
+        <Panel
+        headerProps={{
+            title: "Редактировать социальные сети",
+            backOnPress: () => goBack()
+        }}
+        >
             <DraggableFlatList
             data={networks}
             renderItem={renderNetwork}
@@ -316,6 +314,6 @@ export const EditSocialNetworks = (props) => {
             }
             ListFooterComponent={<View style={{ marginBottom: 200 }}/>}
             />
-        </View>
+        </Panel>
     )
 };
