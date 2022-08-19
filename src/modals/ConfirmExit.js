@@ -1,22 +1,21 @@
 import React from "react";
 import { View } from "react-native";
-import { EventRegister } from "react-native-event-listeners";
+import { useDispatch } from "react-redux";
 
 import {
     Button,
     Cell
 } from "../components";
 import { storage } from "../functions";
+import { closeModal, setAuthorized } from "../redux/reducers";
 
-export const ConfirmExit = (props) => {
-    const { onClose, navigate } = props;
+export const ConfirmExit = () => {
+    const dispatch = useDispatch();
 
     const confirm = () => {
-        onClose();
-        EventRegister.emit("app", {
-            type: "changeAuthorized",
-            value: false
-        });
+        dispatch(setAuthorized(false));
+        dispatch(closeModal());
+
         storage.setItem("AUTHORIZATION_SIGN", null);
     };
     
@@ -32,7 +31,7 @@ export const ConfirmExit = (props) => {
                 <Button
                 title="Отмена"
                 type="outline"
-                onPress={() => onClose()}
+                onPress={() => dispatch(closeModal())}
                 containerStyle={{
                     maxWidth: "50%"
                 }}

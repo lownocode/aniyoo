@@ -18,10 +18,11 @@ import {
     Icon,
     Placeholder,
     PressIcon,
-    Panel
+    Panel,
+    ContentHeader
 } from "../../components";
 
-import { storage } from "../../functions";
+import { declOfNum, storage } from "../../functions";
 
 const SearchInput = (props) => {
     const { theme } = useSelector(state => state.theme);
@@ -96,6 +97,7 @@ const SearchInput = (props) => {
 };
 
 export const SearchUsers = (props) => {
+    const { user } = useSelector(state => state.user);
     const { theme } = useSelector(state => state.theme);
 
     const {
@@ -106,7 +108,7 @@ export const SearchUsers = (props) => {
     } = props;
 
     const [ text, setText ] = useState("");
-    const [ findedUsers, setFindedUsers ] = useState([]);
+    const [ findedUsers, setFindedUsers ] = useState({});
     const [ loading, setLoading ] = useState(false);
     const [ clipboardText, setClipboardText ] = useState("");
 
@@ -119,22 +121,25 @@ export const SearchUsers = (props) => {
         getClipboardText();
     }, []);
 
-    const search = async (text) => {
-        setText(text);
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => searchRequest(text), 200);
+    
+        return () => clearTimeout(delayDebounceFn);
+    }, [text]);
+    
+    const searchRequest = () => {
+        if(text.split(" ").join("").length < 1) return;
         setLoading(true);
-        
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/users.search", {
             nickname: text,
-            limit: 15
         }, {
             headers: {
-                "Authorization": sign
+                "Authorization": user.sign
             }
         })
         .then(({ data }) => {
-            setFindedUsers(data.users);
+            setFindedUsers(data);
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -148,14 +153,17 @@ export const SearchUsers = (props) => {
         axios.post("/users.search", {
             nickname: text,
             limit: 15,
-            offset: findedUsers.length
+            offset: findedUsers?.users?.length
         }, {
             headers: {
                 "Authorization": sign
             }
         })
         .then(({ data }) => {
-            setFindedUsers(findedUsers.concat(data.users));
+            setFindedUsers({
+                ...findedUsers,
+                users: findedUsers.users.concat(data.users)
+            });
         })
         .catch(({ response: { data } }) => {
             console.log(data)
@@ -235,7 +243,7 @@ export const SearchUsers = (props) => {
                 />
 
                 <SearchInput 
-                onChangeText={search} 
+                onChangeText={setText} 
                 value={text} 
                 />
 
@@ -271,7 +279,7 @@ export const SearchUsers = (props) => {
             </View>
 
             {
-                clipboardText.length > 1 && (findedUsers.length === 0 && text.length === 0) ? (
+                clipboardText.length > 1 && (findedUsers?.users?.length === 0 && text.length === 0) ? (
                     <View
                     style={{
                         margin: 10,
@@ -282,7 +290,7 @@ export const SearchUsers = (props) => {
                     >
                         <TouchableNativeFeedback
                         background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                        onPress={() => search(clipboardText)}
+                        onPress={() => setText(clipboardText)}
                         >
                             <View
                             style={{
@@ -336,7 +344,7 @@ export const SearchUsers = (props) => {
             }
 
             {
-                (findedUsers.length === 0 && text.length === 0) ? (
+                text.split(" ").join("").length < 1 ? (
                     <Placeholder
                     icon={
                         <Icon
@@ -348,7 +356,7 @@ export const SearchUsers = (props) => {
                     title="Начните вводить никнейм"
                     subtitle="Здесь будут показаны подходящие по никнейму пользователи"
                     />
-                ) : loading ? (
+                ) : (loading && findedUsers?.users?.length  === 0 && text.length) ? (
                     <Placeholder
                     icon={
                         <ActivityIndicator
@@ -359,7 +367,7 @@ export const SearchUsers = (props) => {
                     title="Выполняется поиск"
                     subtitle="Нужно немного подождать..."
                     />
-                ) : (text.length > 0 && findedUsers.length === 0 || text.length === 0 && findedUsers.length > 0) ? (
+                ) : (text.length > 0 && findedUsers?.users?.length === 0 || text.length === 0 && findedUsers?.users?.length > 0) ? (
                     <Placeholder
                     icon={
                         <Icon
@@ -373,13 +381,47 @@ export const SearchUsers = (props) => {
                     />
                 ) : (
                     <FlatList
-                    data={findedUsers}
+                    data={findedUsers?.users}
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={renderUsers}
                     showsVerticalScrollIndicator={false}
                     overScrollMode="never"
                     keyboardShouldPersistTaps="always"
                     onEndReached={() => loadMoreUsers()}
+                    ListHeaderComponent={
+                        <View
+                        style={{
+                            marginTop: 15,
+                            marginBottom: 5
+                        }}
+                        >
+                            <ContentHeader
+                            icon={
+                                loading ? (
+                                    <ActivityIndicator color={theme.activity_indicator_color} size={14} />
+                                ) : (
+                                    <Icon
+                                    name="description"
+                                    color={theme.text_secondary_color}
+                                    />
+                                )
+                            }
+                            text={`Найдено ${findedUsers?.count || "0"} ${declOfNum(findedUsers?.count, ["пользователь", "пользователя", "пользователей"])}`}
+                            after={
+                                <View
+                                style={{
+                                    marginRight: 10
+                                }}
+                                >
+                                    <Icon
+                                    name="chevron-down"
+                                    color={theme.text_color}
+                                    />
+                                </View>
+                            }
+                            />
+                        </View>
+                    }
                     />
                 )
             }

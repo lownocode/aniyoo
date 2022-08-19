@@ -1,24 +1,22 @@
-import React, { useEffect, useState, useRef, createRef } from "react";
-import { Linking, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Linking } from "react-native";
 import { CommonActions, NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
-import SplashScreen from "react-native-splash-screen";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import axios from "axios";
-import { EventRegister } from "react-native-event-listeners";
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { store } from "./redux/store";
-import { getThemeIsDark, getUserData } from "./redux/reducers";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useDispatch, useSelector } from "react-redux";
+import { closeModal, getAuthorized, getTheme, getUserData, setAuthorized } from "./redux/reducers";
 import { Modalize } from "react-native-modalize";
-
 import FBMessaging from "@react-native-firebase/messaging";
 import Firebase from "@react-native-firebase/app";
 
+import { BottomModalContent } from "./modals";
+import { store } from "./redux/store";
 import {
     Authorization,
     AuthorizationRegistrationConfirmation,
 } from "./panels";
 import Tabs from "./navigation/Tabs";
-import { sleep, storage } from "./functions";
+import { storage } from "./functions";
 import { WINDOW_WIDTH } from "../constants";
 
 const AuthorizationStack = createNativeStackNavigator();
@@ -34,49 +32,14 @@ if (!Firebase.apps.length) {
     });
 }
 
-const App = () => {
+export const App = () => {
     const dispatch = useDispatch();
 
     const { theme } = useSelector(state => state.theme);
-    const { modal } = useSelector(state => state.app);
-
-    const [ authorized, setAuthorized ] = useState(false);
+    const { authorized, modal } = useSelector(state => state.app);
 
     const navigation = useNavigationContainerRef();
     const modalRef = useRef();
-
-    useEffect(() => {
-        axios.interceptors.response.use((response) => {
-            return response;
-        }, (error) => {
-            if(error.response.data.code === "INVALID_SIGN") {
-                storage.setItem("AITHORIZATION_SIGN", null);
-                return setAuthorized(false);
-            }
-        
-            return Promise.reject(error);
-        });
-    }, []);
-
-    useEffect(() => {
-        const eventListener = EventRegister.addEventListener("app", (data) => {
-            switch(data.type) {
-                case "changeAuthorized": {
-                    return setAuthorized(data.value);
-                }
-                default:
-                    return;
-            }
-        });
-
-        return () => {
-            EventRegister.removeEventListener(eventListener);
-        };
-    }, []);
-
-    useEffect(() => {
-        console.log(modal)
-    }, [modal]);
 
     const handleDeeplink = async () => {
         const getUrlVars = (url) => {
@@ -130,13 +93,18 @@ const App = () => {
         });
     }; 
 
-    const getIsSignedIn = async () => {
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
-
-        if(!sign) return;
-
-        return setAuthorized(true);
-    };
+    useEffect(() => {
+        axios.interceptors.response.use((response) => {
+            return response;
+        }, (error) => {
+            if(error.response.data.code === "INVALID_SIGN") {
+                storage.setItem("AITHORIZATION_SIGN", null);
+                return dispatch(setAuthorized(false));
+            }
+        
+            return Promise.reject(error);
+        });
+    }, []);
 
     const notificationsAndUserInit = async () => {
         await FBMessaging().registerDeviceForRemoteMessages();
@@ -145,23 +113,36 @@ const App = () => {
         dispatch(getUserData(notifyToken ?? null));
     };
 
-    const initialize = new Promise((resolve) => {
-        dispatch(getThemeIsDark());
+    useEffect(() => {
+        store.subscribe(() => {
+            const modalIsVisible = store.getState().app.modal.visible;
+
+            if(modal.visible !== modalIsVisible) {
+                if(modalIsVisible) {
+                    return modalRef.current?.open();
+                }
+
+                modalRef.current?.close();
+            }
+        });
+    }, []);
+
+    const initialize = () => {
+        dispatch(getTheme());
+        dispatch(getAuthorized());
 
         notificationsAndUserInit();
         handleDeeplink();
-        getIsSignedIn();
-
-        return sleep(0.5).then(() => resolve());
-    });
+    };
 
     return (
         <NavigationContainer 
-        onReady={() => initialize.finally(() => SplashScreen.hide())}
+        onReady={() => initialize()}
         ref={navigation}
         >
             <Modalize
             ref={modalRef}
+            onClosed={() => dispatch(closeModal())}
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
             modalStyle={{
                 left: 10,
@@ -176,9 +157,7 @@ const App = () => {
             }}
             adjustToContentHeight
             >
-                {
-                    // modal.content
-                }
+                <BottomModalContent/>
             </Modalize>
             {
                 authorized ? (
@@ -204,12 +183,4 @@ const App = () => {
             }
         </NavigationContainer>
     );
-};
-
-export default AppWrapper = () => {
-    return (
-        <Provider store={store}>
-            <App />
-        </Provider>
-    )
 };

@@ -4,7 +4,7 @@ import changeNavigationBarColor from "react-native-navigation-bar-color";
 import theme from "../../config/theme";
 import { storage } from "../../functions";
 
-export const getThemeIsDark = createAsyncThunk("theme/fetchThemeIsDark", async () => {
+export const getTheme = createAsyncThunk("theme/getTheme", async () => {
     const isDarkMode = await storage.getItem("DARK_THEME_MODE") ?? true;
 
     changeNavigationBarColor(isDarkMode ? theme.DARK.bottom_tabbar.background : theme.LIGHT.bottom_tabbar.background, !isDarkMode, true);
@@ -29,7 +29,7 @@ const themeSlice = createSlice({
         }
     },
     extraReducers: builder => {
-        builder.addCase(getThemeIsDark.fulfilled, (state, action) => {
+        builder.addCase(getTheme.fulfilled, (state, action) => {
             state.theme = action.payload;
         })
     }

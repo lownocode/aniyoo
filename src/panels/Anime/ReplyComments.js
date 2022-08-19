@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { 
     View, 
     ToastAndroid, 
@@ -8,15 +8,12 @@ import {
     Keyboard, 
     RefreshControl,
     TouchableNativeFeedback,
-    StyleSheet,
-    Dimensions,
     FlatList,
     Text,
     KeyboardAvoidingView
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -34,11 +31,12 @@ import {
     Placeholder,
     ContentHeader,
 } from "../../components";
-import { CommentActions } from "../../modals";
-
+import { openModal } from "../../redux/reducers";
 import { declOfNum, storage } from "../../functions";
 
 export const AnimeReplyComments = (props) => {
+    const dispatch = useDispatch();
+
     const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
@@ -52,10 +50,8 @@ export const AnimeReplyComments = (props) => {
     const [ replies, setReplies ] = useState([]);
     const [ reply, setReply ] = useState(route.params?.reply || {});
     const [ loadingComments, setLoadingComments ] = useState(true);
-    const [ modalContent, setModalContent ] = useState(null);
 
     const flatListRef = useRef();
-    const modalRef = useRef();
 
     const {
         navigation: {
@@ -206,18 +202,14 @@ export const AnimeReplyComments = (props) => {
             key={"reply-" + item.id}
             title={item?.user?.nickname}
             centered={false}
-            onPress={() => {
-                setModalContent(
-                    <CommentActions 
-                    onClose={() => modalRef.current?.close()} 
-                    comment={item} 
-                    successEditing={() => {
-                        getComment(false);
-                    }}
-                    />
-                );
-                modalRef.current?.open();
-            }}
+            onPress={() => dispatch(openModal({ 
+                visible: true, 
+                id: "COMMENT_ACTIONS", 
+                props: {
+                    comment: item,
+                    successEditing: () => getComment(false)
+                } 
+            }))}
             subtitle={
                 <View>
                     {
@@ -489,20 +481,6 @@ export const AnimeReplyComments = (props) => {
         });
     };
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerProps={{
@@ -510,15 +488,6 @@ export const AnimeReplyComments = (props) => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             {
                 loadingComments ? (
                     <Placeholder
@@ -545,18 +514,14 @@ export const AnimeReplyComments = (props) => {
                                 <Cell
                                 title={comment?.user?.nickname}
                                 centered={false}
-                                onPress={() => {
-                                    setModalContent(
-                                        <CommentActions 
-                                        onClose={() => modalRef.current?.close()} 
-                                        comment={comment} 
-                                        successEditing={() => {
-                                            getComment(false);
-                                        }}
-                                        />
-                                    );
-                                    modalRef.current?.open();
-                                }}
+                                onPress={() => dispatch(openModal({ 
+                                    visible: true, 
+                                    id: "SET_STATUS",
+                                    props: {
+                                        comment,
+                                        successEditing: () => getComment(false),
+                                    } 
+                                }))}
                                 subtitle={
                                     <View>
                                         {

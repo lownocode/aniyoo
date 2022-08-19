@@ -1,12 +1,15 @@
+import React from "react";
 import { AppRegistry, LogBox, } from "react-native";
-import axios from "axios";
+import { Provider } from "react-redux";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
+import axios from "axios";
 import Orientation from "react-native-orientation";
 import notifee, { EventType, AndroidStyle, AndroidImportance } from "@notifee/react-native";
 import FBMessaging from "@react-native-firebase/messaging";
 
-import App from "./src/App";
+import { App } from "./src/App";
 import { REQUEST_DOMAIN } from "./variables";
+import { store } from "./src/redux/store";
 
 LogBox.ignoreLogs([
     "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -68,6 +71,13 @@ FBMessaging().onMessage(onMessageReceived);
 FBMessaging().setBackgroundMessageHandler(onMessageReceived);
 
 axios.defaults.baseURL = REQUEST_DOMAIN;
+
 Orientation.lockToPortrait();
 
-AppRegistry.registerComponent("aniyoo", () => gestureHandlerRootHOC(App));
+const Component = () => (
+	<Provider store={store}>
+		<App/>
+	</Provider>
+);
+
+AppRegistry.registerComponent("aniyoo", () => gestureHandlerRootHOC(Component));

@@ -5,8 +5,6 @@ import {
     TouchableNativeFeedback, 
     View, 
     ActivityIndicator,
-    Dimensions,
-    StyleSheet,
     PanResponder,
     ToastAndroid,
     TouchableWithoutFeedback,
@@ -18,7 +16,6 @@ import Slider from "@react-native-community/slider";
 import Orientation from "react-native-orientation";
 import axios from "axios";
 import { hideNavigationBar } from "react-native-navigation-bar-color";
-import { Modalize } from "react-native-modalize";
 import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
@@ -26,9 +23,7 @@ import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 import { Cell, Icon, Progress } from "../../components";
-import { 
-    AnimeWatchedBefore, 
-} from "../../modals";
+import { openModal } from "../../redux/reducers";
 
 import { declOfNum, storage } from "../../functions";
 
@@ -50,7 +45,6 @@ export const AnimeVideoPlayer = (props) => {
     const [ videoUrls, setVideoUrls ] = useState(route.params?.videos || {});
     const [ animeData, setAnimeData ] = useState(route.params?.data);
     const [ loading, setLoading ] = useState(true);
-    const [ modalContent, setModalContent ] = useState(null);
     const [ lastProgressCurrent, setLastProgressCurrent ] = useState(0);
     const [ swipeBefore, setSwipeBefore ] = useState(0);
     const [ swipeStartPoint, setSwipeStartPoint ] = useState(null);
@@ -62,7 +56,6 @@ export const AnimeVideoPlayer = (props) => {
     const [ skipToMoment, setSkipToMoment ] = useState(false);
     const [ videoPlayableUrl, setVideoPlayableUrl ] = useState("");
 
-    const modalRef = useRef();
     const videoRef = useRef();
 
     const panResponder = PanResponder.create({
@@ -207,24 +200,22 @@ export const AnimeVideoPlayer = (props) => {
         if(animeAllViewed?.find(x => x.episode === animeData.playedEpisode && x.translationId === route.params?.translationId)) {
             const data = animeAllViewed?.find(x => x.episode === animeData.playedEpisode && x.translationId === route.params?.translationId);
 
-            setModalContent(
-                <AnimeWatchedBefore 
-                data={data}
-                animeContinue={(time) => {
-                    setPaused(false);
-                    videoRef.current?.seek(time);
-                    modalRef.current?.close();
-                }}
-                startOver={() => {
-                    setPaused(false);
-                    modalRef.current?.close();
-                }}
-                onClose={() => modalRef.current?.close()}
-                />
-            );
+            dispatch(openModal({ 
+                visible: true, 
+                id: "ANIME_WATCHED_BEFORE",
+                props: {
+                    data,
+                    animeContinue: (time) => {
+                        setPaused(false);
+                        videoRef.current?.seek(time);
+                    },
+                    startOver: () => {
+                        setPaused(false)
+                    }
+                } 
+            }));
 
             setPaused(true);
-            modalRef.current?.open();
         }
     }; 
 
@@ -366,20 +357,6 @@ export const AnimeVideoPlayer = (props) => {
         return setVideoPlayableUrl(urls ? urls[quality] : videoUrls[quality]);
     };
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: Dimensions.get("window").width / 4,
-            width: Dimensions.get("window").width / 2,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <View style={{ backgroundColor: "#000", flex: 1, }}>
             <Video
@@ -424,16 +401,6 @@ export const AnimeVideoPlayer = (props) => {
                 }
             }}
             />
-
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            onClosed={() => setPaused(false)}
-            >
-                {modalContent}
-            </Modalize>
             
             {
                 controlsOpen && !lockedControls ? (

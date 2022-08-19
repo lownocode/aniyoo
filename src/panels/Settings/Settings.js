@@ -1,7 +1,6 @@
-import React, { useState, useRef } from "react";
-import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
-import { useSelector } from "react-redux";
-import { Modalize } from "react-native-modalize";
+import React from "react";
+import { View, ScrollView } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
     Cell,
@@ -9,11 +8,11 @@ import {
     Divider,
     Panel,
 } from "../../components";
-import {
-    ConfirmExit,
-} from "../../modals";
+import { openModal } from "../../redux/reducers";
 
 export const Settings = props => {
+    const dispatch = useDispatch(); 
+
     const { theme } = useSelector(state => state.theme);
 
     const { 
@@ -23,24 +22,6 @@ export const Settings = props => {
         },
     } = props;
 
-    const [ modalContent, setModalContent ] = useState(null);
-
-    const modalRef = useRef();
-
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerProps={{
@@ -48,15 +29,6 @@ export const Settings = props => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-            
             <ScrollView>
                 <Cell
                 centered={false}
@@ -80,10 +52,7 @@ export const Settings = props => {
                         />
                     </View>
                 }
-                onPress={() => {
-                    setModalContent(<ConfirmExit navigate={navigate} onClose={() => modalRef.current?.close()}/>);
-                    modalRef.current?.open();
-                }}
+                onPress={() => dispatch(openModal({ visible: true, id: "CONFIRM_EXIT", props: { navigate } }))}
                 />
 
                 <Divider dividerStyle={{marginVertical: 10}}/>

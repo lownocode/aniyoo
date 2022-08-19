@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { 
     View, 
     StatusBar, 
     Image, 
     TouchableNativeFeedback,
     Dimensions,
-    StyleSheet,
     ToastAndroid,
     RefreshControl,
     ActivityIndicator,
@@ -18,7 +17,6 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { Modalize } from "react-native-modalize";
 import LinearGradient from "react-native-linear-gradient";
 import ImageColors from "react-native-image-colors";
 import { Menu as Popup } from "react-native-material-menu";
@@ -53,11 +51,13 @@ import {
     RenderAllCommentsList,
     Panel
 } from "../../components";
-import { AnimeSetList } from "../../modals";
+import { openModal } from "../../redux/reducers";
 import { FLAGS, DOMAIN } from "../../../variables";
 import { STATUSBAR_HEIGHT, WINDOW_HEIGHT } from "../../../constants";
 
 export const Anime = (props) => {
+    const dispatch = useDispatch();
+
     const { theme } = useSelector(state => state.theme);
 
     const {
@@ -70,7 +70,6 @@ export const Anime = (props) => {
 
     const route = useRoute();
     const scrollViewRef = useRef();
-    const modalRef = useRef();
 
     const topButtonsPosition = useRef(new Animated.Value(20)).current;
     const scrollYBefore = useRef(new Animated.Value(0)).current;
@@ -82,7 +81,6 @@ export const Anime = (props) => {
     const [ refreshing, setRefreshing ] = useState(true);
     const [ animeData, setAnimeData ] = useState(route.params?.animeData);
     const [ hideDescription, setHideDescription ] = useState(true);
-    const [ modalContent, setModalContent ] = useState(null);
     const [ linkedAnimes, setLinkedAnimes ] = useState({});
     const [ descriptionLinesCount, setDescriptionLinesCount ] = useState(0);
     const [ posterColors, setPosterColors ] = useState({});
@@ -908,20 +906,6 @@ export const Anime = (props) => {
         }).start();
     };
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerShown={false}
@@ -1137,15 +1121,6 @@ export const Anime = (props) => {
                 </TouchableNativeFeedback>
             </Animated.View>
 
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             <ScrollView
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
@@ -1316,18 +1291,16 @@ export const Anime = (props) => {
                                 "none": "Не в списке"
                             }[animeData?.inList]
                         }
-                        onPress={() => {
-                            setModalContent(
-                                <AnimeSetList 
-                                animeId={animeData?.id} 
-                                inList={animeData?.inList}
-                                getAnimeData={getAnimeData}
-                                addAnimeToList={addAnimeToList}
-                                onClose={() => modalRef.current?.close()}
-                                />
-                            );
-                            modalRef.current?.open();
-                        }}
+                        onPress={() => dispatch(openModal({ 
+                            visible: true, 
+                            id: "ANIME_SET_LIST",
+                            props: {
+                                animeId: animeData?.id,
+                                inList: animeData?.inList,
+                                getAnimeData: getAnimeData,
+                                addAnimeToList: addAnimeToList,
+                            } 
+                        }))}
                         upperTitle={false}
                         backgroundColor={theme.anime[animeData?.inList || "none"]}
                         textColor="#ffffff"
@@ -2517,8 +2490,6 @@ export const Anime = (props) => {
                                 return (
                                     <RenderAllCommentsList
                                     key={"comment-" + item.id}
-                                    modalRef={modalRef}
-                                    setModalContent={setModalContent}
                                     navigate={navigate}
                                     item={item}
                                     />

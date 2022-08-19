@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ScrollView, View, StyleSheet, Dimensions, ToastAndroid } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ScrollView, View, ToastAndroid } from "react-native";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { launchImageLibrary } from "react-native-image-picker";
-import { Modalize } from "react-native-modalize";
 
 import { 
     Panel,
@@ -11,9 +10,6 @@ import {
     Icon,
     Avatar,
 } from "../../components";
-import {
-    SetStatus
-} from "../../modals";
 
 import { storage } from "../../functions";
 
@@ -28,10 +24,6 @@ export const EditProfileProfile = (props) => {
             navigate
         },
     } = props;
-
-    const [ modalContent, setModalContent ] = useState(null);
-
-    const modalRef = useRef();
 
     const changePhoto = async () => {
         launchImageLibrary({
@@ -78,20 +70,6 @@ export const EditProfileProfile = (props) => {
         getCachedUserData();
     }, []);
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerProps={{
@@ -100,15 +78,6 @@ export const EditProfileProfile = (props) => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             <ScrollView
             showsVerticalScrollIndicator={false}
             style={{ marginTop: -15 }}
@@ -203,10 +172,7 @@ export const EditProfileProfile = (props) => {
                     </View>
                 }
                 subtitle="Выразите свои мысли..."
-                onPress={() => {
-                    setModalContent(<SetStatus onClose={() => modalRef?.current?.close()}/>);
-                    modalRef?.current?.open();
-                }}
+                onPress={() => dispatch(openModal({ visible: true, id: "SET_STATUS" }))}
                 />
             </ScrollView>
         </Panel>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { 
     View,
@@ -98,6 +98,7 @@ const SearchInput = (props) => {
 };
 
 export const SearchAnime = (props) => {
+    const { user } = useSelector(state => state.user);
     const { theme } = useSelector(state => state.theme);
 
     const { 
@@ -108,7 +109,7 @@ export const SearchAnime = (props) => {
     } = props;
 
     const [ text, setText ] = useState("");
-    const [ findedAnimes, setFindedAnimes ] = useState([]);
+    const [ findedAnimes, setFindedAnimes ] = useState({});
     const [ loading, setLoading ] = useState(false);
     const [ clipboardText, setClipboardText ] = useState("");
 
@@ -121,17 +122,15 @@ export const SearchAnime = (props) => {
         getClipboardText();
     }, []);
 
-    const search = async (text) => {
-        setText(text);
+    const searchRequest = (text) => {
+        if(text.split(" ").join("").length < 1) return;
         setLoading(true);
-
-        const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.search", {
             title: text,
         }, {
             headers: {
-                "Authorization": sign,
+                "Authorization": user.sign,
             }
         })
         .then(({ data }) => {
@@ -143,12 +142,18 @@ export const SearchAnime = (props) => {
         .finally(() => setLoading(false));
     };
 
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => searchRequest(text), 200);
+    
+        return () => clearTimeout(delayDebounceFn);
+    }, [text]);
+
     const loadMoreAnimes = async () => {
         const sign = await storage.getItem("AUTHORIZATION_SIGN");
 
         axios.post("/animes.search", {
             title: text,
-            offset: findedAnimes.animes.length,
+            offset: findedAnimes?.animes?.length,
         }, {
             headers: {
                 "Authorization": sign,
@@ -196,7 +201,7 @@ export const SearchAnime = (props) => {
                 />
 
                 <SearchInput 
-                onChangeText={search} 
+                onChangeText={(text) => setText(text)} 
                 value={text} 
                 />
 
@@ -232,7 +237,7 @@ export const SearchAnime = (props) => {
             </View>
 
             {
-                clipboardText.length > 1 && (findedAnimes.length === 0 && text.length === 0) ? (
+                clipboardText.length > 1 && (findedAnimes?.animes?.length === 0 && text.length === 0) ? (
                     <View
                     style={{
                         margin: 10,
@@ -243,7 +248,7 @@ export const SearchAnime = (props) => {
                     >
                         <TouchableNativeFeedback
                         background={TouchableNativeFeedback.Ripple(theme.cell.press_background, false)}
-                        onPress={() => search(clipboardText)}
+                        onPress={() => setText(text)}
                         >
                             <View
                             style={{
@@ -297,7 +302,7 @@ export const SearchAnime = (props) => {
             }
 
             {
-                (findedAnimes.length === 0 && text.length === 0) ? (
+                text.split(" ").join("").length < 1 ? (
                     <Placeholder
                     icon={
                         <Icon
@@ -309,7 +314,7 @@ export const SearchAnime = (props) => {
                     title="Начните вводить название"
                     subtitle="Здесь будут отображены подходящие по названию аниме-сериалы и фильмы"
                     />
-                ) : loading ? (
+                ) : (loading && findedAnimes?.animes?.length  === 0 && text.length) ? (
                     <Placeholder
                     icon={
                         <ActivityIndicator
@@ -320,7 +325,7 @@ export const SearchAnime = (props) => {
                     title="Выполняется поиск"
                     subtitle="Нужно немного подождать..."
                     />
-                ) : (text.length > 0 && findedAnimes.length === 0 || text.length === 0 && findedAnimes.length > 0) ? (
+                ) : (text.length > 0 && findedAnimes?.animes?.length === 0 || text.length === 0 && findedAnimes?.animes?.length > 0) ? (
                     <Placeholder
                     icon={
                         <Icon
@@ -337,6 +342,7 @@ export const SearchAnime = (props) => {
                     list={findedAnimes}
                     loadMoreAnimes={loadMoreAnimes}
                     navigation={navigation}
+                    loading={loading}
                     />
                 )
             }

@@ -7,15 +7,12 @@ import {
     Keyboard, 
     RefreshControl, 
     TouchableNativeFeedback,
-    StyleSheet,
-    Dimensions,
     Text,
     KeyboardAvoidingView
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { Modalize } from "react-native-modalize";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -33,14 +30,15 @@ import {
     Placeholder,
     AllCommentsList
 } from "../../components";
-import { CommentActions } from "../../modals";
-
+import { openModal } from "../../redux/reducers";
 import { 
     declOfNum, 
     storage,
 } from "../../functions";
 
 export const AnimeAllComments = (props) => {
+    const dispatch = useDispatch();
+
     const { theme } = useSelector(state => state.theme);
     const route = useRoute();
 
@@ -52,10 +50,8 @@ export const AnimeAllComments = (props) => {
     const [ spoilers, setSpoilers ] = useState([]);
     const [ loadingMoreComments, setLoadingMoreComments ] = useState(false);
     const [ loadingComments, setLoadingComments ] = useState(true);
-    const [ modalContent, setModalContent ] = useState(null);
 
     const flatListRef = useRef();
-    const modalRef = useRef();
 
     const {
         navigation: {
@@ -215,18 +211,14 @@ export const AnimeAllComments = (props) => {
                 title={item.user.nickname}
                 centered={false}
                 centeredAfter={false}
-                onPress={() => {
-                    setModalContent(
-                        <CommentActions 
-                        onClose={() => modalRef.current?.close()} 
-                        comment={item} 
-                        successEditing={() => {
-                            getComments(false);
-                        }}
-                        />
-                    );
-                    modalRef.current?.open();
-                }}
+                onPress={() => dispatch(openModal({ 
+                    visible: true, 
+                    id: "SET_STATUS",
+                    props: {
+                        comment: item,
+                        successEditing: () => getComments(false),
+                    } 
+                }))}
                 subtitle={
                     <View>
                         <View
@@ -599,20 +591,6 @@ export const AnimeAllComments = (props) => {
         )
     };
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerProps={{
@@ -620,15 +598,6 @@ export const AnimeAllComments = (props) => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             {
                 loadingComments ? (
                     <Placeholder
@@ -653,8 +622,6 @@ export const AnimeAllComments = (props) => {
                         }
                         flatListRef={flatListRef}
                         comments={{ list: comments }}
-                        setModalContent={setModalContent}
-                        modalRef={modalRef}
                         navigate={navigate}
                         />
 

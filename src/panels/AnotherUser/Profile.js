@@ -1,20 +1,17 @@
-import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useCallback, useEffect, useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { 
     View, 
     RefreshControl, 
     ScrollView, 
     FlatList, 
     TouchableNativeFeedback, 
-    StyleSheet, 
-    Dimensions, 
     ToastAndroid,
     Image,
     Text
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { Modalize } from "react-native-modalize";
 import { PieChart } from "react-native-svg-charts";
 import { Menu as Popup } from "react-native-material-menu";
 
@@ -34,10 +31,7 @@ import {
     Placeholder,
     PressIcon,
 } from "../../components";
-import {
-    SocialNetworks
-} from "../../modals";
-
+import { openModal } from "../../redux/reducers";
 import {
     storage,
     declOfNum,
@@ -45,6 +39,8 @@ import {
 import UserContext from "../../config/UserContext";
 
 export const AnotherUserProfile = (props) => {
+    const dispatch = useDispatch();
+
     const { theme } = useSelector(state => state.theme);
     const user = useContext(UserContext);
 
@@ -60,12 +56,9 @@ export const AnotherUserProfile = (props) => {
 
     const [ refreshing, setRefreshing ] = useState(false);
     const [ userData, setUserData ] = useState({});
-    const [ modalContent, setModalContent ] = useState(null);
     const [ popupVisible, setPopupVisible ] = useState(false);
     const [ friends, setFriends ] = useState([]);
     const [ browsingHistory, setBrowsingHistory ] = useState([]);
-
-    const modalRef = useRef();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -215,21 +208,6 @@ export const AnotherUserProfile = (props) => {
         },
         key: `pie-${index}`,
     }));
-
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-            zIndex: 1000
-        },
-    });
 
     const friendsListRender = ({ item, index }) => {
         return (
@@ -607,19 +585,15 @@ export const AnotherUserProfile = (props) => {
                     marginBottom: 0,
                     marginRight: 0
                 }}
-                onPress={() => {
-                    setModalContent(
-                        <SocialNetworks 
-                        networks={userData?.social_networks}
-                        navigate={navigate} 
-                        from="another"
-                        onClose={() => {
-                            modalRef.current?.close();
-                        }}
-                        />
-                    );
-                    modalRef.current?.open();
-                }}
+                onPress={() => dispatch(openModal({ 
+                    visible: true, 
+                    id: "SOCIAL_NETWORKS", 
+                    props: {
+                        navigate,
+                        networks: userData?.social_networks,
+                        from: "another"
+                    } 
+                }))}
                 />
 
                 <Popup
@@ -1201,15 +1175,6 @@ export const AnotherUserProfile = (props) => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             <ScrollView
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}

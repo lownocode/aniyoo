@@ -3,7 +3,8 @@ import {
     View, 
     Image, 
     FlatList,
-    Text
+    Text,
+    ActivityIndicator
 } from "react-native";
 import { useSelector } from "react-redux";
 
@@ -17,7 +18,8 @@ export const SearchAnimeList = (props) => {
     const {
         list,
         loadMoreAnimes,
-        navigation
+        navigation,
+        loading
     } = props;
 
     const checkEpisodesStatus = (total, aired, status) => {
@@ -290,10 +292,14 @@ export const SearchAnimeList = (props) => {
             >
                 <ContentHeader
                 icon={
-                    <Icon
-                    name="description"
-                    color={theme.text_secondary_color}
-                    />
+                    loading ? (
+                        <ActivityIndicator color={theme.activity_indicator_color} size={14} />
+                    ) : (
+                        <Icon
+                        name="description"
+                        color={theme.text_secondary_color}
+                        />
+                    )
                 }
                 text={`Найдено ${list.count} аниме`}
                 after={

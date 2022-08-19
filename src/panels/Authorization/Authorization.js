@@ -21,7 +21,7 @@ import {
 import {
     storage,
 } from "../../functions";
-import { setUser } from "../../redux/reducers";
+import { setAuthorized, setUser } from "../../redux/reducers";
 
 const Input = (props) => {
     const { theme } = useSelector(state => state.theme);
@@ -136,11 +136,8 @@ export const Authorization = (props) => {
         })
         .then(({ data }) => {
             dispatch(setUser(data));
+            dispatch(setAuthorized(true));
             storage.setItem("AUTHORIZATION_SIGN", data?.sign);
-            EventRegister.emit("app", {
-                type: "changeAuthorized",
-                value: true,
-            });
         })
         .catch(({ response: { data } }) => {
             ToastAndroid.show(data.message, ToastAndroid.CENTER);

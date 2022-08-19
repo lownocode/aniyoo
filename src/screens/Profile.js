@@ -1,18 +1,15 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { 
     View, 
     RefreshControl, 
     ScrollView, 
     FlatList, 
     TouchableNativeFeedback, 
-    StyleSheet, 
-    Dimensions, 
     Image,
     Text,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { PieChart } from 'react-native-svg-charts';
-import { Modalize } from "react-native-modalize";
 import { Menu as Popup } from "react-native-material-menu";
 
 import dayjs from "dayjs";
@@ -32,11 +29,10 @@ import {
     Panel,
 } from "../components";
 import {
-    storage,
     declOfNum,
 } from "../functions";
-import { SetStatus, SocialNetworks } from "../modals";
-import { getUserData, setModalVisible } from "../redux/reducers";
+import { getUserData, openModal } from "../redux/reducers";
+import { SCREEN_HEIGHT, SOFT_BAR_MENU_HEIGHT, STATUSBAR_HEIGHT, WINDOW_HEIGHT } from "../../constants";
 
 export const Profile = props => {
     const dispatch = useDispatch();
@@ -48,15 +44,11 @@ export const Profile = props => {
         navigation: {
             navigate,
         },
-        navigation,
     } = props;
 
-    const [ modalContent, setModalContent ] = useState(null);
     const [ friends, setFriends ] = useState([]);
     const [ popupVisible, setPopupVisible ] = useState(false);
     const [ browsingHistory, setBrowsingHistory ] = useState([]);
-
-    const modalRef = useRef();
 
     const onRefresh = useCallback(() => {
         dispatch(getUserData());
@@ -86,7 +78,12 @@ export const Profile = props => {
             ),
             title: "Коллекции",
             count: user?.collectionsCount ?? 0,
-            type: "collections"
+            type: "collections",
+            onPress: () => {
+                console.log(STATUSBAR_HEIGHT);
+                // console.log(SCREEN_HEIGHT, WINDOW_HEIGHT);
+                console.log(SOFT_BAR_MENU_HEIGHT / 2);
+            }
         }
     ];
 
@@ -160,21 +157,6 @@ export const Profile = props => {
         key: `pie-${index}`,
     }));
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-            zIndex: 1000
-        },
-    });
-
     const userInfoRender = () => (
         <View
         style={{
@@ -197,18 +179,7 @@ export const Profile = props => {
             subtitle={
                 <View>
                     <TouchableNativeFeedback 
-                    onPress={() => 
-                        dispatch(setModalVisible(true))
-                        // setModalContent(
-                        //     <SetStatus 
-                        //     navigate={navigate} 
-                        //     onClose={() => {
-                        //         modalRef.current?.close();
-                        //     }}
-                        //     />
-                        // );
-                        // modalRef.current?.open();
-                    }
+                    onPress={() => dispatch(openModal({ visible: true, id: "SET_STATUS" }))}
                     >
                         <Text 
                         style={{
@@ -328,18 +299,14 @@ export const Profile = props => {
                     marginBottom: 0,
                     marginRight: 0
                 }}
-                onPress={() => {
-                    setModalContent(
-                        <SocialNetworks 
-                        networks={user?.social_networks}
-                        navigate={navigate} 
-                        onClose={() => {
-                            modalRef.current?.close();
-                        }}
-                        />
-                    );
-                    modalRef.current?.open();
-                }}
+                onPress={() => dispatch(openModal({ 
+                    visible: true, 
+                    id: "SOCIAL_NETWORKS", 
+                    props: { 
+                        networks: user?.social_networks, 
+                        navigate: navigate 
+                    } 
+                }))}
                 />
 
                 <Button
@@ -1030,16 +997,8 @@ export const Profile = props => {
             afterActions: renderHeaderAfterActions()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             <ScrollView
+            showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
                 progressBackgroundColor={theme.refresh_control_background}

@@ -1,23 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, FlatList, ActivityIndicator, Dimensions, StyleSheet, Text } from "react-native";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect, } from "react";
+import { View, FlatList, ActivityIndicator, Text } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { Modalize } from "react-native-modalize";
 
 import { Cell, Icon, Panel } from "../../components";
-
+import { openModal } from "../../redux/reducers";
 import { formatViews, storage } from "../../functions";
-import { SelectVideoSource } from "../../modals";
 
 export const AnimeSelectTranslation = (props) => {
+    const dispatch = useDispatch();
+
     const { theme } = useSelector(state => state.theme);
 
     const [ translations, setTranslations ] = useState([]);
     const [ loading, setLoading ] = useState(null);
-    const [ modalContent, setModalContent ] = useState(null);
-
-    const modalRef = useRef();
 
     const { 
         navigation: {
@@ -78,22 +75,22 @@ export const AnimeSelectTranslation = (props) => {
                 });
             }
 
-            setModalContent(
-                <SelectVideoSource
-                sources={data}
-                translation={translation}
-                navigation={navigation}
-                animeData={{
-                    animeId: route.params?.animeId, 
-                    translationId: translationId,
-                    translation: translation,
-                    title: route.params?.title,
-                }}
-                onClose={() => modalRef.current?.close()}
-                />
-            );
+            dispatch(openModal({ 
+                visible: true, 
+                id: "SELECT_VIDEO_SOURCE",
+                props: {
+                    sources: data,
+                    navigation,
+                    translation,
+                    animeData: {
+                        animeId: route.params?.animeId,
+                        translationId,
+                        translation,
+                        title: route.params?.title
+                    }
+                } 
+            }));
 
-            modalRef.current?.open();
             setLoading(null);
         })
         .catch(({ response: { data } }) => {
@@ -166,20 +163,6 @@ export const AnimeSelectTranslation = (props) => {
         )
     };
 
-    const styles = StyleSheet.create({
-        modalContainer: {
-            left: 10,
-            width: Dimensions.get("window").width - 20,
-            bottom: 10,
-            borderRadius: 15,
-            backgroundColor: theme.bottom_modal.background,
-            borderColor: theme.bottom_modal.border,
-            borderWidth: 0.5,
-            overflow: "hidden",
-            borderRadius: 15,
-        },
-    });
-
     return (
         <Panel
         headerProps={{
@@ -187,15 +170,6 @@ export const AnimeSelectTranslation = (props) => {
             backOnPress: () => goBack()
         }}
         >
-            <Modalize
-            ref={modalRef}
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
-            modalStyle={styles.modalContainer}
-            adjustToContentHeight
-            >
-                {modalContent}
-            </Modalize>
-
             <FlatList
             showsVerticalScrollIndicator={false}
             data={translations}
